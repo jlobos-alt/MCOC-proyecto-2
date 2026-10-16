@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Guía Exposición P0 — mimatmul</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; color: #222; }
+  h1 { color: #1a5276; text-align: center; }
+  h2 { color: #1a5276; border-bottom: 2px solid #1a5276; padding-bottom: 5px; margin-top: 30px; }
+  .q { background: #eaf2f8; padding: 10px 14px; border-left: 5px solid #1a5276; font-weight: bold; margin-top: 15px; border-radius: 4px; }
+  .a { padding: 8px 14px; margin: 4px 0 12px 0; }
+  .cmd { background: #f4f4f4; font-family: Consolas, monospace; padding: 2px 6px; border-radius: 3px; }
+  .box { background: #fef9e7; border: 1px solid #f1c40f; padding: 10px 14px; border-radius: 5px; margin-top: 20px; }
+  @media print { .box { page-break-inside: avoid; } }
+</style>
+</head>
+<body>
+
+<h1>📘 Guía para la Exposición — P0 mimatmul</h1>
+<p><strong>Proyecto:</strong> comparar una multiplicación de matrices escrita a mano en Python (<span class="cmd">mimatmul</span>) contra <span class="cmd">NumPy</span>, midiendo tiempos reales.</p>
+
+<h2>1. Comandos para la prueba práctica</h2>
+<div class="cmd" style="padding:8px 14px; line-height:1.8;">
+cd C:\Users\josel\OneDrive\Escritorio\MCOC\P0-lobos-jose<br>
+dir &nbsp;&nbsp;y&nbsp; dir src<br>
+.\.venv\Scripts\Activate.ps1 &nbsp;→ sale (.venv)<br>
+python -m pytest tests/ &nbsp;→ 6 passed<br>
+python src/benchmark.py &nbsp;→ guarda CSV y PNG
+</div>
+<p><strong>Dónde se guarda:</strong> resultados → <span class="cmd">data/benchmark_results.csv</span> · gráfico → <span class="cmd">figures/benchmark.png</span> · info PC → <span class="cmd">data/system_info.json</span></p>
+
+<h2>2. Preguntas conceptuales</h2>
+
+<div class="q">¿Por qué NumPy es más rápido que mimatmul?</div>
+<div class="a">Porque mimatmul corre en Python puro con ciclos que interpretan operación por operación. NumPy usa código C/Fortran optimizado (BLAS), vectorizado, con buena caché y varios núcleos. En mis mediciones: ~50 a ~260 veces más rápido.</div>
+
+<div class="q">¿Por qué las repeticiones no dan el mismo tiempo?</div>
+<div class="a">Ruido del sistema: planificación del OS, frecuencia del CPU (turbo), estado de la caché y otros procesos. Por eso se mide varias veces y se promedia.</div>
+
+<div class="q">¿Qué mide una fila del CSV?</div>
+<div class="a">Una sola medición: método (mimatmul/numpy), tamaño de la matriz, número de repetición y tiempo en segundos. Se guarda cada repetición por separado.</div>
+
+<div class="q">¿Por qué se realiza calentamiento?</div>
+<div class="a">Para que la primera llamada (que carga código, inicializa memoria y caché) no contamine las mediciones. Se ejecuta una vez antes de medir.</div>
+
+<div class="q">¿Cómo sabe que una prueba fue exitosa?</div>
+<div class="a">pytest muestra "6 passed". Si falla, muestra FAILED con la diferencia entre lo esperado y lo obtenido.</div>
+
+<div class="q">¿Qué ocurre si las dimensiones son incompatibles?</div>
+<div class="a">mimatmul lanza ValueError con mensaje claro (ej. "Dimensiones incompatibles: A tiene 3 columnas y B tiene 2 filas"). Hay una prueba con pytest.raises.</div>
+
+<div class="q">¿Qué componente del computador observó?</div>
+<div class="a">CPU (tiempo de cálculo y uso de núcleos) y RAM (las matrices caben en memoria). Mi PC: i7-1185G7, 4 núcleos físicos / 8 lógicos, 15.4 GB RAM.</div>
+
+<div class="q">¿Cómo estimó un tamaño seguro de matriz?</div>
+<div class="a">Matriz float64 de n×n ocupa 8·n² bytes. Con ~5 GB libres sobra RAM. Como mimatmul es O(n³), elegí 16, 32, 64 y 128: seguros y rápidos.</div>
+
+<div class="q">¿Qué error cometió OpenCode?</div>
+<div class="a">El correo de los commits quedó mal y hubo que reescribir la historia de git. / o: Yo revisé los tamaños del benchmark para mi equipo.</div>
+
+<div class="q">¿Qué parte del código comprende mejor?</div>
+<div class="a">src/mimatmul.py: recibe dos matrices, valida dimensiones y multiplica con 3 ciclos (i, j, k). Es la más simple y está cubierta por las pruebas.</div>
+
+<h2>3. Predecir o modificar (práctica)</h2>
+<div class="a"><strong>Duplicar tamaño (128 → 256):</strong> como es O(n³), 2× tamaño ≈ 8× tiempo. mimatmul ~0.095s → ~0.8s; NumPy ~0.0004s → ~0.003s.</div>
+<div class="a"><strong>Cambiar repeticiones (3 → 5):</strong> más filas en el CSV, tarda más, promedio más estable.</div>
+<div class="a"><strong>Cambiar tamaño:</strong> se edita <span class="cmd">TAMANOS</span> en <span class="cmd">src/benchmark.py</span>.</div>
+<div class="a"><strong>Cambiar prueba:</strong> se edita <span class="cmd">tests/test_mimatmul.py</span>.</div>
+
+<div class="box">💡 <strong>Inicio de exposición:</strong> "El proyecto compara una multiplicación de matrices hecha a mano en Python contra NumPy, para medir cuánto importa usar código optimizado."</div>
+
+</body>
+</html>

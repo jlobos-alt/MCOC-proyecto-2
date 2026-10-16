@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Repositorios/repos anidados
+MCOC-grupo1/
+MCOC-grupo1-matias/
+P0-lobos-jose/
+
+# OS / editores
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
