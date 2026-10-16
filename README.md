@@ -7,7 +7,7 @@
 | **Grupo** | 1 |
 | **Integrantes** | Clemente Sánchez, Matías Campos |
 | **URL repositorio** | https://github.com/jlobos-alt/MCOC-proyecto-2 |
-| **SHA inicial** | _se completa tras el primer commit_ |
+| **SHA inicial** | `f222414d01ed90b2d648077dc49701ad247c9907` |
 
 ## Contexto del proyecto
 
