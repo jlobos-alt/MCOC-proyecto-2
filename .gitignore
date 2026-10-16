@@ -14,6 +14,9 @@ MCOC-grupo1/
 MCOC-grupo1-matias/
 P0-lobos-jose/
 
+# Logs de AutoCAD (Autodesk CER)
+ErrorReports/
+
 # OS / editores
 Thumbs.db
 .DS_Store
