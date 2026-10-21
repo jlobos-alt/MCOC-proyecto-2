@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from mcplan.plan import plan_from_dict  # noqa: E402
 from mcplan.thermal import build_model, solve  # noqa: E402

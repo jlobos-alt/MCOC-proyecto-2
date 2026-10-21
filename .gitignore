@@ -32,3 +32,8 @@ Calculo_Transito_Capacidad_NOS.xlsx
 Informe_Presupuesto.docx
 MEMORIA_TRANSITO_CAPACIDAD_NOS.docx
 
+
+# Python tests
+.pytest_cache/
+output/
+results/*.vtk

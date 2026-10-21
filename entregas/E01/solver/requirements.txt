@@ -1,6 +1,0 @@
-numpy
-pytest
-ifcopenshell
-python-docx
-matplotlib
-python-pptx
