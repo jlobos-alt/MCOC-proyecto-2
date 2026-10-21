@@ -97,10 +97,17 @@ class Result:
     def delta_T_max(self) -> float:
         return float(np.nanmax(self.delta_T)) if self.time_h.size else float("nan")
 
-    def time_of(self, series: np.ndarray, value: float) -> float:
-        if series.size == 0:
+    def time_of_max(self, series: np.ndarray) -> float:
+        """Instante en que la serie alcanza su maximo."""
+        if series.size == 0 or np.all(np.isnan(series)):
             return float("nan")
-        return float(self.time_h[int(np.nanargmax(np.abs(series - value)))])
+        return float(self.time_h[int(np.nanargmax(series))])
+
+    def time_of_min(self, series: np.ndarray) -> float:
+        """Instante en que la serie alcanza su minimo."""
+        if series.size == 0 or np.all(np.isnan(series)):
+            return float("nan")
+        return float(self.time_h[int(np.nanargmin(series))])
 
 
 def _slice_along(array: np.ndarray, axis: int, index) -> np.ndarray:
@@ -580,17 +587,17 @@ def _initial_field(model: Model, temperatura_inicial) -> np.ndarray:
 
 
 def _accumulate_internal(model: Model, T: np.ndarray, net: np.ndarray, t_h: float) -> None:
+    n_cells = model.grid.n_cells
     for axis, face in model.internal.items():
-        conductance = model.internal_G[axis]
         conducting = model.internal_start[axis] <= t_h + 1e-9
         if not np.any(conducting):
             continue
         owner = face.owner[conducting]
         neighbor = face.neighbor[conducting]
-        g = conductance[conducting]
+        g = model.internal_G[axis][conducting]
         flux = g * (T[neighbor] - T[owner])
-        np.add.at(net, owner, flux)
-        np.add.at(net, neighbor, -flux)
+        net += np.bincount(owner, weights=flux, minlength=n_cells)
+        net -= np.bincount(neighbor, weights=flux, minlength=n_cells)
 
 
 def _accumulate_boundary(model: Model, T: np.ndarray, net: np.ndarray, t_h: float) -> None:
@@ -630,7 +637,7 @@ def _accumulate_boundary(model: Model, T: np.ndarray, net: np.ndarray, t_h: floa
         valid = np.isfinite(conductance) & np.isfinite(far_field)
         flux = np.zeros(owner.size)
         flux[valid] = conductance[valid] * (far_field[valid] - T[owner[valid]])
-        np.add.at(net, owner, flux)
+        net += np.bincount(owner, weights=flux, minlength=model.grid.n_cells)
 
 
 def _accumulate_sources(

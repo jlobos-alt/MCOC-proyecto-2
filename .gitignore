@@ -22,3 +22,13 @@ Thumbs.db
 .DS_Store
 .vscode/
 .idea/
+
+# Blender
+*.blend
+*.blend1
+
+# Archivos temporales / de otro ramo (no forman parte de la entrega)
+Calculo_Transito_Capacidad_NOS.xlsx
+Informe_Presupuesto.docx
+MEMORIA_TRANSITO_CAPACIDAD_NOS.docx
+

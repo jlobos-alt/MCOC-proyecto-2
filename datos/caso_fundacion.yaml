@@ -4,19 +4,21 @@
 # colocacion y retiro de moldaje) proviene del modelo BIM/IFC del proyecto:
 #   proyecto2-fundacion/ifc/foundation_props.ifc
 # La geometria no esta en el IFC (el archivo no tiene representacion), por eso
-# se declara aqui de forma explicita y trazable.
+# se declara aqui de forma explicita y trazable. La grilla usa dx = 0.48 m para
+# que los limites de cada vertida (0.48 m) caigan exactamente sobre planos de
+# celda: es un supuesto de modelado a confirmar contra el modelo BIM.
 
 caso: fundacion_5_vertidas
 descripcion: >
-  Losa de fundacion de 24.0 x 16.0 m y 2.4 m de espesor, ejecutada en 5 vertidas
+  Losa de fundacion de 24.0 x 19.2 m y 2.4 m de espesor, ejecutada en 5 vertidas
   de 0.48 m con 6 h de intervalo entre ellas. Hormigon M1, colocacion a 18 C,
   ambiente medio 15 C, contacto con suelo a 12 C.
 
 geometria:
   x: [0.0, 24.0]
-  y: [0.0, 16.0]
+  y: [0.0, 19.2]
   z: [0.0, 2.4]
-  dx: 0.4
+  dx: 0.48
 
 materiales:
   M1:

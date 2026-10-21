@@ -13,11 +13,12 @@
 
 Preparación y evidencia para la revisión oral (BIM/IFC + física de difusión térmica + solver 1D).
 
-- **Respuestas E01:** [`Respuestas_E01_BIM_Difusion_Solver1D.md`](Respuestas_E01_BIM_Difusion_Solver1D.md)
-- **Documento Word:** `Respuestas_E01_BIM_Difusion_Solver1D.docx`
-- **Guía de revisión:** [`docs/guia_revision_grupo.md`](docs/guia_revision_grupo.md)
-- **Modelo IFC (BIM):** `modelo/foundation.ifc` (5 vertidas `IfcFooting` + Property Set `UANDES_HormigonMasivo`)
+- **Respuestas E01:** [`docs/E01_respuestas_bim_difusion_solver1d.md`](docs/E01_respuestas_bim_difusion_solver1d.md) · [`.docx`](docs/E01_respuestas_bim_difusion_solver1d.docx)
+- **Guía de revisión:** [`docs/E01_guia_revision_grupo.md`](docs/E01_guia_revision_grupo.md)
+- **Guías del curso (G00–G08):** [`docs/guias/`](docs/guias/)
+- **Modelo IFC (BIM):** [`modelo/foundation.ifc`](modelo/foundation.ifc) (5 vertidas `IfcFooting` + Property Set `UANDES_HormigonMasivo`)
 - **Solver / utilidades:** [`scripts/mcplan/`](scripts/mcplan/)
+- **Utilidades IFC:** [`scripts/ifc/`](scripts/ifc/)
 - **Tests:** [`tests/`](tests/)
 
 ### Cómo ejecutar
@@ -25,6 +26,7 @@ Preparación y evidencia para la revisión oral (BIM/IFC + física de difusión 
 ```bash
 pip install -r requirements.txt
 python -m pytest tests/
+python scripts/run_case.py --plan datos/caso_fundacion.yaml
 ```
 
 ### Entorno
@@ -44,13 +46,19 @@ python -m pytest tests/
 
 ```
 .
-├── datos/             # Datos climáticos / de entrada
-├── docs/              # Documentación (guía de exposición, apuntes)
+├── datos/             # Datos de entrada y casos declarativos (plan.yaml)
+├── docs/              # Documentación (respuestas E01, guías G00–G08)
+│   └── guias/         # Guías del curso
 ├── issues/            # Registro de issues / seguimiento de tareas
-├── modelo/            # Modelos BIM/IFC y geometría de referencia
+├── modelo/            # Modelos BIM/IFC (foundation.ifc)
 ├── plantas_por_piso/  # Plantas y geometría por piso
-├── scripts/           # Código: solver, simulación y utilidades
+├── scripts/           # Código: solver (mcplan), utilidades IFC, demos
+│   ├── mcplan/        # Solver térmico y confiabilidad
+│   ├── ifc/           # Lectura/verificación IFC
+│   └── demos/         # Scripts de prueba/demo
+├── tests/             # Tests de verificación
 ├── validacion/        # Casos y resultados de validación (Ju y Lei, ICH)
+├── requirements.txt
 ├── README.md
 └── .gitignore
 ```

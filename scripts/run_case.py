@@ -131,7 +131,7 @@ def _graficar_campo(ruta: Path, model, result) -> None:
     mascara = result.active_final[:, :, campo.shape[2] // 2]
     figura, ejes = plt.subplots(figsize=(8, 5))
     imagen = ejes.imshow(
-        np.ma.masked_where(~mascara, plano.T),
+        np.ma.masked_where(~mascara.T, plano.T),
         origin="lower",
         cmap="inferno",
         aspect="auto",

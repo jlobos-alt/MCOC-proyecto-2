@@ -84,7 +84,7 @@ def evaluar_criterios(result: Result, criterios: CriteriaSpec) -> Veredicto:
             limite=criterios.T_max_C,
             valor=T_max,
             cumple=bool(T_max <= criterios.T_max_C),
-            instante_h=result.time_of(result.T_max_global, T_max),
+            instante_h=result.time_of_max(result.T_max_global),
         )
     )
 
@@ -93,7 +93,7 @@ def evaluar_criterios(result: Result, criterios: CriteriaSpec) -> Veredicto:
         instante = None
     else:
         delta_max = float(np.nanmax(result.delta_T))
-        instante = result.time_of(result.delta_T, delta_max)
+        instante = result.time_of_max(result.delta_T)
     lista.append(
         Criterio(
             nombre="diferencial_termico",

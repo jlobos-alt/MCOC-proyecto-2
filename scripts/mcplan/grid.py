@@ -78,6 +78,12 @@ def erode(mask: np.ndarray, iterations: int = 1) -> np.ndarray:
     result = mask.copy()
     for _ in range(iterations):
         shrunk = result.copy()
+        shrunk[0, :, :] = False
+        shrunk[-1, :, :] = False
+        shrunk[:, 0, :] = False
+        shrunk[:, -1, :] = False
+        shrunk[:, :, 0] = False
+        shrunk[:, :, -1] = False
         shrunk[:-1, :, :] &= result[1:, :, :]
         shrunk[1:, :, :] &= result[:-1, :, :]
         shrunk[:, :-1, :] &= result[:, 1:, :]

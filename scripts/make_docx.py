@@ -1,12 +1,13 @@
 import os
 from docx import Document
-from docx.shared import Pt, Inches, RGBColor
+from docx.shared import Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-OUTDIR = r'C:\Users\josel\OneDrive\Escritorio\MCOC\proyecto2-fundacion\eqs'
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTDIR = os.path.join(ROOT, 'docs', 'eqs')
 os.makedirs(OUTDIR, exist_ok=True)
 
 plt.rcParams['mathtext.fontset'] = 'cm'
@@ -173,6 +174,6 @@ for item in [
 ]:
     doc.add_paragraph(item, style='List Bullet')
 
-out = r'C:\Users\josel\OneDrive\Escritorio\MCOC\Respuestas_E01_BIM_Difusion_Solver1D.docx'
+out = os.path.join(ROOT, 'docs', 'E01_respuestas_bim_difusion_solver1d.docx')
 doc.save(out)
 print('DONE', out)
