@@ -13,6 +13,7 @@
 
 Preparación y evidencia para la revisión oral (BIM/IFC + física de difusión térmica + solver 1D).
 
+- **Entregable E01 (todo junto):** [`entregas/E01/`](entregas/E01/) — respuestas, guía, IFC, códigos 1D y resultados.
 - **Respuestas E01:** [`docs/E01_respuestas_bim_difusion_solver1d.md`](docs/E01_respuestas_bim_difusion_solver1d.md) · [`.docx`](docs/E01_respuestas_bim_difusion_solver1d.docx)
 - **Guía de revisión:** [`docs/E01_guia_revision_grupo.md`](docs/E01_guia_revision_grupo.md)
 - **Guías del curso (G00–G08):** [`docs/guias/`](docs/guias/)
@@ -49,6 +50,8 @@ python scripts/run_case.py --plan datos/caso_fundacion.yaml
 ├── datos/             # Datos de entrada y casos declarativos (plan.yaml)
 ├── docs/              # Documentación (respuestas E01, guías G00–G08)
 │   └── guias/         # Guías del curso
+├── entregas/          # Entregables por semana (E01, ...)
+│   └── E01/           # Entrega 1: BIM + difusión + solver 1D
 ├── issues/            # Registro de issues / seguimiento de tareas
 ├── modelo/            # Modelos BIM/IFC (foundation.ifc)
 ├── plantas_por_piso/  # Plantas y geometría por piso
