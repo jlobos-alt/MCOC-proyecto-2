@@ -1,0 +1,124 @@
+# Caso de referencia: losa de fundacion ejecutada en 5 vertidas.
+#
+# La secuencia de vertidas (identificador, hora de inicio, temperatura de
+# colocacion y retiro de moldaje) proviene del modelo BIM/IFC del proyecto:
+#   proyecto2-fundacion/ifc/foundation_props.ifc
+# La geometria no esta en el IFC (el archivo no tiene representacion), por eso
+# se declara aqui de forma explicita y trazable.
+
+caso: fundacion_5_vertidas
+descripcion: >
+  Losa de fundacion de 24.0 x 16.0 m y 2.4 m de espesor, ejecutada en 5 vertidas
+  de 0.48 m con 6 h de intervalo entre ellas. Hormigon M1, colocacion a 18 C,
+  ambiente medio 15 C, contacto con suelo a 12 C.
+
+geometria:
+  x: [0.0, 24.0]
+  y: [0.0, 16.0]
+  z: [0.0, 2.4]
+  dx: 0.4
+
+materiales:
+  M1:
+    k: 2.222
+    cp: 970.0
+    rho: 2400.0
+
+vertidas:
+  - id: 1
+    inicio_h: 0.0
+    z_min: 0.0
+    z_max: 0.48
+    material: M1
+    temperatura_colocacion_C: 18.0
+    retiro_moldaje_h: 72.0
+  - id: 2
+    inicio_h: 6.0
+    z_min: 0.48
+    z_max: 0.96
+    material: M1
+    temperatura_colocacion_C: 18.0
+    retiro_moldaje_h: 72.0
+  - id: 3
+    inicio_h: 12.0
+    z_min: 0.96
+    z_max: 1.44
+    material: M1
+    temperatura_colocacion_C: 18.0
+    retiro_moldaje_h: 72.0
+  - id: 4
+    inicio_h: 18.0
+    z_min: 1.44
+    z_max: 1.92
+    material: M1
+    temperatura_colocacion_C: 18.0
+    retiro_moldaje_h: 72.0
+  - id: 5
+    inicio_h: 24.0
+    z_min: 1.92
+    z_max: 2.4
+    material: M1
+    temperatura_colocacion_C: 18.0
+    retiro_moldaje_h: 72.0
+
+hidratacion:
+  elevacion_adibatica_C: 45.0
+  tau_h: 30.0
+  elevacion_adibatica_2_C: 0.0
+  tau_2_h: 0.0
+  madurez: false
+  energia_activacion_K: 4000.0
+
+ambiente:
+  media_C: 15.0
+  amplitud_C: 5.0
+  periodo_h: 24.0
+  desfase_h: 0.0
+
+suelo:
+  media_C: 12.0
+
+fronteras:
+  # Caras verticales: encofrado de madera hasta el retiro (72 h) y conveccion
+  # al aire ambiente. Simplificacion documentada: el encofrado se modela como
+  # una unica capa activa para todas las caras verticales durante 0-72 h.
+  - name: perimetro
+    direccion: perimetro
+    tipo: convectiva
+    h: 12.0
+    capas:
+      - tipo: conductiva
+        nombre: encofrado
+        espesor_m: 0.02
+        k: 0.5
+        desde_h: 0.0
+        hasta_h: 72.0
+  # Cara superior: conveccion con el aire.
+  - name: superficie
+    direccion: superficie
+    tipo: convectiva
+    h: 12.0
+  # Base: contacto con el suelo, modelado como semiinfinito a 12 C a traves de
+  # una resistencia de contacto.
+  - name: base
+    direccion: base
+    tipo: convectiva
+    h: 6.0
+    capas:
+      - tipo: conductiva
+        nombre: contacto_suelo
+        espesor_m: 1.0
+        k: 1.389
+        desde_h: 0.0
+        hasta_h: .inf
+
+criterios:
+  T_max_C: 70.0
+  delta_T_max_C: 20.0
+  core_erosion: 2
+  incluir_base_en_superficie: false
+
+simulacion:
+  duracion_h: 168.0
+  intervalo_salida_h: 1.0
+  factor_estabilidad: 0.8
