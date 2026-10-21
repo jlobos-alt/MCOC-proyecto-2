@@ -14,6 +14,16 @@ descripcion: >
   de 0.48 m con 6 h de intervalo entre ellas. Hormigon M1, colocacion a 18 C,
   ambiente medio 15 C, contacto con suelo a 12 C.
 
+sitio:
+  grupo: 5
+  nombre: Pahuil / Chanco
+  region: Maule
+  proyecto_eolico: Viento Pacifico Verde
+  latitud: -35.644721
+  longitud: -72.568332
+  estacion_dmc: Dunas de Chanco (Pahuil)
+  estacion_dmc_id: "350040"
+
 geometria:
   x: [0.0, 24.0]
   y: [0.0, 19.2]

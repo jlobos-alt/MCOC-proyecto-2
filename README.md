@@ -4,8 +4,10 @@
 
 | Campo | Valor |
 |---|---|
-| **Grupo** | 1 |
-| **Integrantes** | Clemente Sánchez, Matías Campos |
+| **Grupo** | 5 |
+| **Sitio** | Pahuil / Chanco — Región del Maule |
+| **Proyecto eólico** | Viento Pacífico Verde (en evaluación) |
+| **Coordenadas** | -35.644721, -72.568332 |
 | **URL repositorio** | https://github.com/jlobos-alt/MCOC-proyecto-2 |
 | **SHA inicial** | `f222414d01ed90b2d648077dc49701ad247c9907` |
 
@@ -42,6 +44,14 @@ python scripts/run_case.py --plan datos/caso_fundacion.yaml
 - Límites de diseño: 70 °C (máx. temperatura interna) y 20 °C (diferencial máx. superficie–núcleo).
 - Referencias: paper de Ju y Lei, especificación ICH.
 - Flujo de trabajo: BIM → IFC → solver → confiabilidad.
+
+## Sitio asignado (Grupo 5)
+
+- **Sitio:** Pahuil / Chanco (Región del Maule), sitio costero.
+- **Proyecto eólico de referencia:** Viento Pacífico Verde (en evaluación).
+- **Coordenadas meteorológicas del caso docente:** `-35.644721, -72.568332`. Todos los scripts de clima deben usar estas coordenadas.
+- **Estación DMC de contraste:** Dunas de Chanco (Pahuil) — https://climatologia.meteochile.gob.cl/application/informacion/fichaDeEstacion/350040
+- **Fuente SEA:** https://www.sea.gob.cl/portal-de-participacion-ciudadana-y-consulta-indigena/proyecto/parque-eolico-viento-pacifico-verde
 
 ## Estructura del repositorio
 
