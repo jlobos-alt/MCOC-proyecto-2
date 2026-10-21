@@ -1,48 +1,49 @@
-# E01 - BIM, difusión térmica y solver 1D
+# E01 - Semana 1 / miércoles: BIM, difusión y solver 1D
 
-Entrega de la Semana 1 (miércoles): revisión oral de BIM/IFC + física de difusión térmica + solver 1D.
+Revisión oral (3 pts). Entrega en Canvas: repositorio + commit evaluado (+ nota
+opcional de máximo 100 palabras sobre lo aún incompleto).
 
-## Contenido de la entrega
+## Dónde está cada cosa (mapeo a la rúbrica)
 
-| Carpeta / archivo | Descripción |
-|---|---|
-| `docs/respuestas_E01.md` / `.docx` | Respuestas escritas a las preguntas de la E01 (BIM, IFC, difusión, CI/CC, discretización y estabilidad). El `.docx` incluye las ecuaciones renderizadas como imágenes. |
-| `docs/guia_revision_grupo.md` | Guía de preguntas y respuestas para la revisión oral. |
-| `modelo_ifc/foundation.ifc` | Modelo BIM del proyecto: 5 vertidas (`Vertida_01`..`Vertida_05`, `IfcFooting`) más el Property Set `UANDES_HormigonMasivo`. |
-| `codigo_1d/*.py` | Códigos 1D de referencia (FTCS) para las distintas condiciones de borde. |
-| `resultados/*` | Salidas del caso de fundación (series temporales, campo final y resumen). |
+### Comprensión física individual (1.0 pt)
+- `docs/respuestas_E01.md` / `.docx` — k, rho, c_p, alpha; balance de energía; CI; Dirichlet/Neumann/Robin; discretización 1D; estabilidad (Fo <= 0.5).
+- `docs/guia_revision_grupo.md` — guía de preguntas/respuestas para la oral.
 
-## Códigos 1D
+### Comprensión BIM/IFC individual (0.7 pt)
+- `docs/respuestas_E01.md` — qué es BIM, qué es IFC, rol de Blender, qué agrega Bonsai, por qué el solver no depende de Blender.
+- `modelo_ifc/foundation.ifc` — modelo BIM: 5 vertidas (`Vertida_01`..`Vertida_05`, `IfcFooting`) + Property Set `UANDES_HormigonMasivo`.
 
-| Archivo | Caso | Condición de borde |
-|---|---|---|
-| `01_dirichlet.py` | Difusión con perfil inicial sinusoidal | Dirichlet en ambos bordes |
-| `03_neumann.py` | Barra con un extremo fijo y otro aislado | Dirichlet izq. + Neumann adiabático der. |
-| `04_robin.py` | Losa con convección y ambiente oscilante | Robin en ambos bordes |
-| `05_calor_interno.py` | Difusión con generación de calor | Dirichlet + término fuente |
+### Capacidad de explicar el solver/código (0.8 pt)
+- `solver/mcplan/thermal.py` — núcleo FTCS: `T_i^{n+1}`, balance de energía, criterio de estabilidad.
+- `solver/mcplan/boundary.py` — condiciones Dirichlet / Neumann / Robin.
+- `solver/mcplan/materials.py` — k, rho, c_p, alpha.
+- `solver/mcplan/hydration.py` — fuente interna (calor de hidratación).
+- `solver/mcplan/grid.py`, `criteria.py`, `reliability.py`, `weather.py`, `plan.py`.
+- `codigo_1d/*.py` — casos 1D de referencia (Dirichlet, Neumann, Robin, calor interno), esquema FTCS con `r = Fo <= 0.5`.
 
-En todos se usa el esquema explícito **FTCS**:
+### Estado real y reproducible del repositorio (0.5 pt)
+- `solver/requirements.txt` — entorno reproducible.
+- `solver/tests/test_verificacion_termica.py` — 5 tests (1D y 2D vs solución analítica, conservación de energía, fuente uniforme, Robin).
+- `solver/run_case.py` + `solver/datos/caso_fundacion.yaml` — runner del caso.
+- `resultados/` — salidas del caso base (series, campo final/peak, resumen).
+- `README.md` (raíz del repo) — README mínimo + cómo ejecutar.
 
-    T_i^{n+1} = T_i^n + Fo * (T_{i+1}^n - 2*T_i^n + T_{i-1}^n),    Fo = alpha * dt / dx^2
+## Reproducir (desde esta carpeta)
 
-con paso `r = Fo <= 0.5` para garantizar estabilidad en conducción pura 1D.
-
-## Solver del proyecto
-
-La implementación integrada (grilla, materiales, hidratación, fronteras, criterios
-y confiabilidad) vive en `scripts/mcplan/` del repositorio. El caso declarativo
-está en `datos/caso_fundacion.yaml` y la verificación numérica en
-`tests/test_verificacion_termica.py`. El pipeline usa el `.ifc` como fuente de
-verdad (Blender + Bonsai -> IFC -> IfcOpenShell -> solver), por lo que corre por
-CLI y en tests sin depender de Blender.
-
-## Reproducir
-
+    cd solver
     pip install -r requirements.txt
-    python scripts/run_case.py datos/caso_fundacion.yaml
+    python run_case.py --plan datos/caso_fundacion.yaml
     python -m pytest tests/
 
-## Modelo IFC
+## Resultado del caso base
+
+- T_maxima = 58.16 °C vs 70.0 °C -> OK (h = 103.0 h)
+- diferencial_termico = 38.03 °C vs 20.0 °C -> NO CUMPLE (h = 143.0 h)
+
+Caso base sin estrategia de control: cumple T_max pero no el diferencial.
+Pendiente de mitigación (aislación, vertidas por capas, secuencia constructiva).
+
+## Modelo IFC (BIM)
 
 `Vertida_01`..`Vertida_05` como `IfcFooting`, con el Property Set
 `UANDES_HormigonMasivo` (VertidaID, Inicio_h, TemperaturaColocacion_C,
