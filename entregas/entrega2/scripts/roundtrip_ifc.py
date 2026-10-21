@@ -1,0 +1,129 @@
+"""Round-trip IFC: modificacion de propiedades y verificacion desde Python (E02).
+
+Demuestra el flujo minimo  Bonsai -> IFC -> Python  que pide la actividad:
+
+    1. leer el IFC e identificar los objetos (vertidas),
+    2. modificar una propiedad (p.ej. TemperaturaColocacion_C),
+    3. guardar el IFC modificado,
+    4. re-leerlo desde Python y comprobar que el cambio se detecto.
+
+La modificacion se hace con IfcOpenShell (camino oficial del curso), el mismo
+motor que usa Bonsai. El script escribe en un archivo de SALIDA, para no tocar
+el `geometry/foundation.ifc` original.
+
+Uso:
+    python scripts/roundtrip_ifc.py --list
+    python scripts/roundtrip_ifc.py --set TemperaturaColocacion_C=21.5 --vertida Vertida_03
+    python scripts/roundtrip_ifc.py --set TemperaturaColocacion_C=21.5 --vertida Vertida_03 -o geometry/foundation_editado.ifc
+"""
+from __future__ import annotations
+
+import argparse
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src"))
+from mcplan.bim import load_vertidas  # noqa: E402
+
+PSET = "Pset_HormigonMasivo"
+
+
+def _load_model(path: Path):
+    import ifcopenshell
+    return ifcopenshell.open(str(path))
+
+
+def _find_element(model, name: str):
+    for el in model.by_type("IfcElement"):
+        if el.Name == name:
+            return el
+    raise SystemExit(f"No se encontro el objeto '{name}' en el IFC")
+
+
+def _get_property(model, element, prop_name: str):
+    import ifcopenshell.util.element as ue
+    psets = ue.get_psets(element)
+    return psets.get(PSET, {}).get(prop_name)
+
+
+def _set_property(model, element, prop_name: str, value):
+    import ifcopenshell.api
+    import ifcopenshell.util.element as ue
+
+    psets = ue.get_psets(element)
+    if PSET not in psets:
+        raise SystemExit(f"El objeto no tiene el Pset '{PSET}'")
+    pset = model.by_id(psets[PSET]["id"])
+    existed = any(p.Name == prop_name for p in pset.HasProperties)
+    ifcopenshell.api.run("pset.edit_pset", model, pset=pset, properties={prop_name: value})
+    return "actualizada" if existed else "agregada"
+
+
+def _coerce(value: str):
+    try:
+        return int(value)
+    except ValueError:
+        pass
+    try:
+        return float(value)
+    except ValueError:
+        return value
+
+
+def cmd_list(path: Path):
+    print(f"Objetos identificables en {path}:")
+    print(f"{'#':>2}  {'Vertida':<12}{'GUID':<25}{'Clase':<12}{'Tcol[°C]':>9}")
+    for i, v in enumerate(load_vertidas(path), start=1):
+        tcol = v.properties.get("TemperaturaColocacion_C", float("nan"))
+        print(f"{i:>2}  {v.name:<12}{v.guid:<25}{v.ifc_class:<12}{tcol:>9.1f}")
+    print(f"\nTotal: {len(load_vertidas(path))} objetos (>=3 requeridos por la actividad)")
+
+
+def cmd_set(path: Path, vertida: str, prop: str, raw_value: str, out: Path):
+    model = _load_model(path)
+    el = _find_element(model, vertida)
+    before = _get_property(model, el, prop)
+    value = _coerce(raw_value)
+    status = _set_property(model, el, prop, value)
+    model.write(str(out))
+    print(f"[1] Leido      : {path}")
+    print(f"[2] Objeto     : {vertida} (GUID {el.GlobalId})")
+    print(f"[3] Propiedad  : {PSET}.{prop}  ({status})")
+    print(f"[4] Antes  -> Despues : {before!r} -> {value!r}")
+    print(f"[5] Guardado   : {out}")
+
+    # Re-leer con el MISMO lector que usa el resto del proyecto
+    after = None
+    for v in load_vertidas(out):
+        if v.name == vertida:
+            after = v.properties.get(prop)
+    print(f"[6] Verificacion (Python detecta el cambio): {after!r}")
+    if after == value:
+        print("    OK: el round-trip cerro correctamente.")
+    else:
+        print(f"    ERROR: se esperaba {value!r} y se leyo {after!r}")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--ifc", type=Path, default=ROOT / "geometry" / "foundation.ifc")
+    ap.add_argument("--list", action="store_true", help="solo listar objetos y salir")
+    ap.add_argument("--set", nargs=2, metavar=("PROPIEDAD", "VALOR"),
+                    help="modificar una propiedad, p.ej. --set TemperaturaColocacion_C 21.5")
+    ap.add_argument("--vertida", default="Vertida_01", help="nombre del objeto a modificar")
+    ap.add_argument("-o", "--out", type=Path,
+                    default=ROOT / "geometry" / "foundation_editado.ifc")
+    args = ap.parse_args()
+
+    if not args.ifc.exists():
+        raise SystemExit(f"No existe el IFC: {args.ifc}")
+    if args.list or not args.set:
+        cmd_list(args.ifc)
+        return
+    cmd_set(args.ifc, args.vertida, args.set[0], args.set[1], args.out)
+
+
+if __name__ == "__main__":
+    main()
