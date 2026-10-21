@@ -11,7 +11,11 @@ opcional de máximo 100 palabras sobre lo aún incompleto).
 
 ### Comprensión BIM/IFC individual (0.7 pt)
 - `docs/respuestas_E01.md` — qué es BIM, qué es IFC, rol de Blender, qué agrega Bonsai, por qué el solver no depende de Blender.
-- `modelo_ifc/foundation.ifc` — modelo BIM: 5 vertidas (`Vertida_01`..`Vertida_05`, `IfcFooting`) + Property Set `UANDES_HormigonMasivo`.
+- `modelo_ifc/foundation.ifc` — modelo BIM con geometría 3D real: 5 vertidas (`Vertida_01`..`Vertida_05`, `IfcFooting`) + Property Set `UANDES_HormigonMasivo`.
+- `bim/build_foundation_ifc.py` — script que genera el IFC (planta octagonal 18 m entre caras, R_borde=9.74153, R_medio=6.76495, R_int=3.78837, rotación 22.5°).
+- `bim/check_ifc.py` — verificación del IFC (clases, GUID, Property Sets, bounding boxes).
+- `bim/add_course_properties.py` — agrega el Property Set del curso.
+- `bim/open_ifc_in_bonsai.py` — abre el IFC en Blender/Bonsai.
 
 ### Capacidad de explicar el solver/código (0.8 pt)
 - `solver/mcplan/thermal.py` — núcleo FTCS: `T_i^{n+1}`, balance de energía, criterio de estabilidad.
