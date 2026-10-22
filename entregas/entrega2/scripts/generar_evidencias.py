@@ -8,7 +8,10 @@ Uso:
 """
 from __future__ import annotations
 
+import os
+import subprocess
 import sys
+import time
 from pathlib import Path
 
 import numpy as np
@@ -21,9 +24,6 @@ except Exception:
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from mcplan.thermal1d import BC, Material, solve_1d  # noqa: E402
-
-import os
-import time
 
 import matplotlib  # noqa: E402
 matplotlib.use("Agg")            # backend sin ventana: guarda a archivo
@@ -106,9 +106,18 @@ def fig_dx_convergencia():
 
 def main():
     print("Generando evidencias E02 (sin abrir aplicaciones)...")
-    fig_principal()
-    fig_dx_convergencia()
+    imgs = [fig_principal(), fig_dx_convergencia()]
     print(f"\nListo. Imagenes en: {OUT}")
+
+    # Abrir las imagenes automaticamente con el visor de Windows
+    for img in imgs:
+        try:
+            subprocess.Popen(["cmd", "/c", "start", "", str(img)], shell=False)
+        except Exception:
+            try:
+                os.startfile(str(img))  # noqa: S606
+            except Exception as e:  # noqa: BLE001
+                print(f"[aviso] no se pudo abrir {img.name}: {e}")
 
 
 if __name__ == "__main__":
