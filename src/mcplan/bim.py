@@ -37,6 +37,9 @@ def _with_ifcopenshell(path: Path) -> list[VertidaInfo]:
     return sorted(out, key=lambda v: v.name)
 
 
+_CLASS_NAMES = {"IFCFOOTING": "IfcFooting", "IFCSLAB": "IfcSlab",
+                "IFCBUILDINGELEMENTPROXY": "IfcBuildingElementProxy"}
+
 _ENT = re.compile(r"^#(\d+)=([A-Z0-9]+)\((.*)\);\s*$")
 
 
@@ -85,7 +88,7 @@ def _with_step_text(path: Path) -> list[VertidaInfo]:
     for i, (cls, a) in ents.items():
         name = a[2].strip("'") if len(a) > 2 else ""
         if cls in ("IFCFOOTING", "IFCSLAB", "IFCBUILDINGELEMENTPROXY") and name.startswith("Vertida"):
-            elems[i] = VertidaInfo(a[0].strip("'"), name, cls.title().replace("Ifc", "Ifc"), {})
+            elems[i] = VertidaInfo(a[0].strip("'"), name, _CLASS_NAMES[cls], {})
     for cls, a in ents.values():
         if cls == "IFCRELDEFINESBYPROPERTIES":
             ps_cls, ps = ents[ref(a[5])]

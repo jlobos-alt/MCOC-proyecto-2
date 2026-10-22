@@ -13,7 +13,8 @@ Uso:
     python scripts/demo_1d_dx_dt.py                 # malla de referencia
     python scripts/demo_1d_dx_dt.py --nx 21         # Delta x mas grueso
     python scripts/demo_1d_dx_dt.py --nx 131        # Delta x mas fino
-    python scripts/demo_1d_dx_dt.py --dt 3600       # Delta t grande (inestable si Fo>0.5)
+    python scripts/demo_1d_dx_dt.py --dt 3600       # Delta t sobre el limite: el solver lo rechaza
+    python scripts/demo_1d_dx_dt.py --dt 3600 --forzar   # correrlo igual y ver como diverge
     python scripts/demo_1d_dx_dt.py --sweep         # tabla comparativa nx y dt
 """
 from __future__ import annotations
@@ -96,13 +97,29 @@ def main():
     ap.add_argument("--nx", type=int, default=67, help="numero de nodos (controla Delta x)")
     ap.add_argument("--dt", type=float, default=None, help="paso de tiempo en s (controla Delta t)")
     ap.add_argument("--sweep", action="store_true", help="tabla comparativa de nx y dt")
+    ap.add_argument("--forzar", action="store_true",
+                    help="correr aunque dt supere el limite de estabilidad (para ver la divergencia)")
     args = ap.parse_args()
 
     if args.sweep:
         sweep()
         return
 
-    res = solve(args.nx, dt=args.dt)
+    dx = L / (args.nx - 1)
+    dt_max = stable_dt_1d(MAT, dx, BC.adiabatic(), BC.robin(H, T_AIR))
+    if args.dt is not None and args.dt > dt_max and not args.forzar:
+        print(f"dx = {dx:.4f} m  ->  dt_max estable = {dt_max:.1f} s  (Fo efectivo pedido = "
+              f"{MAT.alpha * args.dt / dx**2:.3f})")
+        print(f"dt = {args.dt:.1f} s supera el limite: el solver se NIEGA a correr (ValueError).")
+        print("El limite sale de dt <= C_i/(sum G_ij + G_borde): Fo <= 0.5 en el interior y")
+        print("algo menos en el borde Robin. Usa --forzar para ver como diverge.")
+        return
+    res = solve(args.nx, dt=args.dt, allow_unstable=args.forzar)
+    if args.forzar and (not np.all(np.isfinite(res.T_final)) or np.nanmax(np.abs(res.T_final)) > 1e3):
+        print(f"INESTABLE: dt = {res.dt:.1f} s > dt_max = {res.dt_max:.1f} s  (Fo = {res.fo:.3f})")
+        print(f"La temperatura llega a |T| ~ {np.nanmax(np.abs(res.T_final)):.3g} °C: oscilacion que crece")
+        print("en cada paso (peso 1-2Fo negativo). Resultado sin sentido fisico.")
+        return
     print(f"Material : k={MAT.k} W/mK  rho={MAT.rho} kg/m3  cp={MAT.cp} J/kgK  "
           f"alpha={MAT.alpha:.3e} m2/s")
     report(res, "caso")

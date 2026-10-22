@@ -37,3 +37,6 @@ MEMORIA_TRANSITO_CAPACIDAD_NOS.docx
 .pytest_cache/
 output/
 results/*.vtk
+
+# foto del round-trip (se regenera)
+resultados/foto_ifc_antes.json
