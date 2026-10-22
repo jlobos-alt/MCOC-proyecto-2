@@ -20,10 +20,12 @@ entregas/entrega2/
 │   └── bim.py                       lectura del IFC (IfcOpenShell o STEP)
 ├── scripts/
 │   ├── roundtrip_ifc.py             listar / modificar propiedad / verificar
-│   └── demo_1d_dx_dt.py             demo 1D con Δx y Δt configurables
+│   ├── demo_1d_dx_dt.py             demo 1D con Δx y Δt configurables
+│   └── generar_evidencias.py        genera todas las imagenes (sin abrir apps)
 ├── tests/                           36 tests (round-trip + efecto Δx/Δt)
 ├── resultados/
-│   └── demo_1d.png                  figura del caso 1D
+│   ├── demo_1d.png                  perfiles + historias de temperatura
+│   └── demo_1d_dx.png               convergencia al refinar Δx
 └── requirements.txt / pyproject.toml / environment.yml
 ```
 
@@ -40,6 +42,9 @@ python scripts/roundtrip_ifc.py --set TemperaturaColocacion_C 21.5 --vertida Ver
 python scripts/demo_1d_dx_dt.py --sweep
 python scripts/demo_1d_dx_dt.py --nx 21      # Δx grueso
 python scripts/demo_1d_dx_dt.py --nx 161     # Δx fino
+
+# Generar todas las imagenes de evidencia (sin abrir nada)
+python scripts/generar_evidencias.py
 
 # Tests
 python -m pytest tests/ -q                    # 36 passed
