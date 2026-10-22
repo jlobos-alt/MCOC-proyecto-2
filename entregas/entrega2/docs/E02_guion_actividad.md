@@ -10,7 +10,7 @@ los 8 pasos de abajo; aquí está el comando exacto y qué responder.
 - [ ] IFC con al menos 3 objetos identificables → `geometry/foundation.ifc` (5 vertidas).
 - [ ] Script que lea el IFC → `scripts/roundtrip_ifc.py --list`.
 - [ ] Solver 1D ejecutable → `scripts/demo_1d_dx_dt.py`.
-- [ ] Al menos un test automatizado → `tests/` (36 tests).
+- [ ] Al menos un test automatizado → `tests/` (41 tests).
 
 ---
 
@@ -19,59 +19,79 @@ los 8 pasos de abajo; aquí está el comando exacto y qué responder.
 - Bonsai: **File → Open IFC Project** → `geometry/foundation.ifc`.
 - El modelo aparece en el árbol: 5 objetos `Vertida_01..Vertida_05`.
 
-## Paso 2 — Identificar los objetos
+## Paso 2 — Identificar los objetos (y sacar la "foto" de antes)
 
 ```bash
-python scripts/roundtrip_ifc.py --list
+python scripts/roundtrip_ifc.py --antes
 ```
 
-Salida esperada: 5 filas, cada una con nombre, GUID (22 caracteres), clase
-`IfcFooting` y temperatura de colocación.
+Muestra los 5 objetos con nombre, GUID, clase, rango en z, volumen y ubicación,
+y guarda esa foto en `resultados/foto_ifc_antes.json`.
+
+En Bonsai, mostrar el árbol: IfcProject > IfcSite > IfcBuilding > IfcBuildingStorey
+> 5 `IfcFooting`. Al seleccionar una vertida, el panel **Object Information**
+muestra la clase, el GUID y el `Pset_HormigonMasivo`.
 
 > **Qué decir:** son 5 vertidas de hormigón masivo, cada una `IfcFooting`, con
 > GUID único y un `Pset_HormigonMasivo` con propiedades (VertidaID, fechas,
-> T de colocación, volumen).
+> T de colocación, moldaje, aislación, volumen).
 
-## Paso 3 — Modificar geometría o una propiedad
+## Paso 3 — Modificar en Bonsai (geometría o propiedad)
 
-Propiedad (por script):
+Opción A, **propiedad** (la más segura):
+1. Seleccionar `Vertida_03` en el árbol.
+2. Panel derecho → pestaña **Object** (Object Properties) → sección
+   **Property Sets** → `Pset_HormigonMasivo` → ícono de lápiz (editar).
+3. Cambiar `TemperaturaColocacion_C` de 18 a, por ejemplo, 12.5 y confirmar (✓).
 
-```bash
-python scripts/roundtrip_ifc.py --set TemperaturaColocacion_C 21.5 --vertida Vertida_03
-```
+Opción B, **geometría** (mover una vertida):
+1. Seleccionar `Vertida_05` en el árbol (o en la vista 3D).
+2. Teclas `G`, luego `Z`, escribir `0.5` y `Enter`: sube 0,5 m.
 
-O en Bonsai: seleccionar `Vertida_03` → **Object Properties** → editar
-`TemperaturaColocacion_C` (o mover/escalar la geometría con las herramientas
-de edición).
-
-> **Qué decir:** cambio la temperatura de colocación de la vertida 3 de 18 a
-> 21.5 °C para representar una colocación más calurosa.
+> **Qué decir:** bajo la temperatura de colocación de la vertida 3 (por ejemplo,
+> enfriando el agua de la mezcla), o muevo el pedestal para ver que el cambio de
+> geometría también viaja por el IFC.
 
 ## Paso 4 — Guardar
 
-- Script: escribe `geometry/foundation_editado.ifc` (no toca el original).
-- Bonsai: **Ctrl+S** / File → Save.
+Bonsai: **File → Save IFC Project** (o `Ctrl+S`). Se guarda sobre `geometry/foundation.ifc`.
 
 > **Qué decir:** el `.ifc` es la fuente de verdad; el `.blend` no se versiona.
 
 ## Paso 5 — Demostrar que Python detecta la modificación
 
-El propio script imprime la verificación:
-
-```
-[4] Antes  -> Despues : 18.0 -> 21.5
-[6] Verificacion (Python detecta el cambio): 21.5
-    OK: el round-trip cerro correctamente.
+```bash
+python scripts/roundtrip_ifc.py --despues
 ```
 
-O con el test:
+Salida esperada (opción A):
+
+```
+Python detectó 1 cambio(s):
+  * Vertida_03: propiedad Pset_HormigonMasivo.TemperaturaColocacion_C: 18 -> 12.5
+Identidad BIM: 5 objetos conservan su GUID.
+```
+
+Con la opción B aparece `Vertida_05: ubicación (0,0,0) -> (0,0,0.5) m`,
+`z mínimo 3.300 -> 3.800 m` y `z máximo 4.300 -> 4.800 m`. El volumen no
+cambia, porque mover no cambia el tamaño.
+
+Este comparador (`src/mcplan/ifc_diff.py`) lee el IFC como texto, sin
+IfcOpenShell ni Blender: resuelve las referencias `#n`, suma los placements
+y calcula volúmenes de extrusiones, B-reps y mallas. Está verificado por
+`tests/test_roundtrip_bonsai.py`, que simula las tres ediciones típicas.
+
+Alternativa sin Bonsai (si algo falla en vivo):
 
 ```bash
-python -m pytest tests/test_roundtrip.py -v
+python scripts/roundtrip_ifc.py --set TemperaturaColocacion_C 21.5 --vertida Vertida_03
 ```
 
-> **Qué decir:** re-leo el IFC con IfcOpenShell (el mismo motor que usa Bonsai) y
-> encuentro el valor nuevo. Los GUID no cambian: la identidad BIM se preserva.
+> **Qué decir:** re-leo el archivo guardado desde Python, sin Blender abierto,
+> y aparece el valor nuevo. Los GUID no cambian: la identidad BIM se preserva.
+
+**Después de la demo**, para dejar el IFC como estaba:
+`git checkout geometry/foundation.ifc`.
 
 ## Paso 6 — Ejecutar el solver 1D
 
@@ -91,7 +111,9 @@ python scripts/demo_1d_dx_dt.py --nx 21      # Δx grueso
 python scripts/demo_1d_dx_dt.py --nx 161     # Δx fino
 
 # Δt: forzar el paso de tiempo
-python scripts/demo_1d_dx_dt.py --dt 2000
+python scripts/demo_1d_dx_dt.py --dt 500          # estable (dt_max ≈ 950 s con nx=67)
+python scripts/demo_1d_dx_dt.py --dt 3600         # el solver lo rechaza y explica por qué
+python scripts/demo_1d_dx_dt.py --dt 3600 --forzar   # se ve cómo diverge
 python scripts/demo_1d_dx_dt.py --sweep      # tabla comparativa
 ```
 

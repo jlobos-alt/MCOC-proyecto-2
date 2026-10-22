@@ -17,12 +17,13 @@ entregas/entrega2/
 │   └── foundation_base.ifc          semilla determinista
 ├── src/mcplan/                      solver (paquete)
 │   ├── thermal1d.py                 solver 1D FTCS (Dirichlet/Neumann/Robin)
-│   └── bim.py                       lectura del IFC (IfcOpenShell o STEP)
+│   ├── bim.py                       lectura del IFC (IfcOpenShell o STEP)
+│   └── ifc_diff.py                  foto del IFC y comparación antes/después
 ├── scripts/
-│   ├── roundtrip_ifc.py             listar / modificar propiedad / verificar
+│   ├── roundtrip_ifc.py             --antes/--despues (Bonsai), listar, modificar
 │   ├── demo_1d_dx_dt.py             demo 1D con Δx y Δt configurables
 │   └── generar_evidencias.py        genera todas las imagenes (sin abrir apps)
-├── tests/                           36 tests (round-trip + efecto Δx/Δt)
+├── tests/                           41 tests (round-trip + efecto Δx/Δt)
 ├── resultados/
 │   ├── demo_1d.png                  perfiles + historias de temperatura
 │   └── demo_1d_dx.png               convergencia al refinar Δx
@@ -34,7 +35,12 @@ entregas/entrega2/
 ```bash
 pip install -r requirements.txt
 
-# Round-trip IFC
+# Round-trip IFC con Bonsai
+python scripts/roundtrip_ifc.py --antes      # foto antes de editar
+#   ... editar en Bonsai (propiedad o mover una vertida) y File > Save IFC Project ...
+python scripts/roundtrip_ifc.py --despues    # Python muestra qué cambió
+
+# Round-trip por script (alternativa)
 python scripts/roundtrip_ifc.py --list
 python scripts/roundtrip_ifc.py --set TemperaturaColocacion_C 21.5 --vertida Vertida_03
 
@@ -42,12 +48,14 @@ python scripts/roundtrip_ifc.py --set TemperaturaColocacion_C 21.5 --vertida Ver
 python scripts/demo_1d_dx_dt.py --sweep
 python scripts/demo_1d_dx_dt.py --nx 21      # Δx grueso
 python scripts/demo_1d_dx_dt.py --nx 161     # Δx fino
+python scripts/demo_1d_dx_dt.py --dt 3600    # Δt sobre el límite: el solver lo rechaza
+python scripts/demo_1d_dx_dt.py --dt 3600 --forzar   # ver la divergencia
 
 # Generar todas las imagenes de evidencia (sin abrir nada)
 python scripts/generar_evidencias.py
 
 # Tests
-python -m pytest tests/ -q                    # 36 passed
+python -m pytest tests/ -q                    # 41 tests (4 se omiten si no está IfcOpenShell)
 ```
 
 ## Mapeo a la rúbrica de la actividad
@@ -57,17 +65,17 @@ python -m pytest tests/ -q                    # 36 passed
 | IFC con ≥ 3 objetos identificables | `geometry/foundation.ifc` — 5 `IfcFooting` `Vertida_01..05` |
 | Script que lea el IFC | `scripts/roundtrip_ifc.py --list` (usa `mcplan.bim`) |
 | Solver 1D ejecutable | `scripts/demo_1d_dx_dt.py` → `src/mcplan/thermal1d.py` |
-| ≥ 1 test automatizado | `tests/` → 36 tests |
+| ≥ 1 test automatizado | `tests/` → 41 tests |
 
 | Paso de la actividad | Cómo se demuestra |
 |---|---|
 | 1. Abrir el IFC en Bonsai | `geometry/foundation.ifc` (File > Open IFC Project) |
 | 2. Identificar los objetos | `python scripts/roundtrip_ifc.py --list` |
-| 3. Modificar geometría o propiedad | `--set TemperaturaColocacion_C 21.5 --vertida Vertida_03` (o editar en Bonsai) |
-| 4. Guardar | el script escribe `geometry/foundation_editado.ifc` (Bonsai: Ctrl+S) |
-| 5. Python detecta la modificación | paso `[6] Verificacion` del script / `tests/test_roundtrip.py` |
+| 3. Modificar geometría o propiedad | En Bonsai: Pset de `Vertida_03` o mover `Vertida_05` (alternativa: `--set ...`) |
+| 4. Guardar | Bonsai: File > Save IFC Project |
+| 5. Python detecta la modificación | `roundtrip_ifc.py --despues` / `tests/test_roundtrip_bonsai.py` |
 | 6. Ejecutar el solver 1D | `python scripts/demo_1d_dx_dt.py` |
-| 7. Modificar Δx o Δt | `--nx 21/161` y `--dt ...` |
+| 7. Modificar Δx o Δt | `--nx 21/161`, `--dt 500` / `--dt 3600 [--forzar]` |
 | 8. Explicar el efecto | ver `docs/E02_guion_actividad.md` |
 
 ## Efecto de Δx y Δt (resumen)
