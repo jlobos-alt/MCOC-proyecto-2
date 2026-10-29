@@ -10,7 +10,7 @@ no el 1D de E01–E03.
 
 ```powershell
 pip install -r requirements.txt
-python -m pytest tests -q                       # 46 tests (29 de E05 + 17 de E01/E03)
+python -m pytest tests -q                       # 52 tests (29 batería E05 + 6 bloque + 17 de E01/E03)
 python -m pytest tests/test_bateria_e05.py -v   # solo la batería E05
 python scripts/bateria_e05.py                   # tabla PASA/FALLA de los 13 casos
 python scripts/bateria_e05.py --figuras         # + figuras en results/e05/
@@ -61,6 +61,52 @@ es justo lo que debe pasar.
 
 `e05_sinusoidal_{1d,2d,3d}.png` (numérica vs exacta + error), `e05_convergencia.png` (pendiente 2),
 `e05_energia.png`, `e05_fuente.png`, `e05_neumann.png`, `e05_robin.png`, `e05_robin_t.png`.
+
+## Visualizador térmico interactivo
+
+```powershell
+python scripts/visualizador_termico.py          # abre la ventana
+python scripts/verificar_visualizador.py        # verificación completa (~1 min, termina en TODO OK)
+```
+
+Archivo: [`scripts/visualizador_termico.py`](scripts/visualizador_termico.py) (también en
+`scripts/` de la raíz del repo). Usa el mismo solver 3D (`build_model` + `solve`), con matplotlib;
+no requiere instalar nada más.
+
+- **8 casos:** seno 1D, 2D y 3D; Dirichlet base/techo; adiabático dT/dn = 0; Robin
+  −k dT/dn = h(T − T_aire) con h = k·β; fuente q₀; Neumann q_n. Los casos de borde usan el bloque de
+  3 × 3 × 0,6 m con caras laterales adiabáticas.
+- **Paneles:**
+  - Mapa térmico: barra en 1D, placa en 2D y voxels con un corte en 3D.
+  - Perfil por el centro: solver vs solución exacta.
+  - Curva de calor T(t) en puntos de control.
+  - Slider de tiempo y botón **Animar**.
+- **Sliders:** n, t final, Lx, Ly, Lz, y los parámetros propios de cada caso (T, A, β, q₀, q_n).
+  Cada caso conserva sus valores. La escala de colores es fija por caso, así que un cambio de β o
+  q_n se ve en el color.
+- **Solución exacta en cada instante:**
+  - Senos: el modo propio que decae.
+  - Dirichlet y adiabático: series de Fourier.
+  - Robin: autovalores de tan(μH) = −μk/h.
+  - Neumann: cos((m−½)πz/H).
+  - Fuente: recta.
+- **Protección:** si la combinación de sliders exige más de 100 000 pasos (Δt ∝ Δx²), avisa en vez
+  de congelarse.
+
+`verificar_visualizador.py` hace 112 chequeos:
+- Barre cada parámetro hasta los extremos del slider y compara con la exacta en los 40 instantes.
+  El error es ≤ 0,3 % del rango con n ≥ 8.
+- Revisa Δt estable, principio del máximo y energía.
+- Revisa tendencias físicas: más β da un techo más frío; duplicar q₀ duplica la subida; el signo de
+  q_n decide si entra o sale calor; el seno 3D se enfría antes que el 2D, y el 2D antes que el 1D.
+- Revisa la interfaz.
+
+El único caso que no cumple ≤ 2 % es Dirichlet con t = 1 h y n = 12, porque el calor todavía no
+cruza una celda. Ahí se verifica que el error **converja al refinar** (0,21 → 0,025 → 0,005 °C).
+
+**Tres condiciones de borde en el bloque 3 × 3 × 0,6 m**, sin ventana:
+`python scripts/casos_borde_bloque.py --figura` (Dirichlet 20/30 °C, dT/dn = 0, Robin β), con sus
+tests en `tests/test_casos_borde_bloque.py` y la figura en `results/casos_borde/perfiles.png`.
 
 ## Cambios al solver hechos para esta entrega
 
