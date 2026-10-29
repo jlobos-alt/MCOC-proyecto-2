@@ -100,7 +100,7 @@ y comparación antes/después sin IfcOpenShell) y `scripts/roundtrip_ifc.py --an
 | E02 Lab round-trip IFC + demo 1D | 22 oct | hecho | `adf0e1c` |
 | E03 Verificación 1D | 23 oct | hecho (José) | `513eb4e` |
 | E04 Revisión oral 2D/3D + CC | 28 oct | hecho (José) | `25b992f` |
-| E05 Lab batería de verificación térmica | 29 oct | pendiente | — |
+| E05 Lab batería de verificación térmica | 29 oct | hecho (Clemente) | ver `entregas/entrega5/README.md` |
 | E06 Dossier de verificación + BIM del caso | 30 oct | pendiente | — |
 | E07–E09 Voxelización, vertidas, hidratación, baseline 3D | 4–6 nov | pendiente | — |
 | E10–E12 Entorno, moldaje, clima, simulación 14 días | 11–13 nov | pendiente | — |

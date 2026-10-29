@@ -13,6 +13,10 @@ Una vez conocido R_total, la conductancia de la cara es G = A / R_total y el
 intercambio con el medio se escribe como:
 
     Q = G * (T_infinito - T_celda)
+
+Una frontera Neumann no tiene resistencia: impone directamente el flujo
+q_n [W/m^2] (n hacia afuera, q_n > 0 sale calor), Q = -q_n * A. Adiabatica es
+el caso q_n = 0.
 """
 
 from __future__ import annotations
@@ -75,6 +79,7 @@ class BoundaryGroup:
     capas: list[ScheduledLayer] = field(default_factory=list)
     far_field: Callable[[float], float] = lambda t: 15.0
     valor_dirichlet_C: float | None = None
+    flujo_W_m2: float = 0.0
 
     def capas_resistance(self, t_h: float) -> float:
         """Resistencia por unidad de area de las capas activas [m^2 K/W]."""
@@ -91,7 +96,7 @@ class BoundaryGroup:
 
     def resistance(self, t_h: float) -> float:
         """Resistencia total por unidad de area de la frontera [m^2 K/W]."""
-        if self.tipo == "adiabatica":
+        if self.tipo in ("adiabatica", "neumann"):
             return float("inf")
         return self.capas_resistance(t_h) + self.convective_resistance()
 

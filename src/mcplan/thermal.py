@@ -11,7 +11,8 @@ donde:
 
     G_ij  = k_ij * A_ij / d_ij     conductancia entre celdas vecinas
     G_b   = A / R_total             conductancia hacia el medio (frontera)
-    Qdot  = rho * cp * d(theta_ad)/dt   calor de hidratacion
+    Qdot  = rho * cp * d(theta_ad)/dt   calor de hidratacion (+ fuente fija q0)
+    Q_b   = -q_n * A                    frontera Neumann (flujo impuesto)
 
 Se usa un esquema explicito (Euler) con paso de tiempo elegido a partir del
 criterio de estabilidad derivado del balance:
@@ -126,13 +127,15 @@ def build_model(plan: Plan) -> Model:
     """Construye el modelo numerico a partir de un plan declarativo."""
     geom = plan.geometria
     dx = geom.dx
+    dy = geom.dy or dx
+    dz = geom.dz or dx
     grid = Grid(
         nx=int(round((geom.x[1] - geom.x[0]) / dx)),
-        ny=int(round((geom.y[1] - geom.y[0]) / dx)),
-        nz=int(round((geom.z[1] - geom.z[0]) / dx)),
+        ny=int(round((geom.y[1] - geom.y[0]) / dy)),
+        nz=int(round((geom.z[1] - geom.z[0]) / dz)),
         dx=dx,
-        dy=dx,
-        dz=dx,
+        dy=dy,
+        dz=dz,
         x0=geom.x[0],
         y0=geom.y[0],
         z0=geom.z[0],
@@ -229,6 +232,7 @@ def build_model(plan: Plan) -> Model:
             capas=capas,
             far_field=far_field,
             valor_dirichlet_C=spec.valor_dirichlet_C,
+            flujo_W_m2=spec.flujo_W_m2,
         )
         groups[spec.name] = group
 
@@ -494,12 +498,16 @@ def solve(
     factor_estabilidad: float = 0.8,
     guardar_campo: bool = True,
     temperatura_inicial=None,
+    fuente_W_m3: float = 0.0,
 ) -> Result:
     """Resuelve el problema termico y devuelve las series de salida.
 
     `temperatura_inicial` permite imponer un perfil propio (por ejemplo el
     sinusoidal de la verificacion analitica) en lugar de la temperatura de
     colocacion. Acepta un vector plano o una funcion de (x, y, z).
+
+    `fuente_W_m3` agrega una fuente volumetrica constante q0 en todas las celdas
+    activas (se suma al calor de hidratacion). Sirve para verificar la fuente.
     """
     grid = model.grid
     n_cells = grid.n_cells
@@ -519,7 +527,8 @@ def solve(
     placed_mask = np.zeros(n_cells, dtype=bool)
     active = placed_mask.copy()
 
-    n_steps = int(np.ceil(duracion_h * 3600.0 / dt))
+    # tolerancia: 86400/dt puede dar 495.0000001 por redondeo y ceil sumaria un paso de mas
+    n_steps = int(np.ceil(duracion_h * 3600.0 / dt - 1e-6))
     times: list[float] = []
     max_global: list[float] = []
     max_core: list[float] = []
@@ -550,6 +559,8 @@ def solve(
         _accumulate_internal(model, T, net, t_h)
         _accumulate_boundary(model, T, net, t_h)
         _accumulate_sources(model, T, net, dt, t_h, active, equivalent_age)
+        if fuente_W_m3:
+            net[active] += fuente_W_m3 * grid.cell_volume
 
         update = np.zeros(n_cells)
         capacity = model.rho_cp_flat * grid.cell_volume
@@ -616,12 +627,15 @@ def _accumulate_boundary(model: Model, T: np.ndarray, net: np.ndarray, t_h: floa
         k_owner = model.k_flat[owner]
         resistance = np.empty(owner.size)
         far_field = np.empty(owner.size)
+        q_neumann = np.zeros(owner.size)
         for name in np.unique(group_names):
             selection = group_names == name
             group = model.groups[str(name)]
-            if group.tipo == "adiabatica":
+            if group.tipo in ("adiabatica", "neumann"):
                 resistance[selection] = np.inf
                 far_field[selection] = np.nan
+                if group.tipo == "neumann":
+                    q_neumann[selection] = group.flujo_W_m2
                 continue
             r_layers = group.capas_resistance(t_h)
             r_conv = group.convective_resistance()
@@ -638,6 +652,8 @@ def _accumulate_boundary(model: Model, T: np.ndarray, net: np.ndarray, t_h: floa
         flux = np.zeros(owner.size)
         flux[valid] = conductance[valid] * (far_field[valid] - T[owner[valid]])
         net += np.bincount(owner, weights=flux, minlength=model.grid.n_cells)
+        # Neumann: -k dT/dn = q_n con n hacia afuera -> la celda pierde q_n * A
+        net -= np.bincount(owner, weights=q_neumann * face.area, minlength=model.grid.n_cells)
 
 
 def _accumulate_sources(

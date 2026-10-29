@@ -51,6 +51,9 @@ class LayerSpec:
 class BoundarySpec:
     """Frontera termica asociada a un conjunto de caras.
 
+    `tipo`: "convectiva" (Robin), "dirichlet", "neumann" (flujo impuesto
+    `flujo_W_m2`, positivo si sale calor) o "adiabatica".
+
     `direccion` define el conjunto de caras por defecto:
         "perimetro": caras laterales (x, y)
         "superficie": cara superior (z+)
@@ -63,6 +66,7 @@ class BoundarySpec:
     tipo: str = "convectiva"
     h: float = 12.0
     valor_dirichlet_C: float | None = None
+    flujo_W_m2: float = 0.0
     ejes: list[int] = field(default_factory=list)
     signo: str = "ambos"
     capas: list[LayerSpec] = field(default_factory=list)
@@ -93,6 +97,8 @@ class GeometrySpec:
     y: tuple[float, float] = (0.0, 16.0)
     z: tuple[float, float] = (0.0, 2.4)
     dx: float = 0.3
+    dy: float | None = None  # si es None se usa dx (celdas cubicas)
+    dz: float | None = None
 
 
 @dataclass
@@ -135,6 +141,8 @@ def plan_from_dict(data: dict) -> Plan:
         y=tuple(geom.get("y", (0.0, 16.0))),
         z=tuple(geom.get("z", (0.0, 2.4))),
         dx=float(geom.get("dx", 0.3)),
+        dy=float(geom["dy"]) if geom.get("dy") is not None else None,
+        dz=float(geom["dz"]) if geom.get("dz") is not None else None,
     )
 
     materiales = {
@@ -194,6 +202,7 @@ def plan_from_dict(data: dict) -> Plan:
                 if spec.get("valor_dirichlet_C") is not None
                 else None
             ),
+            flujo_W_m2=float(spec.get("flujo_W_m2", 0.0)),
             ejes=[int(axis) for axis in spec.get("ejes", []) or []],
             signo=str(spec.get("signo", "ambos")),
             capas=[
