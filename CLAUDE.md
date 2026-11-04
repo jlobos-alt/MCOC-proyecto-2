@@ -53,11 +53,15 @@ temperatura de colocación, moldaje/aislación, retiro), no una simulación.
 src/mcplan/            paquete principal (raíz = versión vigente)
   thermal1d.py         solver 1D FTCS nodal (media celda en bordes): Material, BC.dirichlet/
                        neumann/adiabatic/robin, stable_dt_1d, solve_1d (rechaza dt inestable)
-  bim.py               lee vertidas del IFC (IfcOpenShell si está; si no, lector STEP propio)
+  bim.py               lee vertidas del IFC (IfcOpenShell si está; si no, lector STEP propio);
+                       extraer_solidos da la geometría triangulada (requiere IfcOpenShell)
+  voxel.py             voxelizar: vertida_id por celda (centro dentro del sólido, conteo de cruces),
+                       error de volumen, área en escalera, dz_que_calza
   thermal.py, grid.py  solver 3D por balance de celdas (centrado en celdas), build_model/solve
   boundary.py          capas en serie: convección, moldaje, aislación, retiro en el tiempo
-  hydration.py         θ_ad(t) → q_h = ρ cp dθ/dt (exponencial, provisorio)
-  plan.py, criteria.py plan declarativo YAML (datos/caso_fundacion.yaml) y chequeo 70/20 °C
+  hydration.py         θ_ad(t) → q_h = ρ cp dθ/dt, con madurez de Arrhenius (parámetros provisorios)
+  plan.py, criteria.py plan declarativo YAML y chequeo 70/20 °C. Fundación real: plantilla
+                       datos/fundacion_ifc.yaml + plan_desde_solidos + build_model(plan, voxeles=...)
   reliability.py, weather.py   Monte Carlo y series de clima (esqueleto)
 geometry/              foundation.ifc (guardado con Bonsai), foundation_base.ifc (semilla),
                        course_geometry.json, make_foundation_ifc.py, bonsai_open_and_save.py
@@ -102,7 +106,8 @@ y comparación antes/después sin IfcOpenShell) y `scripts/roundtrip_ifc.py --an
 | E04 Revisión oral 2D/3D + CC | 28 oct | hecho (José) | `25b992f` |
 | E05 Lab batería de verificación térmica | 29 oct | hecho (Clemente) | ver `entregas/entrega5/README.md` |
 | E06 Dossier de verificación + BIM del caso | 30 oct | pendiente | — |
-| E07–E09 Voxelización, vertidas, hidratación, baseline 3D | 4–6 nov | pendiente | — |
+| E07 Revisión oral voxelización, vertidas, hidratación | 4 nov | en revisión (Matías) | ver `entregas/entrega7/README.md` |
+| E08–E09 BIM→grid + activación, baseline 3D con hidratación | 5–6 nov | pendiente | — |
 | E10–E12 Entorno, moldaje, clima, simulación 14 días | 11–13 nov | pendiente | — |
 | E13–E15 Incertidumbre, Monte Carlo + HPC, recomendación | 18–20 nov | pendiente | — |
 
@@ -127,7 +132,9 @@ pip install -r requirements.txt
 python -m pytest tests -q                       # tests de la raíz
 python scripts\inspect_ifc.py                   # vertidas, GUID y Pset
 python scripts\run_1d_demo.py                   # demo 1D con hidratación
-python scripts\run_case.py --plan datos\caso_fundacion.yaml   # caso 3D
+python scripts\run_case.py --plan datos\caso_fundacion.yaml   # caso 3D con losa rectangular
+python scripts\voxelizar_ifc.py                 # voxeles, error de volumen y de área
+python scripts\simular_fundacion_ifc.py         # fundación real por vertidas
 
 cd entregas\entrega2
 python scripts\roundtrip_ifc.py --antes         # foto antes de editar en Bonsai

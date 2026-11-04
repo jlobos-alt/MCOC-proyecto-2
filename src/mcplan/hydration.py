@@ -12,11 +12,20 @@ y el calor volumetrico equivalente se obtiene de:
 El factor de madurez de Arrhenius escala la velocidad de hidratacion segun la
 temperatura real de la celda:
 
-    m(T) = exp(-Ea/R * (1/T - 1/T_ref))
+    m(T) = exp(-(Ea/R) * (1/T - 1/T_ref))        T en kelvin
 
 La edad equivalente de cada celda es:
 
     age_eq(t) = integral_0^t m(T(tau)) dtau
+
+y, por la regla de la cadena, el calor generado es
+
+    qdot = rho * cp * d(theta_ad)/d(age_eq) * m(T)
+
+Ese factor m(T) es lo que hace que el calor total no dependa de la temperatura:
+el hormigon caliente libera lo mismo, pero antes. El solver integra esta curva
+dentro de cada paso (ver `thermal._accumulate_sources`), con la temperatura del
+inicio del paso, para que el calor total tampoco dependa de dt.
 """
 
 from __future__ import annotations
@@ -25,9 +34,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-R_GAS = 8.314462618  # J/(mol K)
-
-DEFAULT_ACTIVATION_TEMPERATURE = 4000.0  # K
+DEFAULT_ACTIVATION_TEMPERATURE = 4000.0  # K, Ea/R (Ea ~ 33 kJ/mol)
 DEFAULT_REFERENCE_TEMPERATURE = 293.15  # K (20 C)
 
 
@@ -68,7 +75,8 @@ class HydrationModel:
             return np.ones_like(np.asarray(temperature_C, dtype=float))
         temperature_K = np.asarray(temperature_C, dtype=float) + 273.15
         temperature_K = np.maximum(temperature_K, 1.0)
-        exponent = -self.activation_temperature_K / R_GAS * (
+        # activation_temperature_K ya es Ea/R: no se divide otra vez por R
+        exponent = -self.activation_temperature_K * (
             1.0 / temperature_K - 1.0 / self.reference_temperature_K
         )
         return np.exp(np.clip(exponent, -50.0, 50.0))

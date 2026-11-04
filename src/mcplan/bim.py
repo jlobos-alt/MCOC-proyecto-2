@@ -2,16 +2,23 @@
 Capa BIM: lee el IFC y devuelve objetos Python simples (sin detalles del esquema).
 
     IFC  --(IfcOpenShell)-->  [VertidaInfo(guid, name, properties, ...)]
+    IFC  --(IfcOpenShell)-->  [SolidoVertida(verts, faces, inicio_h, ...)]
 
 Si IfcOpenShell está instalado se usa (camino oficial del curso).
 Si no, un lector mínimo del texto STEP permite listar vertidas y Psets
 (útil para tests y CI sin dependencias pesadas).
+
+La geometría sí requiere IfcOpenShell: un IFC puede describir un sólido como
+extrusión, B-rep o malla, y es su motor el que convierte todo eso en triángulos.
 """
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
+
+import numpy as np
 
 
 @dataclass
@@ -102,6 +109,82 @@ def _with_step_text(path: Path) -> list[VertidaInfo]:
                 if eid in elems:
                     elems[eid].properties.update(props)
     return sorted(elems.values(), key=lambda v: v.name)
+
+
+@dataclass
+class SolidoVertida:
+    """Una vertida del IFC: su malla de triángulos y lo que necesita el solver."""
+
+    vertida_id: int
+    nombre: str
+    guid: str
+    verts: np.ndarray                  # (N, 3) en coordenadas de mundo [m]
+    faces: np.ndarray                  # (M, 3) índices de vértices
+    inicio_h: float                    # horas desde la primera vertida
+    temperatura_colocacion_C: float
+    tipo_hormigon: str
+    moldaje: str
+    aislacion: str
+    retiro_moldaje_h: float
+    volumen_pset_m3: float | None = None
+
+    @property
+    def volumen(self) -> float:
+        return volumen_malla(self.verts, self.faces)
+
+
+def volumen_malla(verts: np.ndarray, faces: np.ndarray) -> float:
+    """Volumen de una malla cerrada: suma de tetraedros contra el origen."""
+    a, b, c = verts[faces[:, 0]], verts[faces[:, 1]], verts[faces[:, 2]]
+    return abs(float(np.einsum("ij,ij->i", a, np.cross(b, c)).sum())) / 6.0
+
+
+def horas_desde_primera(fechas: list[str]) -> list[float]:
+    """Convierte fechas ISO en horas contadas desde la más temprana."""
+    tiempos = [datetime.fromisoformat(f) for f in fechas]
+    cero = min(tiempos)
+    return [(t - cero).total_seconds() / 3600.0 for t in tiempos]
+
+
+def extraer_solidos(path) -> list[SolidoVertida]:
+    """Lee del IFC la geometría triangulada y las propiedades de cada vertida."""
+    import ifcopenshell
+    import ifcopenshell.geom
+    import ifcopenshell.util.element as ue
+
+    model = ifcopenshell.open(str(path))
+    settings = ifcopenshell.geom.settings()
+    settings.set(settings.USE_WORLD_COORDS, True)   # aplica los IfcLocalPlacement
+
+    elementos = []
+    for el in model.by_type("IfcElement"):
+        props = ue.get_psets(el).get("Pset_HormigonMasivo")
+        if props and "VertidaID" in props:
+            elementos.append((el, props))
+    if not elementos:
+        raise ValueError(f"{path}: no hay elementos con Pset_HormigonMasivo.VertidaID")
+
+    inicios = horas_desde_primera([p["InicioPlanificado"] for _, p in elementos])
+    solidos = []
+    for (el, props), inicio_h in zip(elementos, inicios):
+        geo = ifcopenshell.geom.create_shape(settings, el).geometry
+        solidos.append(
+            SolidoVertida(
+                vertida_id=int(props["VertidaID"]),
+                nombre=el.Name,
+                guid=el.GlobalId,
+                verts=np.array(geo.verts, dtype=float).reshape(-1, 3),
+                faces=np.array(geo.faces, dtype=int).reshape(-1, 3),
+                inicio_h=inicio_h,
+                temperatura_colocacion_C=float(props["TemperaturaColocacion_C"]),
+                tipo_hormigon=str(props["TipoHormigon"]),
+                moldaje=str(props["Moldaje"]),
+                aislacion=str(props["Aislacion"]),
+                retiro_moldaje_h=float(props["RetiroMoldaje_h"]),
+                volumen_pset_m3=props.get("VolumenGeometrico_m3"),
+            )
+        )
+    return sorted(solidos, key=lambda s: s.vertida_id)
 
 
 def load_vertidas(path, backend: str = "auto") -> list[VertidaInfo]:

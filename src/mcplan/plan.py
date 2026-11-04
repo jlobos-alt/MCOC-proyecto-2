@@ -11,6 +11,8 @@ from dataclasses import dataclass, field, replace
 
 import yaml
 
+from .bim import horas_desde_primera
+
 
 @dataclass
 class MaterialSpec:
@@ -313,16 +315,45 @@ def apply_overrides(plan: Plan, values: dict[str, float]) -> Plan:
     return updated
 
 
+def plan_desde_solidos(plantilla: Plan, solidos, dx: float) -> Plan:
+    """Copia de `plantilla` con las vertidas tomadas de los solidos del IFC.
+
+    Del IFC salen identidad, geometria y secuencia. Materiales, hidratacion,
+    clima y fronteras siguen viniendo de la plantilla.
+    """
+    plan = copy.deepcopy(plantilla)
+    vertidas = []
+    for solido in solidos:
+        if solido.tipo_hormigon not in plan.materiales:
+            raise KeyError(f"{solido.nombre}: material {solido.tipo_hormigon!r} no esta en el plan")
+        vertidas.append(
+            LiftSpec(
+                id=solido.vertida_id,
+                inicio_h=solido.inicio_h,
+                z_min=float(solido.verts[:, 2].min()),
+                z_max=float(solido.verts[:, 2].max()),
+                material=solido.tipo_hormigon,
+                temperatura_colocacion_C=solido.temperatura_colocacion_C,
+                retiro_moldaje_h=solido.retiro_moldaje_h,
+            )
+        )
+    plan.vertidas = vertidas
+    plan.geometria.dx = dx
+    return plan
+
+
 def read_ifc_vertidas(path: str) -> list[dict]:
     """Lee las vertidas y sus propiedades desde un IFC con property sets.
 
-    Requiere que cada producto tenga un pset con VertidaID, Inicio_h,
-    TemperaturaColocacion_C, TipoHormigon, Moldaje, Aislacion y RetiroMoldaje_h.
+    Requiere que cada producto tenga un pset con VertidaID, InicioPlanificado
+    (fecha ISO) o Inicio_h, TemperaturaColocacion_C, TipoHormigon, Moldaje,
+    Aislacion y RetiroMoldaje_h.
     """
     import ifcopenshell
 
     model = ifcopenshell.open(path)
     vertidas: list[dict] = []
+    fechas: list[str | None] = []
     for product in model.by_type("IfcProduct"):
         if not getattr(product, "Name", None):
             continue
@@ -335,6 +366,7 @@ def read_ifc_vertidas(path: str) -> list[dict]:
                     properties[prop.Name] = value
         if "VertidaID" not in properties:
             continue
+        fechas.append(properties.get("InicioPlanificado"))
         vertidas.append(
             {
                 "id": int(properties["VertidaID"]),
@@ -347,5 +379,10 @@ def read_ifc_vertidas(path: str) -> list[dict]:
                 "retiro_moldaje_h": float(properties.get("RetiroMoldaje_h", 72.0)),
             }
         )
+    if any(fechas):
+        if not all(fechas):
+            raise ValueError("Hay vertidas sin InicioPlanificado en el IFC")
+        for vertida, inicio in zip(vertidas, horas_desde_primera(fechas)):
+            vertida["inicio_h"] = inicio
     vertidas.sort(key=lambda v: v["id"])
     return vertidas

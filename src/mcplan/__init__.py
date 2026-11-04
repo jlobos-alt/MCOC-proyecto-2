@@ -12,15 +12,17 @@ Uso tipico:
     veredicto = evaluar_criterios(result, plan.criterios)
 """
 
+from .bim import SolidoVertida, extraer_solidos
 from .boundary import BoundaryGroup
 from .criteria import Criterio, Veredicto, evaluar_criterios
 from .grid import Grid
 from .hydration import HydrationModel
 from .materials import Material
-from .plan import Plan, load_plan, plan_from_dict, read_ifc_vertidas
+from .plan import Plan, load_plan, plan_desde_solidos, plan_from_dict, read_ifc_vertidas
 from .reliability import MuestraConfiabilidad, ejecutar_montecarlo
 from .thermal import Model, Result, build_model, estimate_timestep, solve
 from .weather import TemperatureSeries
+from .voxel import Voxelizacion, area_expuesta, area_exterior, dz_que_calza, voxelizar
 from .thermal1d import BC, Result1D, solve_1d, stable_dt_1d
 from .thermal1d import Material as Material1D
 
@@ -46,7 +48,15 @@ __all__ = [
     "evaluar_criterios",
     "ejecutar_montecarlo",
     "load_plan",
+    "plan_desde_solidos",
     "plan_from_dict",
     "read_ifc_vertidas",
     "solve",
+    "SolidoVertida",
+    "Voxelizacion",
+    "area_expuesta",
+    "area_exterior",
+    "dz_que_calza",
+    "extraer_solidos",
+    "voxelizar",
 ]

@@ -35,7 +35,13 @@ Bonsai/Blender ──> IFC ──> IfcOpenShell ──> voxelización ──> so
 | Tests: 12 solver 1D + 7 IFC + 5 solver 3D | `tests/` | ✅ 24/24 |
 | Caso demo 1D con hidratación | `scripts/run_1d_demo.py` | ✅ (parámetros provisorios) |
 | Avance: solver 3D por balance de celdas, plan YAML, hidratación, criterios, Monte Carlo | `src/mcplan/thermal.py`, `plan.py`, …, `scripts/run_case.py` | 🧪 adelanto para E04+ |
-| Voxelización desde el IFC, clima real del sitio, hidratación calibrada | — | ⏳ |
+| Clima real del sitio, hidratación calibrada | — | ⏳ |
+
+## E07 — Voxelización, vertidas e hidratación
+
+Del IFC a la grilla: `extraer_solidos` (geometría y propiedades) → `voxelizar` (`vertida_id` por celda,
+centro dentro del sólido) → `plan_desde_solidos` + `build_model(plan, voxeles=...)` → `solve`.
+Detalle, resultados y correcciones al solver en [`entregas/entrega7/README.md`](entregas/entrega7/README.md).
 
 ## Instalación
 
@@ -49,10 +55,13 @@ o con conda: `conda env create -f environment.yml && conda activate mcoc-p2`
 ## Uso
 
 ```bash
-pytest -v                                    # 24 tests
+python -m pytest tests -q                    # 99 tests
 python scripts/inspect_ifc.py                # vertidas, GUID y Pset del IFC
 python scripts/run_1d_demo.py                # losa 1D con hidratación -> results/demo_1d.png
-python scripts/run_case.py --plan datos/caso_fundacion.yaml   # caso 3D (avance)
+python scripts/run_case.py --plan datos/caso_fundacion.yaml   # caso 3D con losa rectangular (antiguo)
+python scripts/voxelizar_ifc.py              # voxeliza el IFC y mide error de volumen y área
+python scripts/curva_hidratacion.py          # curva adiabática, Q̇h y madurez
+python scripts/simular_fundacion_ifc.py      # fundación real por vertidas (parámetros provisorios)
 python geometry/make_foundation_ifc.py       # regenera foundation_base.ifc
 ```
 
@@ -92,15 +101,17 @@ energía, fuente uniforme y Robin contra capacidad agrupada.
 ## Estructura
 
 ```text
-src/mcplan/        thermal1d.py (solver 1D E01), bim.py (lectura IFC),
+src/mcplan/        thermal1d.py (solver 1D E01), bim.py (lectura IFC y geometría), voxel.py (voxelizador),
                    thermal.py, grid.py, boundary.py, hydration.py, materials.py,
                    plan.py, criteria.py, reliability.py, weather.py (solver 3D y plan)
 geometry/          foundation.ifc (Bonsai), foundation_base.ifc, course_geometry.json, scripts BIM
-scripts/           inspect_ifc.py, run_1d_demo.py, run_case.py
-tests/             test_thermal1d.py, test_ifc.py, test_verificacion_termica.py
-datos/             caso_fundacion.yaml (plan declarativo)
+scripts/           inspect_ifc.py, run_1d_demo.py, run_case.py, voxelizar_ifc.py,
+                   curva_hidratacion.py, simular_fundacion_ifc.py, bateria_e05.py
+tests/             test_thermal1d.py, test_ifc.py, test_verificacion_termica.py, test_voxel.py,
+                   test_vertidas_hidratacion.py, test_bateria_e05.py, test_casos_borde_bloque.py
+datos/             caso_fundacion.yaml (losa rectangular), fundacion_ifc.yaml (plantilla de la fundación real)
 validacion/        resultados del caso 3D
-results/           figuras generadas
+results/           figuras generadas (results/e07: voxelización y vertidas)
 docs/              E01_preparacion_oral.md, respuestas E01, guía de revisión, guías G00–G08, referencias
 calendario/        calendario del capstone (E00–E15)
 ```

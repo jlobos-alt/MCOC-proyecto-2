@@ -1,0 +1,5 @@
+numpy>=1.24
+matplotlib>=3.7
+pytest>=7
+pyyaml>=6
+ifcopenshell>=0.8   # lectura IFC (los tests tienen lector STEP de respaldo)

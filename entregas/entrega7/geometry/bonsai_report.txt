@@ -1,0 +1,13 @@
+IfcOpenShell 0.9.0.post1 | Blender 5.2.2 LTS
+Archivo: C:\Users\cleme\OneDrive\Escritorio\semestre_actual\MCOC\Ultimo proyecto\MCOC-proyecto-2\geometry\foundation.ifc
+Schema: IFC4
+
+Vertida     Clase      GUID                     V_geom[m3] V_pset[m3]
+Vertida_01  IfcFooting 31iH5tssDQFvNWfCIFLghN      147.626    147.626
+Vertida_02  IfcFooting 3UM1zOtm5Q4gbVXnQo2LAA      147.626    147.626
+Vertida_03  IfcFooting 2oYYVZJc1I_P4zCu4krkeO      214.224    214.224
+Vertida_04  IfcFooting 3IK2Ijs4TRUgmlfsOcKagW       88.925     88.925
+Vertida_05  IfcFooting 3bq4PvxDrM0RnRybcq1v1H       38.477     38.485
+TOTAL                                              636.878
+
+Objetos en la escena de Blender: IfcBuilding/Aerogenerador, IfcBuildingStorey/Fundacion, IfcFooting/Vertida_01, IfcFooting/Vertida_02, IfcFooting/Vertida_03, IfcFooting/Vertida_04, IfcFooting/Vertida_05, IfcProject/MCOC Proyecto 2 - Hormigon Masivo, IfcSite/Sitio

@@ -123,23 +123,31 @@ def _face_area(grid: Grid, axis: int) -> float:
     return grid.face_area(axis)
 
 
-def build_model(plan: Plan) -> Model:
-    """Construye el modelo numerico a partir de un plan declarativo."""
+def build_model(plan: Plan, voxeles=None) -> Model:
+    """Construye el modelo numerico a partir de un plan declarativo.
+
+    Sin `voxeles`, cada vertida es una caja definida por el plan. Con `voxeles`
+    (un `mcplan.voxel.Voxelizacion`), la grilla y las celdas de cada vertida
+    vienen de la geometria del IFC.
+    """
     geom = plan.geometria
     dx = geom.dx
     dy = geom.dy or dx
     dz = geom.dz or dx
-    grid = Grid(
-        nx=int(round((geom.x[1] - geom.x[0]) / dx)),
-        ny=int(round((geom.y[1] - geom.y[0]) / dy)),
-        nz=int(round((geom.z[1] - geom.z[0]) / dz)),
-        dx=dx,
-        dy=dy,
-        dz=dz,
-        x0=geom.x[0],
-        y0=geom.y[0],
-        z0=geom.z[0],
-    )
+    if voxeles is not None:
+        grid = voxeles.grid
+    else:
+        grid = Grid(
+            nx=int(round((geom.x[1] - geom.x[0]) / dx)),
+            ny=int(round((geom.y[1] - geom.y[0]) / dy)),
+            nz=int(round((geom.z[1] - geom.z[0]) / dz)),
+            dx=dx,
+            dy=dy,
+            dz=dz,
+            x0=geom.x[0],
+            y0=geom.y[0],
+            z0=geom.z[0],
+        )
 
     material_names = sorted({lift.material for lift in plan.vertidas})
     materials = [
@@ -159,7 +167,12 @@ def build_model(plan: Plan) -> Model:
     placement_T = np.full(grid.shape, np.nan)
 
     for lift in plan.vertidas:
-        lift_mask = box_mask(grid, geom.x, geom.y, (lift.z_min, lift.z_max))
+        if voxeles is not None:
+            lift_mask = voxeles.vertida_id == lift.id
+            if not np.any(lift_mask):
+                raise ValueError(f"La vertida {lift.id} no tiene celdas: refine la grilla.")
+        else:
+            lift_mask = box_mask(grid, geom.x, geom.y, (lift.z_min, lift.z_max))
         mask |= lift_mask
         lift_of_cell[lift_mask] = lift.id
         place_time[lift_mask] = lift.inicio_h
@@ -374,7 +387,9 @@ def _build_faces(model: Model, plan: Plan, ids: np.ndarray, mask_flat: np.ndarra
             neighbor_time[has_neighbor] = model.place_time[neighbor[has_neighbor]]
 
         waiting = has_neighbor & neighbor_inside & (neighbor_time > start)
-        exposed = waiting | ~has_neighbor
+        # Expuesta si espera a la vertida siguiente o si al otro lado no hay
+        # hormigon (borde de la grilla o celda vacia de la geometria).
+        exposed = waiting | ~neighbor_inside
         end = np.where(waiting, neighbor_time, np.inf)
 
         owner = owner[exposed]
@@ -673,14 +688,20 @@ def _accumulate_sources(
     temperature = T[indices]
     rho_cp = model.rho_cp_flat[indices]
 
+    # Se integra la curva adiabatica dentro del paso: dtheta = theta(fin) - theta(ini).
+    # Evaluar dtheta/dt al inicio del paso sobrestima el calor si dt no es chico
+    # frente a tau; asi, el calor total liberado no depende de dt.
+    dt_h = dt / 3600.0
     if model.hydration.uses_maturity:
-        maturity = model.hydration.maturity_factor(temperature)
-        equivalent_age[indices] += dt / 3600.0 * maturity
-        dtheta_dt = model.hydration.dtheta_dage(equivalent_age[indices])
+        edad_ini = equivalent_age[indices].copy()
+        equivalent_age[indices] += dt_h * model.hydration.maturity_factor(temperature)
+        edad_fin = equivalent_age[indices]
     else:
-        dtheta_dt = model.hydration.dtheta_dage(age_h)
+        edad_ini = age_h
+        edad_fin = age_h + dt_h
 
-    qdot = rho_cp * dtheta_dt / 3600.0
+    dtheta = model.hydration.theta(edad_fin) - model.hydration.theta(edad_ini)
+    qdot = rho_cp * dtheta / dt
     net[indices] += qdot * model.grid.cell_volume
 
 
