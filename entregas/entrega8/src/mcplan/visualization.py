@@ -9,11 +9,17 @@ spacing, origen). Los datos van por celda y en orden Fortran, que es el de VTK.
 """
 from __future__ import annotations
 
+import importlib.util
 from pathlib import Path
 
 import numpy as np
 
 from .grid import Grid
+
+
+def disponible() -> bool:
+    """True si PyVista se puede importar."""
+    return importlib.util.find_spec("pyvista") is not None
 
 
 def a_image_data(grid: Grid, vertida_id: np.ndarray, T: np.ndarray | None = None):

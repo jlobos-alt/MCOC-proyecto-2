@@ -10,7 +10,7 @@ Carpeta autocontenida. Guion de la demo: [docs/E08_guion_lab.md](docs/E08_guion_
 
 ```powershell
 pip install -r requirements.txt
-python -m pytest tests -q                  # 119 pruebas (~1 min)
+python -m pytest tests -q                  # 121 pruebas (~1 min)
 python scripts/simular_fundacion_ifc.py    # caso base (~10 s)
 ```
 
@@ -54,6 +54,10 @@ T máx y su instante casi no cambian. **ΔT todavía no converge:** sube al refi
 |---|---|---|---:|
 | Base: cada 6 h, todas a 18 °C | 63,06 °C | 52 h | 47,18 °C |
 | Cada 12 h, vertida 3 a 12 °C | 62,03 °C | 84 h | 45,13 °C |
+| Solo cada 12 h | 62,79 °C | 58 h | 46,66 °C |
+| Solo vertida 3 a 12 °C | 61,89 °C | 62 h | 45,26 °C |
+
+La baja de T máx viene sobre todo de enfriar la vertida 3, donde estaba el máximo. El intervalo de 12 h solo aporta 0,27 °C, y con Δx = 0,5 m ese efecto incluso cambia de signo (+0,13 °C): es del orden del error de malla. El retraso a 84 h ocurre porque el máximo pasa de la vertida 3 a la 5.
 
 ![Comparación](results/e08/intervalo12_tcol3=12_dx0.25/comparacion.png)
 
@@ -68,6 +72,7 @@ T máx y su instante casi no cambian. **ΔT todavía no converge:** sube al refi
 
 - θ∞, τ, Ea/R y el clima son provisorios (E09–E12).
 - ΔT se mide en centros de celda, no a 25 mm (E09).
+- Con madurez, el esquema es de primer orden en Δt. Al bajar Δt de 3600 s a 225 s en el caso base, T máx cambia 0,08 °C y ΔT 0,18 °C.
 - El moldaje es una capa común entre 0 y 72 h. Aún no se puede cambiar por vertida, ni aplicar la aislación (E10). En la defensa pueden pedirlo.
 - El área en escalera queda cerca de 17 % sobre la real y no mejora al refinar.
 

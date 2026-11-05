@@ -1,9 +1,9 @@
 # E08 — Guion del laboratorio
 
-Abre una terminal en esta carpeta, con el entorno activo:
+Abre una terminal en esta carpeta, con tu entorno activo. Si es la primera vez, instala las dependencias (incluye PyVista, necesario para la vista 3D):
 
 ```powershell
-C:\Users\matia\.venvs\mcoc-p2\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
 **Antes de que llegue el ayudante:** corre `python -m pytest tests -q` y abre una vez `python scripts/simular_fundacion_ifc.py --visor` para comprobar que la ventana funciona.
@@ -72,7 +72,7 @@ python scripts/simular_fundacion_ifc.py --intervalo 12 --tcol 3=12 --visor
 
 Figuras en `results/e08/<caso>/`: `comparacion.png`, `activacion_cortes.png`, `series_fundacion.png`.
 
-**Qué decir (con ese ejemplo):** "T máx baja de 63,06 °C a 62,03 °C y se retrasa de 52 h a 84 h, porque cada vertida alcanza a botar más calor antes de que llegue la siguiente. ΔT baja de 47,18 °C a 45,13 °C. Son valores con parámetros provisorios: muestran que el modelo responde, no son el plan."
+**Qué decir (con ese ejemplo):** "T máx baja de 63,06 °C a 62,03 °C y ΔT de 47,18 °C a 45,13 °C. La baja de T máx viene sobre todo de enfriar la vertida 3, donde estaba el máximo: solo con `--tcol 3=12` da 61,89 °C, y solo con `--intervalo 12` da 62,79 °C. El peak se retrasa de 52 h a 84 h porque el máximo pasa de la vertida 3 a la 5. Son valores con parámetros provisorios: muestran que el modelo responde, no son el plan."
 
 ## Preguntas probables
 
@@ -81,6 +81,8 @@ Figuras en `results/e08/<caso>/`: `comparacion.png`, `activacion_cortes.png`, `s
 **¿Qué pasa cuando entra una vertida?** "Sus celdas estaban en NaN y no participaban. A su hora toman la temperatura de colocación con edad cero. La cara superior de la vertida de abajo deja de perder calor al aire y empieza a conducir hacia la nueva."
 
 **¿Cómo entra la hidratación?** "Q̇h = ρ·cp·dθ/dt, en W/m³. Cada celda tiene su propia edad. En cada paso integro la curva, Δθ = θ(edad final) − θ(edad inicial), para que el calor total no dependa de Δt. Con madurez, la edad corre según la temperatura."
+
+**¿Por qué T máx supera 63 °C, si 18 + 45 = 63?** "63 °C es el promedio si no se pierde calor, y ese promedio da exacto. Localmente se puede superar: una celda joven recibe calor de una vieja que ya está caliente, y todavía le queda calor por liberar. En la fundación con todas las caras adiabáticas (Δx = 0,5 m), la media final es 63,000 °C y el máximo 63,12 °C."
 
 **¿Por qué ΔT sube al refinar?** "Porque hoy se mide en el centro de la celda exterior, y al refinar queda más cerca de la cara. Falta medir a 25 mm: es de la próxima entrega."
 
@@ -92,5 +94,6 @@ Figuras en `results/e08/<caso>/`: `comparacion.png`, `activacion_cortes.png`, `s
 |---|---|
 | La ventana 3D no abre | Usar `--ocultar`, `--t` y `--corte`, y mostrar `vista_3d.png` |
 | Se demora con Δx muy fino | Volver a `--dx 0.5`: tarda unos segundos |
-| `ModuleNotFoundError` | Falta activar el entorno |
+| `ModuleNotFoundError` | Falta activar el entorno o instalar las dependencias |
+| "PyVista no está instalado" | `python -m pip install pyvista`; igual quedan los datos y las figuras 2D |
 | Una vertida "no tiene celdas" | Δz demasiado grande con `--dz`: quitar esa opción |

@@ -215,6 +215,8 @@ def main():
     args = ap.parse_args()
     if args.campo_cada_h <= 0 or abs(args.campo_cada_h - round(args.campo_cada_h)) > 1e-9:
         ap.error("--campo-cada-h debe ser un numero entero de horas")
+    if args.visor and not vis.disponible():
+        ap.error("--visor requiere PyVista. Instalalo con: python -m pip install pyvista")
 
     carpeta = args.salida or ROOT / "results" / "e08" / _etiqueta(args)
     carpeta.mkdir(parents=True, exist_ok=True)
@@ -258,6 +260,12 @@ def main():
         print("\nEfecto del cambio contra el caso base:")
         print(f"  T máx: {a['T_max_C']:.2f} °C a las {a['T_max_h']:.0f} h  ->  {b['T_max_C']:.2f} °C a las {b['T_max_h']:.0f} h")
         print(f"  ΔT   : {a['delta_T_C']:.2f} °C a las {a['delta_T_h']:.0f} h  ->  {b['delta_T_C']:.2f} °C a las {b['delta_T_h']:.0f} h")
+
+    if not vis.disponible():
+        print("\nPyVista no esta instalado: se omiten la vista 3D y los .vti. "
+              "Instalalo con: python -m pip install pyvista")
+        print(f"Resultados en {carpeta}")
+        return
 
     if args.vti_cada_h > 0:
         paso = max(1, int(round(args.vti_cada_h / args.campo_cada_h)))

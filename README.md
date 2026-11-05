@@ -85,7 +85,7 @@ o con conda: `conda env create -f environment.yml && conda activate mcoc-p2`
 ## Uso
 
 ```bash
-python -m pytest tests -q                    # 146 tests (~1-4 min)
+python -m pytest tests -q                    # 148 tests (~1-4 min)
 python scripts/dossier_e06.py                # evidencia del dossier de verificación (E06), ~3 min
 python scripts/inspect_ifc.py                # vertidas, GUID y Pset del IFC
 python scripts/run_1d_demo.py                # losa 1D con hidratación -> results/demo_1d.png

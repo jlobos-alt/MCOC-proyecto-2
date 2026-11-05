@@ -178,6 +178,30 @@ def test_visor_oculta_muestra_y_respeta_la_activacion(resultado, tmp_path):
 
 
 # ---------------------------------------------------------------- de punta a punta
+def _correr_sin_pyvista(*argumentos):
+    pytest.importorskip("ifcopenshell")
+    script = ROOT / "scripts" / "simular_fundacion_ifc.py"
+    codigo = ("import runpy, sys; sys.modules['pyvista'] = None; "
+              f"sys.argv = ['simular', *{list(argumentos)!r}]; "
+              f"runpy.run_path({str(script)!r}, run_name='__main__')")
+    return subprocess.run([sys.executable, "-c", codigo], capture_output=True, text=True, encoding="utf-8")
+
+
+def test_sin_pyvista_el_comando_termina_y_avisa(tmp_path):
+    r = _correr_sin_pyvista("--dx", "1", "--sin-comparar", "--salida", str(tmp_path))
+    assert r.returncode == 0, r.stderr
+    assert "PyVista no esta instalado" in r.stdout
+    assert (tmp_path / "corrida.json").exists() and (tmp_path / "series_fundacion.png").exists()
+    assert not (tmp_path / "vista_3d.png").exists()
+
+
+def test_visor_sin_pyvista_falla_antes_de_simular(tmp_path):
+    r = _correr_sin_pyvista("--dx", "1", "--visor", "--salida", str(tmp_path))
+    assert r.returncode == 2
+    assert "--visor requiere PyVista" in r.stderr
+    assert not (tmp_path / "corrida.json").exists()
+
+
 def test_comando_completo_con_cambios(tmp_path):
     pytest.importorskip("ifcopenshell")
     pytest.importorskip("pyvista")

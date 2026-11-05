@@ -124,8 +124,8 @@ Detalle de cada entrega en `calendario/calendario.md` y en `entregas/entregaN/RE
 ## Entorno (PC de Clemente)
 
 - Windows 11, PowerShell, VS Code. Python del sistema 3.14 (`python`), con numpy, matplotlib,
-  pytest y pyyaml. **IfcOpenShell no está en el Python del sistema** (los tests IFC tienen lector
-  STEP de respaldo); sí viene con Bonsai dentro de Blender.
+  pytest, pyyaml e IfcOpenShell. PyVista no viene instalado: sin él, `simular_fundacion_ifc.py` omite
+  la vista 3D y los .vti, y sus tests se saltan (`python -m pip install -r requirements.txt`).
 - Blender 5.2 + Bonsai 0.9 (extensión `bl_ext.blender_org.bonsai`). Para abrir un IFC:
   File → Open IFC Project. Propiedades: pestaña Object Information → Property Sets.
 - La carpeta del proyecto aparece con dos rutas equivalentes (`...\semestre 26-2\MCOC\...` y
