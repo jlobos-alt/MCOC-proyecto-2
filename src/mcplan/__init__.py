@@ -12,7 +12,7 @@ Uso tipico:
     veredicto = evaluar_criterios(result, plan.criterios)
 """
 
-from .bim import SolidoVertida, extraer_solidos
+from .bim import SolidoVertida, aplicar_cambios, extraer_solidos, revisar_secuencia
 from .boundary import BoundaryGroup
 from .criteria import Criterio, Veredicto, evaluar_criterios
 from .grid import Grid
@@ -53,6 +53,8 @@ __all__ = [
     "read_ifc_vertidas",
     "solve",
     "SolidoVertida",
+    "aplicar_cambios",
+    "revisar_secuencia",
     "Voxelizacion",
     "area_expuesta",
     "area_exterior",

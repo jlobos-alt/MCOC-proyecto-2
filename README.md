@@ -42,6 +42,11 @@ Bonsai/Blender ──> IFC ──> IfcOpenShell ──> voxelización ──> so
 Matriz de verificación, convergencia espacial y temporal por separado, y BIM base en
 [`entregas/entrega6/E06_dossier.md`](entregas/entrega6/E06_dossier.md).
 
+## E08 — Pipeline IFC → simulación por etapas
+
+La secuencia está en los inputs (IFC y opciones del comando), no en el solver. Guion y resultados en
+[`entregas/entrega8/README.md`](entregas/entrega8/README.md).
+
 ## E07 — Voxelización, vertidas e hidratación
 
 Del IFC a la grilla: `extraer_solidos` (geometría y propiedades) → `voxelizar` (`vertida_id` por celda,
@@ -60,14 +65,16 @@ o con conda: `conda env create -f environment.yml && conda activate mcoc-p2`
 ## Uso
 
 ```bash
-python -m pytest tests -q                    # 104 tests
+python -m pytest tests -q                    # 119 tests
 python scripts/dossier_e06.py                # evidencia del dossier de verificación (E06), ~3 min
 python scripts/inspect_ifc.py                # vertidas, GUID y Pset del IFC
 python scripts/run_1d_demo.py                # losa 1D con hidratación -> results/demo_1d.png
 python scripts/run_case.py --plan datos/caso_fundacion.yaml   # caso 3D con losa rectangular (antiguo)
 python scripts/voxelizar_ifc.py              # voxeliza el IFC y mide error de volumen y área
 python scripts/curva_hidratacion.py          # curva adiabática, Q̇h y madurez
-python scripts/simular_fundacion_ifc.py      # fundación real por vertidas (parámetros provisorios)
+python scripts/simular_fundacion_ifc.py      # pipeline completo IFC -> solver -> 3D (parámetros provisorios)
+python scripts/simular_fundacion_ifc.py --inicio 2=12 --tcol 3=12   # otra secuencia, sin tocar código ni IFC
+python scripts/simular_fundacion_ifc.py --visor                     # ventana 3D: oculta/muestra vertidas
 python geometry/make_foundation_ifc.py       # regenera foundation_base.ifc
 ```
 
@@ -109,6 +116,7 @@ energía, fuente uniforme y Robin contra capacidad agrupada.
 
 ```text
 src/mcplan/        thermal1d.py (solver 1D E01), bim.py (lectura IFC y geometría), voxel.py (voxelizador),
+                   visualization.py (VTK y visor 3D, E08),
                    thermal.py, grid.py, boundary.py, hydration.py, materials.py,
                    plan.py, criteria.py, reliability.py, weather.py (solver 3D y plan)
 geometry/          foundation.ifc (Bonsai), foundation_base.ifc, course_geometry.json, scripts BIM
@@ -118,7 +126,7 @@ tests/             test_thermal1d.py, test_ifc.py, test_verificacion_termica.py,
                    test_vertidas_hidratacion.py, test_bateria_e05.py, test_casos_borde_bloque.py
 datos/             caso_fundacion.yaml (losa rectangular), fundacion_ifc.yaml (plantilla de la fundación real)
 validacion/        resultados del caso 3D
-results/           figuras generadas (results/e07: voxelización y vertidas)
+results/           figuras generadas por entrega (results/e06, e07, e08)
 docs/              E01_preparacion_oral.md, respuestas E01, guía de revisión, guías G00–G08, referencias
 calendario/        calendario del capstone (E00–E15)
 ```

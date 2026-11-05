@@ -1,0 +1,71 @@
+{
+  "ifc": "foundation.ifc",
+  "commit_base": "539c621",
+  "cambios_por_comando": {
+    "inicio_h": {},
+    "T_colocacion_C": {
+      "3": 12.0
+    },
+    "intervalo_h": 12.0
+  },
+  "dx_m": 0.25,
+  "dz_m": 0.275,
+  "dt_s": 3600.0,
+  "celdas_activas": 37164,
+  "error_volumen_total": 0.002949596705510664,
+  "vertidas": [
+    {
+      "id": 1,
+      "nombre": "Vertida_01",
+      "inicio_h": 0.0,
+      "T_colocacion_C": 18.0,
+      "V_geom_m3": 147.626,
+      "V_voxel_m3": 146.438,
+      "error_volumen": 0.00805
+    },
+    {
+      "id": 2,
+      "nombre": "Vertida_02",
+      "inicio_h": 12.0,
+      "T_colocacion_C": 18.0,
+      "V_geom_m3": 147.626,
+      "V_voxel_m3": 146.438,
+      "error_volumen": 0.00805
+    },
+    {
+      "id": 3,
+      "nombre": "Vertida_03",
+      "inicio_h": 24.0,
+      "T_colocacion_C": 12.0,
+      "V_geom_m3": 214.224,
+      "V_voxel_m3": 214.706,
+      "error_volumen": 0.00225
+    },
+    {
+      "id": 4,
+      "nombre": "Vertida_04",
+      "inicio_h": 36.0,
+      "T_colocacion_C": 18.0,
+      "V_geom_m3": 88.925,
+      "V_voxel_m3": 88.825,
+      "error_volumen": 0.00112
+    },
+    {
+      "id": 5,
+      "nombre": "Vertida_05",
+      "inicio_h": 48.0,
+      "T_colocacion_C": 18.0,
+      "V_geom_m3": 38.477,
+      "V_voxel_m3": 42.35,
+      "error_volumen": 0.10065
+    }
+  ],
+  "avisos_secuencia": [],
+  "resultado": {
+    "T_max_C": 62.035,
+    "T_max_h": 84.0,
+    "delta_T_C": 45.133,
+    "delta_T_h": 166.0
+  },
+  "aviso": "Parametros termicos provisorios: prueba la cadena, no concluye sobre el plan."
+}

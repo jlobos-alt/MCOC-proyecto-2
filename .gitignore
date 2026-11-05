@@ -37,6 +37,9 @@ MEMORIA_TRANSITO_CAPACIDAD_NOS.docx
 .pytest_cache/
 output/
 results/*.vtk
+# series de ParaView: pesadas y se regeneran con scripts/simular_fundacion_ifc.py
+*.vti
+*.pvd
 
 # foto del round-trip (se regenera)
 resultados/foto_ifc_antes.json

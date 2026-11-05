@@ -14,7 +14,7 @@ extrusión, B-rep o malla, y es su motor el que convierte todo eso en triángulo
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import datetime
 from pathlib import Path
 
@@ -206,6 +206,51 @@ def extraer_solidos(path) -> list[SolidoVertida]:
             )
         )
     return sorted(solidos, key=lambda s: s.vertida_id)
+
+
+def aplicar_cambios(
+    solidos: list[SolidoVertida],
+    inicio: dict[int, float] | None = None,
+    tcol: dict[int, float] | None = None,
+    intervalo_h: float | None = None,
+) -> list[SolidoVertida]:
+    """Copia de los solidos con otra secuencia: el IFC y los originales no cambian.
+
+    `intervalo_h` reparte las vertidas cada tantas horas, en orden. Despues se aplican
+    `inicio` {id: hora} y `tcol` {id: temperatura}, que mandan sobre el intervalo.
+    """
+    inicio, tcol = inicio or {}, tcol or {}
+    ids = {s.vertida_id for s in solidos}
+    for nombre, cambios in (("inicio", inicio), ("tcol", tcol)):
+        for vertida in cambios:
+            if vertida not in ids:
+                raise KeyError(f"{nombre}: la vertida {vertida} no existe; hay {sorted(ids)}")
+    if intervalo_h is not None and intervalo_h < 0 or any(h < 0 for h in inicio.values()):
+        raise ValueError("Las horas de inicio y el intervalo no pueden ser negativos")
+    nuevos = []
+    for orden, solido in enumerate(sorted(solidos, key=lambda s: s.vertida_id)):
+        hora = orden * intervalo_h if intervalo_h is not None else solido.inicio_h
+        nuevos.append(replace(
+            solido,
+            inicio_h=float(inicio.get(solido.vertida_id, hora)),
+            temperatura_colocacion_C=float(tcol.get(solido.vertida_id, solido.temperatura_colocacion_C)),
+        ))
+    return nuevos
+
+
+def revisar_secuencia(solidos: list[SolidoVertida]) -> list[str]:
+    """Avisos si una vertida se coloca antes que la que queda debajo: no se puede construir.
+
+    Es un aviso y no un error: el solver lo calcula igual, pero el resultado no representa
+    una obra posible.
+    """
+    avisos = []
+    por_altura = sorted(solidos, key=lambda s: float(s.verts[:, 2].min()))
+    for abajo, arriba in zip(por_altura, por_altura[1:]):
+        if arriba.inicio_h < abajo.inicio_h:
+            avisos.append(f"{arriba.nombre} ({arriba.inicio_h:g} h) se coloca antes que {abajo.nombre} "
+                          f"({abajo.inicio_h:g} h), que va debajo: esa secuencia no es construible.")
+    return avisos
 
 
 def load_vertidas(path, backend: str = "auto") -> list[VertidaInfo]:

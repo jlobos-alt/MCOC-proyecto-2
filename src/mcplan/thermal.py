@@ -89,6 +89,7 @@ class Result:
     T_final: np.ndarray
     active_final: np.ndarray
     metadata: dict = field(default_factory=dict)
+    campos: dict = field(default_factory=dict)   # {t_h: T[nx, ny, nz]}, si se pidieron
 
     @property
     def T_max_abs(self) -> float:
@@ -514,6 +515,7 @@ def solve(
     guardar_campo: bool = True,
     temperatura_inicial=None,
     fuente_W_m3: float = 0.0,
+    instantes_campo_h=None,
 ) -> Result:
     """Resuelve el problema termico y devuelve las series de salida.
 
@@ -523,6 +525,9 @@ def solve(
 
     `fuente_W_m3` agrega una fuente volumetrica constante q0 en todas las celdas
     activas (se suma al calor de hidratacion). Sirve para verificar la fuente.
+
+    `instantes_campo_h` lista las horas en que se guarda el campo 3D en `Result.campos`,
+    para visualizar. Deben ser multiplos de `intervalo_salida_h`.
     """
     grid = model.grid
     n_cells = grid.n_cells
@@ -549,6 +554,8 @@ def solve(
     max_core: list[float] = []
     min_surface: list[float] = []
     mean_values: list[float] = []
+    pedidos = {round(float(t), 6) for t in (instantes_campo_h if instantes_campo_h is not None else [])}
+    campos: dict[float, np.ndarray] = {}
 
     for step in range(n_steps + 1):
         t_h = step * dt / 3600.0
@@ -565,6 +572,8 @@ def solve(
             max_core.append(_max_or_nan(T, active & model.is_core))
             min_surface.append(_min_or_nan(T, active & model.is_surface))
             mean_values.append(_mean_or_nan(T, active))
+            if round(t_h, 6) in pedidos:
+                campos[round(t_h, 6)] = T.reshape(grid.shape).copy()
 
         if step == n_steps:
             break
@@ -595,6 +604,7 @@ def solve(
         T_final=T.reshape(grid.shape),
         active_final=placed_mask.reshape(grid.shape),
         metadata={"n_cells": int(n_cells), "pasos": int(n_steps)},
+        campos=campos,
     )
 
 

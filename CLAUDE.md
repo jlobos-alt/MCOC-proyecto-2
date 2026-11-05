@@ -58,6 +58,7 @@ src/mcplan/            paquete principal (raíz = versión vigente)
                        extraer_solidos da la geometría triangulada (requiere IfcOpenShell)
   voxel.py             voxelizar: vertida_id por celda (centro dentro del sólido, conteo de cruces),
                        error de volumen, área en escalera, dz_que_calza
+  visualization.py     exporta a .vti/.pvd y VisorVertidas (PyVista, se importa solo aquí)
   thermal.py, grid.py  solver 3D por balance de celdas (centrado en celdas), build_model/solve
   boundary.py          capas en serie: convección, moldaje, aislación, retiro en el tiempo
   hydration.py         θ_ad(t) → q_h = ρ cp dθ/dt, con madurez de Arrhenius (parámetros provisorios)
@@ -106,9 +107,10 @@ y comparación antes/después sin IfcOpenShell) y `scripts/roundtrip_ifc.py --an
 | E03 Verificación 1D | 23 oct | hecho (José) | `513eb4e` |
 | E04 Revisión oral 2D/3D + CC | 28 oct | hecho (José) | `25b992f` |
 | E05 Lab batería de verificación térmica | 29 oct | hecho (Clemente) | ver `entregas/entrega5/README.md` |
-| E06 Dossier de verificación + BIM del caso | 30 oct | en revisión (Matías) | ver `entregas/entrega6/E06_dossier.md` |
+| E06 Dossier de verificación + BIM del caso | 30 oct | hecho (Matías) | `539c621` |
 | E07 Revisión oral voxelización, vertidas, hidratación | 4 nov | hecho (Matías) | `b5efa27` |
-| E08–E09 BIM→grid + activación, baseline 3D con hidratación | 5–6 nov | pendiente | — |
+| E08 Lab BIM→grid + activación | 5 nov | hecho (Matías) | ver `entregas/entrega8/README.md` |
+| E09 Baseline 3D con hidratación | 6 nov | pendiente | — |
 | E10–E12 Entorno, moldaje, clima, simulación 14 días | 11–13 nov | pendiente | — |
 | E13–E15 Incertidumbre, Monte Carlo + HPC, recomendación | 18–20 nov | pendiente | — |
 
@@ -135,7 +137,8 @@ python scripts\inspect_ifc.py                   # vertidas, GUID y Pset
 python scripts\run_1d_demo.py                   # demo 1D con hidratación
 python scripts\run_case.py --plan datos\caso_fundacion.yaml   # caso 3D con losa rectangular
 python scripts\voxelizar_ifc.py                 # voxeles, error de volumen y de área
-python scripts\simular_fundacion_ifc.py         # fundación real por vertidas
+python scripts\simular_fundacion_ifc.py         # pipeline completo; admite --dx --inicio V=H --tcol V=C
+                                                # --intervalo H --visor --t H --ocultar V --corte
 
 cd entregas\entrega2
 python scripts\roundtrip_ifc.py --antes         # foto antes de editar en Bonsai

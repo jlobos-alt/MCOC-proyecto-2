@@ -2,4 +2,5 @@ numpy>=1.24
 matplotlib>=3.7
 pytest>=7
 pyyaml>=6
+pyvista>=0.44      # visualizacion 3D y exportacion a VTK (E08)
 ifcopenshell>=0.8   # lectura IFC (los tests tienen lector STEP de respaldo)

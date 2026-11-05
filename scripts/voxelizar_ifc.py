@@ -9,7 +9,7 @@ Uso:
 Compara dos grillas: dz = dx y dz ajustado para que las interfaces entre vertidas caigan
 en caras de celda (dz_que_calza).
 
-Salidas en results/e07/: volumen_vs_dx.csv, volumen_vs_dx.png, voxeles_cortes.png
+Salidas en results/e08/volumen/: volumen_vs_dx.csv, volumen_vs_dx.png, voxeles_cortes.png
 """
 from __future__ import annotations
 
@@ -131,7 +131,7 @@ def main():
     ap.add_argument("--ifc", type=Path, default=ROOT / "geometry" / "foundation.ifc")
     ap.add_argument("--dx", type=float, nargs="+", default=[1.0, 0.5, 0.25, 0.125, 0.0625])
     ap.add_argument("--corte-dx", type=float, default=0.25)
-    ap.add_argument("--salida", type=Path, default=ROOT / "results" / "e07")
+    ap.add_argument("--salida", type=Path, default=ROOT / "results" / "e08" / "volumen")
     args = ap.parse_args()
     args.salida.mkdir(parents=True, exist_ok=True)
 
