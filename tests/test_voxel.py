@@ -112,13 +112,45 @@ def test_ifc_entrega_cinco_solidos_con_su_volumen(solidos):
 def test_ifc_entrega_altura_y_secuencia(solidos):
     assert [s.verts[:, 2].min() for s in solidos] == pytest.approx([0.0, 0.55, 1.10, 2.20, 3.30])
     assert [s.verts[:, 2].max() for s in solidos] == pytest.approx([0.55, 1.10, 2.20, 3.30, 4.30])
-    assert [s.inicio_h for s in solidos] == pytest.approx([0.0, 24.0, 48.0, 72.0, 96.0])
+    assert [s.inicio_h for s in solidos] == pytest.approx([0.0, 6.0, 12.0, 18.0, 24.0])
 
 
 def test_read_ifc_vertidas_lee_los_inicios_reales():
     pytest.importorskip("ifcopenshell")
     from mcplan.plan import read_ifc_vertidas
-    assert [v["inicio_h"] for v in read_ifc_vertidas(str(IFC))] == [0.0, 24.0, 48.0, 72.0, 96.0]
+    assert [v["inicio_h"] for v in read_ifc_vertidas(str(IFC))] == [0.0, 6.0, 12.0, 18.0, 24.0]
+
+
+def test_set_de_propiedades_usa_el_nombre_del_curso():
+    # El prefijo Pset_ esta reservado a los sets estandar de buildingSMART
+    texto = IFC.read_text(encoding="utf-8", errors="replace")
+    assert texto.count("'UANDES_HormigonMasivo'") == 5
+    assert "Pset_HormigonMasivo" not in texto
+
+
+def test_se_acepta_el_formato_de_la_guia_y_el_ifc_antiguo(tmp_path):
+    pytest.importorskip("ifcopenshell")
+    import re
+    from mcplan.bim import extraer_solidos
+    texto = IFC.read_text(encoding="utf-8", errors="replace")
+
+    # Formato de la guia: Inicio_h en horas, en vez de una fecha
+    horas = iter(["0.", "6.", "12.", "18.", "24."])
+    guia = re.sub(r"'InicioPlanificado',\$,IFCDATETIME\('[^']*'\)",
+                  lambda _: f"'Inicio_h',$,IFCREAL({next(horas)})", texto)
+    (tmp_path / "guia.ifc").write_text(guia, encoding="utf-8")
+    assert [s.inicio_h for s in extraer_solidos(tmp_path / "guia.ifc")] == pytest.approx([0, 6, 12, 18, 24])
+
+    # IFC antiguo del grupo: Pset_HormigonMasivo
+    (tmp_path / "antiguo.ifc").write_text(texto.replace("UANDES_HormigonMasivo", "Pset_HormigonMasivo"),
+                                          encoding="utf-8")
+    assert len(extraer_solidos(tmp_path / "antiguo.ifc")) == 5
+
+
+def test_vertida_sin_hora_de_inicio_se_rechaza():
+    from mcplan.bim import inicios_en_horas
+    with pytest.raises(ValueError, match="InicioPlanificado o Inicio_h"):
+        inicios_en_horas([{"VertidaID": 1}])
 
 
 def test_horas_desde_primera():

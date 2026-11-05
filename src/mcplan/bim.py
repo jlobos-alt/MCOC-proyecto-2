@@ -21,6 +21,18 @@ from pathlib import Path
 import numpy as np
 
 
+# Set de propiedades del curso. El segundo nombre se lee solo por compatibilidad con
+# IFC antiguos del grupo: el prefijo Pset_ esta reservado a los sets de buildingSMART.
+PSET_NOMBRES = ("UANDES_HormigonMasivo", "Pset_HormigonMasivo")
+
+
+def _pset_del_curso(psets: dict) -> dict | None:
+    for nombre in PSET_NOMBRES:
+        if nombre in psets:
+            return psets[nombre]
+    return None
+
+
 @dataclass
 class VertidaInfo:
     guid: str
@@ -38,7 +50,7 @@ def _with_ifcopenshell(path: Path) -> list[VertidaInfo]:
     for el in model.by_type("IfcElement"):
         if el.Name and el.Name.startswith("Vertida"):
             psets = ue.get_psets(el)
-            props = dict(psets.get("Pset_HormigonMasivo", {}))
+            props = dict(_pset_del_curso(psets) or {})
             props.pop("id", None)
             out.append(VertidaInfo(el.GlobalId, el.Name, el.is_a(), props))
     return sorted(out, key=lambda v: v.name)
@@ -99,7 +111,7 @@ def _with_step_text(path: Path) -> list[VertidaInfo]:
     for cls, a in ents.values():
         if cls == "IFCRELDEFINESBYPROPERTIES":
             ps_cls, ps = ents[ref(a[5])]
-            if ps_cls != "IFCPROPERTYSET" or ps[2].strip("'") != "Pset_HormigonMasivo":
+            if ps_cls != "IFCPROPERTYSET" or ps[2].strip("'") not in PSET_NOMBRES:
                 continue
             props = {}
             for pid in refs(ps[4]):
@@ -146,6 +158,15 @@ def horas_desde_primera(fechas: list[str]) -> list[float]:
     return [(t - cero).total_seconds() / 3600.0 for t in tiempos]
 
 
+def inicios_en_horas(props: list[dict]) -> list[float]:
+    """Hora de inicio de cada vertida: InicioPlanificado (fecha ISO) o Inicio_h (horas)."""
+    if all("InicioPlanificado" in p for p in props):
+        return horas_desde_primera([p["InicioPlanificado"] for p in props])
+    if all("Inicio_h" in p for p in props):
+        return [float(p["Inicio_h"]) for p in props]
+    raise ValueError("Cada vertida debe tener InicioPlanificado o Inicio_h en su set de propiedades")
+
+
 def extraer_solidos(path) -> list[SolidoVertida]:
     """Lee del IFC la geometría triangulada y las propiedades de cada vertida."""
     import ifcopenshell
@@ -158,13 +179,13 @@ def extraer_solidos(path) -> list[SolidoVertida]:
 
     elementos = []
     for el in model.by_type("IfcElement"):
-        props = ue.get_psets(el).get("Pset_HormigonMasivo")
+        props = _pset_del_curso(ue.get_psets(el))
         if props and "VertidaID" in props:
             elementos.append((el, props))
     if not elementos:
-        raise ValueError(f"{path}: no hay elementos con Pset_HormigonMasivo.VertidaID")
+        raise ValueError(f"{path}: no hay elementos con {PSET_NOMBRES[0]}.VertidaID")
 
-    inicios = horas_desde_primera([p["InicioPlanificado"] for _, p in elementos])
+    inicios = inicios_en_horas([p for _, p in elementos])
     solidos = []
     for (el, props), inicio_h in zip(elementos, inicios):
         geo = ifcopenshell.geom.create_shape(settings, el).geometry

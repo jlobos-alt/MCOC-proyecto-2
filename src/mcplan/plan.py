@@ -11,7 +11,7 @@ from dataclasses import dataclass, field, replace
 
 import yaml
 
-from .bim import horas_desde_primera
+from .bim import inicios_en_horas
 
 
 @dataclass
@@ -353,7 +353,7 @@ def read_ifc_vertidas(path: str) -> list[dict]:
 
     model = ifcopenshell.open(path)
     vertidas: list[dict] = []
-    fechas: list[str | None] = []
+    todas_las_props: list[dict] = []
     for product in model.by_type("IfcProduct"):
         if not getattr(product, "Name", None):
             continue
@@ -366,12 +366,12 @@ def read_ifc_vertidas(path: str) -> list[dict]:
                     properties[prop.Name] = value
         if "VertidaID" not in properties:
             continue
-        fechas.append(properties.get("InicioPlanificado"))
+        todas_las_props.append(properties)
         vertidas.append(
             {
                 "id": int(properties["VertidaID"]),
                 "nombre": product.Name,
-                "inicio_h": float(properties.get("Inicio_h", 0.0)),
+                "inicio_h": 0.0,          # se asigna abajo, cuando se conocen todas
                 "temperatura_colocacion_C": float(properties.get("TemperaturaColocacion_C", 18.0)),
                 "material": str(properties.get("TipoHormigon", "M1")),
                 "aislacion": str(properties.get("Aislacion", "TBD")),
@@ -379,10 +379,7 @@ def read_ifc_vertidas(path: str) -> list[dict]:
                 "retiro_moldaje_h": float(properties.get("RetiroMoldaje_h", 72.0)),
             }
         )
-    if any(fechas):
-        if not all(fechas):
-            raise ValueError("Hay vertidas sin InicioPlanificado en el IFC")
-        for vertida, inicio in zip(vertidas, horas_desde_primera(fechas)):
-            vertida["inicio_h"] = inicio
+    for vertida, inicio in zip(vertidas, inicios_en_horas(todas_las_props)):
+        vertida["inicio_h"] = inicio
     vertidas.sort(key=lambda v: v["id"])
     return vertidas

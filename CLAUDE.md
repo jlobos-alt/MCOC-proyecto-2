@@ -36,7 +36,8 @@ temperatura de colocación, moldaje/aislación, retiro), no una simulación.
   solver**. El solver **no depende de Blender** (BIM ≠ solver ≠ visualizador). La fuente de verdad
   del BIM es el `.ifc`, no el `.blend`.
 - Cada vertida en el IFC debe tener (Pset): VertidaID, TipoHormigon, InicioPlanificado,
-  TemperaturaColocacion_C, Moldaje, Aislacion, RetiroMoldaje_h. Usamos `Pset_HormigonMasivo`.
+  TemperaturaColocacion_C, Moldaje, Aislacion, RetiroMoldaje_h. Usamos `UANDES_HormigonMasivo`, como
+  pide la guía del curso: el prefijo `Pset_` está reservado a buildingSMART. Caso base: una vertida cada 6 h.
 - Clima: guardar **snapshots** de pronóstico (fuente, modelo, fecha/hora de descarga, coordenadas,
   unidades, horizonte, variables) y **nunca sobrescribir** uno anterior. Explicar cómo se completa
   el horizonte faltante de 14 días.
@@ -105,8 +106,8 @@ y comparación antes/después sin IfcOpenShell) y `scripts/roundtrip_ifc.py --an
 | E03 Verificación 1D | 23 oct | hecho (José) | `513eb4e` |
 | E04 Revisión oral 2D/3D + CC | 28 oct | hecho (José) | `25b992f` |
 | E05 Lab batería de verificación térmica | 29 oct | hecho (Clemente) | ver `entregas/entrega5/README.md` |
-| E06 Dossier de verificación + BIM del caso | 30 oct | pendiente | — |
-| E07 Revisión oral voxelización, vertidas, hidratación | 4 nov | en revisión (Matías) | ver `entregas/entrega7/README.md` |
+| E06 Dossier de verificación + BIM del caso | 30 oct | en revisión (Matías) | ver `entregas/entrega6/E06_dossier.md` |
+| E07 Revisión oral voxelización, vertidas, hidratación | 4 nov | hecho (Matías) | `b5efa27` |
 | E08–E09 BIM→grid + activación, baseline 3D con hidratación | 5–6 nov | pendiente | — |
 | E10–E12 Entorno, moldaje, clima, simulación 14 días | 11–13 nov | pendiente | — |
 | E13–E15 Incertidumbre, Monte Carlo + HPC, recomendación | 18–20 nov | pendiente | — |

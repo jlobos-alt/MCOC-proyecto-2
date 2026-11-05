@@ -1,5 +1,5 @@
-IfcOpenShell 0.9.0.post1 | Blender 5.2.2 LTS
-Archivo: C:\Users\cleme\OneDrive\Escritorio\semestre_actual\MCOC\Ultimo proyecto\MCOC-proyecto-2\geometry\foundation.ifc
+IfcOpenShell 0.9.0.post1 | Blender 5.2.3 LTS
+Archivo: C:\Users\matia\OneDrive\Documentos\MCOC\Proyecto 2\MCOC-proyecto-2\geometry\foundation.ifc
 Schema: IFC4
 
 Vertida     Clase      GUID                     V_geom[m3] V_pset[m3]

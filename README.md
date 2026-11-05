@@ -37,6 +37,11 @@ Bonsai/Blender ──> IFC ──> IfcOpenShell ──> voxelización ──> so
 | Avance: solver 3D por balance de celdas, plan YAML, hidratación, criterios, Monte Carlo | `src/mcplan/thermal.py`, `plan.py`, …, `scripts/run_case.py` | 🧪 adelanto para E04+ |
 | Clima real del sitio, hidratación calibrada | — | ⏳ |
 
+## E06 — Dossier de verificación + BIM del caso
+
+Matriz de verificación, convergencia espacial y temporal por separado, y BIM base en
+[`entregas/entrega6/E06_dossier.md`](entregas/entrega6/E06_dossier.md).
+
 ## E07 — Voxelización, vertidas e hidratación
 
 Del IFC a la grilla: `extraer_solidos` (geometría y propiedades) → `voxelizar` (`vertida_id` por celda,
@@ -55,7 +60,8 @@ o con conda: `conda env create -f environment.yml && conda activate mcoc-p2`
 ## Uso
 
 ```bash
-python -m pytest tests -q                    # 99 tests
+python -m pytest tests -q                    # 104 tests
+python scripts/dossier_e06.py                # evidencia del dossier de verificación (E06), ~3 min
 python scripts/inspect_ifc.py                # vertidas, GUID y Pset del IFC
 python scripts/run_1d_demo.py                # losa 1D con hidratación -> results/demo_1d.png
 python scripts/run_case.py --plan datos/caso_fundacion.yaml   # caso 3D con losa rectangular (antiguo)
@@ -77,9 +83,10 @@ python geometry/make_foundation_ifc.py       # regenera foundation_base.ifc
 | Vertida_04 | 2.20–3.30 | tronco octagonal 12.5 → 7 m | 88.9 |
 | Vertida_05 | 3.30–4.30 | cilindro Ø 7 m | 38.5 |
 
-Cada vertida tiene `Pset_HormigonMasivo`: `VertidaID, TipoHormigon, InicioPlanificado,
-TemperaturaColocacion_C, Moldaje, Aislacion, RetiroMoldaje_h, VolumenGeometrico_m3` (fechas y
-temperaturas **provisorias**). Los GlobalId son deterministas.
+Cada vertida tiene `UANDES_HormigonMasivo`: `VertidaID, TipoHormigon, InicioPlanificado,
+TemperaturaColocacion_C, Moldaje, Aislacion, RetiroMoldaje_h, VolumenGeometrico_m3` (secuencia de
+referencia de la guía: una vertida cada 6 h, a 18 °C; **no es el plan óptimo**). Los GlobalId son
+deterministas. El lector también acepta `Inicio_h` y el nombre antiguo `Pset_HormigonMasivo`.
 
 Flujo: `course_geometry.json` → `make_foundation_ifc.py` → `foundation_base.ifc` → **Bonsai**
 (`File > Open IFC Project` / `Save IFC Project`) → `foundation.ifc`. El paso por Bonsai se automatiza

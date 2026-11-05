@@ -315,6 +315,86 @@ def caso_robin_transitorio(L: float = 0.02, n: int = 4, h: float = 5.0, T0: floa
     return caso, model, result
 
 
+# ---------------------------------------------------------------------------
+# Convergencia aislada: solo espacio o solo tiempo
+# ---------------------------------------------------------------------------
+
+def _orden(errores, razon):
+    return [float(np.log(errores[i] / errores[i + 1]) / np.log(razon[i])) for i in range(len(errores) - 1)]
+
+
+def convergencia_espacial(dim: int = 1, ns=(10, 20, 40, 80), dt_s: float = 20.0, t_h: float = 24.0,
+                          mat=CONCRETO, A: float = 10.0, T0: float = 20.0) -> Caso:
+    """Refina dx con el mismo dt y quita el error temporal de la medida.
+
+    El error de Euler es O(dt) y tiene signo contrario al espacial: en mallas finas lo
+    cancela en parte y el orden parece mayor que 2. Con dos corridas, la extrapolacion
+    de Richardson 2 T(dt/2) - T(dt) elimina el termino O(dt) y deja el error espacial.
+    Se compara contra la solucion exacta. Esperado: orden 2.
+    """
+    errores = []
+    for n in ns:
+        celdas = tuple(n if eje < dim else 1 for eje in range(3))
+        largos = tuple(1.0 if eje < dim else 1.0 / n for eje in range(3))
+        fronteras = [{"name": "dirichlet", "direccion": "ejes", "ejes": list(range(dim)),
+                      "signo": "ambos", "tipo": "dirichlet", "valor_dirichlet_C": T0}]
+        model = build_model(plan_from_dict(plan_caja(largos, celdas, mat, fronteras, T0)))
+        X = _centros(model)
+        forma = np.ones(model.grid.shape)
+        for eje in range(dim):
+            forma = forma * np.sin(np.pi * X[eje])
+        grueso, fino = (solve(model, duracion_h=t_h, intervalo_salida_h=t_h, dt_s=dt,
+                              temperatura_inicial=(T0 + A * forma).ravel())
+                        for dt in (dt_s, dt_s / 2.0))
+        sin_error_temporal = 2.0 * fino.T_final - grueso.T_final
+        decaimiento = np.exp(-difusividad(mat) * dim * np.pi ** 2 * fino.time_h[-1] * 3600.0)
+        errores.append(float(np.max(np.abs(sin_error_temporal - T0 - A * forma * decaimiento))) / (A * decaimiento))
+    ordenes = _orden(errores, [ns[i + 1] / ns[i] for i in range(len(ns) - 1)])
+    return Caso(
+        nombre=f"convergencia espacial {dim}D",
+        error=max(0.0, 1.8 - ordenes[-1]),
+        tolerancia=0.0,
+        detalle=f"dt={dt_s} s y {dt_s / 2} s (Richardson), n={list(ns)}, errores={[f'{e:.2e}' for e in errores]}, "
+                f"orden={[round(p, 2) for p in ordenes]}",
+        datos={"ns": list(ns), "dx": [1.0 / n for n in ns], "errores": errores, "ordenes": ordenes},
+    )
+
+
+def convergencia_temporal(dim: int = 1, n: int = 20, dts=(240.0, 120.0, 60.0, 30.0), dt_ref: float = 1.875,
+                          t_h: float = 24.0, mat=CONCRETO, A: float = 10.0, T0: float = 20.0) -> Caso:
+    """Refina dt con la MISMA malla y compara contra una corrida de referencia con dt muy chico.
+
+    La referencia es de la misma malla, para que el error espacial no entre en la medida.
+    Esperado: orden 1 (Euler explicito).
+    """
+    celdas = tuple(n if eje < dim else 1 for eje in range(3))
+    largos = tuple(1.0 if eje < dim else 1.0 / n for eje in range(3))
+    fronteras = [{"name": "dirichlet", "direccion": "ejes", "ejes": list(range(dim)),
+                  "signo": "ambos", "tipo": "dirichlet", "valor_dirichlet_C": T0}]
+    model = build_model(plan_from_dict(plan_caja(largos, celdas, mat, fronteras, T0)))
+    X = _centros(model)
+    forma = np.ones(model.grid.shape)
+    for eje in range(dim):
+        forma = forma * np.sin(np.pi * X[eje])
+    inicial = (T0 + A * forma).ravel()
+
+    def correr(dt):
+        return solve(model, duracion_h=t_h, intervalo_salida_h=t_h, dt_s=dt, temperatura_inicial=inicial).T_final
+
+    referencia = correr(dt_ref)
+    amplitud = float(np.max(np.abs(referencia - T0)))
+    errores = [float(np.max(np.abs(correr(dt) - referencia))) / amplitud for dt in dts]
+    ordenes = _orden(errores, [dts[i] / dts[i + 1] for i in range(len(dts) - 1)])
+    return Caso(
+        nombre=f"convergencia temporal {dim}D",
+        error=max(0.0, 0.9 - ordenes[-1]),
+        tolerancia=0.0,
+        detalle=f"n={n} fijo, dt={list(dts)} s, errores={[f'{e:.2e}' for e in errores]}, "
+                f"orden={[round(p, 2) for p in ordenes]}",
+        datos={"dts": list(dts), "errores": errores, "ordenes": ordenes},
+    )
+
+
 def bateria(mat=CONCRETO) -> list[Caso]:
     """Corre todos los casos con sus parametros por defecto."""
     return [

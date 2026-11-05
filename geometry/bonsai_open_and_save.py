@@ -36,7 +36,7 @@ for el in sorted(m.by_type("IfcFooting"), key=lambda e: e.Name):
     sh = ifcopenshell.geom.create_shape(st, el)
     V = us.get_volume(sh.geometry)
     tot += V
-    p = ue.get_psets(el).get("Pset_HormigonMasivo", {})
+    p = ue.get_psets(el).get("UANDES_HormigonMasivo", {})
     lines.append(f"{el.Name:<12}{el.is_a():<11}{el.GlobalId:<24}{V:>11.3f}{p.get('VolumenGeometrico_m3', 0):>11.3f}")
 lines.append(f"{'TOTAL':<47}{tot:>11.3f}")
 lines.append("")

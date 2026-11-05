@@ -1,0 +1,20 @@
+| Test | Qué verifica | Error/métrica | Resultado |
+|---|---|---|---|
+| Seno 1D, Dirichlet | Difusión contra solución exacta | error rel. 9.93e-04 | PASA |
+| Seno 2D, Dirichlet | Difusión contra solución exacta | error rel. 1.98e-03 | PASA |
+| Seno 3D, Dirichlet | Difusión contra solución exacta | error rel. 2.98e-03 | PASA |
+| Convergencia espacial 1D | Orden con Δt fijo = 20 s (Richardson) | p = 2.00 | PASA |
+| Convergencia espacial 2D | Orden con Δt fijo = 40 s (Richardson) | p = 1.99 | PASA |
+| Convergencia espacial 3D | Orden con Δt fijo = 40 s (Richardson) | p = 1.99 | PASA |
+| Convergencia temporal 1D | Orden con n = 20 fijo | p = 1.05 | PASA |
+| Convergencia temporal 3D | Orden con n = 12 fijo | p = 1.05 | PASA |
+| Energía sin fuente | Caja adiabática, campo aleatorio: ΣCT constante | error rel. 0.0e+00 | PASA |
+| Energía con fuente | E = E₀ + q₀·V·t | error rel. 3.7e-16 | PASA |
+| Fuente uniforme | Subida lineal T₀ + q₀·t/(ρ·cp) | 3.6e-14 °C | PASA |
+| Hidratación adiabática | Subida final θ∞ = 45 °C, con y sin madurez | 1.2e-10 °C | PASA |
+| Neumann, balance | ΔE = −q_n·A·t | error rel. 5.1e-16 | PASA |
+| Neumann + Dirichlet | Perfil permanente lineal | 4.8e-08 °C | PASA |
+| Robin permanente | q = ΔT/(L/k + 1/h), perfil exacto | 4.6e-13 °C | PASA |
+| Robin transitorio | Capacidad agrupada, Bi ≪ 1 | error rel. 2.70e-03 | PASA |
+| Robin con h → ∞ | Tiende a Dirichlet | 3.2e-13 °C | PASA |
+| Estabilidad 1D | Fo = 0,45 estable; Fo = 0,60 diverge | amplitud final: 0.1 y 4.0e+54 °C | PASA |

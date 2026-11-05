@@ -8,7 +8,8 @@ Blender + Bonsai (File > Open IFC Project) y con IfcOpenShell en Python.
 Cada vertida es un IfcFooting con:
   - geometría (IfcExtrudedAreaSolid o IfcFacetedBrep),
   - material Hormigon_M1,
-  - Pset_HormigonMasivo (VertidaID, TipoHormigon, InicioPlanificado, ...).
+  - UANDES_HormigonMasivo (VertidaID, TipoHormigon, InicioPlanificado, ...).
+    Nombre propio: el prefijo Pset_ esta reservado a los sets de buildingSMART.
 
 GlobalId deterministas (uuid5): regenerar el archivo NO cambia la identidad BIM.
 
@@ -25,13 +26,14 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE / "foundation_base.ifc"   # semilla; Bonsai la abre y guarda foundation.ifc
 NS = uuid.UUID("6f1f3d2e-6c5b-4b8e-9a3e-0c2f6a1d0b11")
 
-# Pset provisorio (se ajustará con el plan de vertidas real)
+# Secuencia de referencia de la guia del curso: una vertida cada 6 h.
+# No es el plan optimo: es el caso base sobre el que se comparan alternativas.
 PSET = {
     1: dict(Inicio="2026-11-27T04:00:00", Tcol=18.0),
-    2: dict(Inicio="2026-11-28T04:00:00", Tcol=18.0),
-    3: dict(Inicio="2026-11-29T04:00:00", Tcol=18.0),
-    4: dict(Inicio="2026-11-30T04:00:00", Tcol=18.0),
-    5: dict(Inicio="2026-12-01T04:00:00", Tcol=18.0),
+    2: dict(Inicio="2026-11-27T10:00:00", Tcol=18.0),
+    3: dict(Inicio="2026-11-27T16:00:00", Tcol=18.0),
+    4: dict(Inicio="2026-11-27T22:00:00", Tcol=18.0),
+    5: dict(Inicio="2026-11-28T04:00:00", Tcol=18.0),
 }
 
 _CH = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_$"
@@ -189,7 +191,7 @@ def build(geom: dict) -> tuple[str, dict]:
             s.add("IFCPROPERTYSINGLEVALUE('RetiroMoldaje_h',$,IFCREAL(72.),$)"),
             s.add(f"IFCPROPERTYSINGLEVALUE('VolumenGeometrico_m3',$,IFCVOLUMEMEASURE({f(round(vol, 6))}),$)"),
         ]
-        ps = s.add(f"IFCPROPERTYSET('{ifc_guid(name + '_pset')}',$,'Pset_HormigonMasivo',$,{lst(props)})")
+        ps = s.add(f"IFCPROPERTYSET('{ifc_guid(name + '_pset')}',$,'UANDES_HormigonMasivo',$,{lst(props)})")
         s.add(f"IFCRELDEFINESBYPROPERTIES('{ifc_guid(name + '_rdp')}',$,$,$,({el}),{ps})")
 
     mat = s.add("IFCMATERIAL('Hormigon_M1',$,'Concrete')")
