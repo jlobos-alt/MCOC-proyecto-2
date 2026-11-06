@@ -1,6 +1,6 @@
-{
+﻿{
   "ifc": "foundation.ifc",
-  "commit_base": "6775410",
+  "commit_base": "7773d10",
   "cambios_por_comando": {
     "inicio_h": {},
     "T_colocacion_C": {},

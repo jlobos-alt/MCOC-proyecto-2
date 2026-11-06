@@ -1,6 +1,6 @@
-{
+﻿{
   "entrega": "E09 - Baseline 3D con hidratacion",
-  "commit_base": "6775410",
+  "commit_base": "7773d10",
   "ifc": "foundation.ifc",
   "malla": {
     "dx_m": 0.25,

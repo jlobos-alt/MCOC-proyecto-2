@@ -1,10 +1,10 @@
-# E09 — Baseline 3D con hidratación
+﻿# E09 — Baseline 3D con hidratación
 
 **Grupo 5:** José Lobos, Clemente Sánchez y Matías Campos
 
 **Repositorio:** https://github.com/jlobos-alt/MCOC-proyecto-2
 
-**Commit evaluado:** 6775410
+**Commit evaluado:** 7773d10
 
 **Fecha:** viernes 6 de noviembre de 2026
 

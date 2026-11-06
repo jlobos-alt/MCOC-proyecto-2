@@ -1,4 +1,4 @@
-"""Genera E09_informe.docx a partir de las figuras y resultados de results/e09."""
+﻿"""Genera E09_informe.docx a partir de las figuras y resultados de results/e09."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -163,7 +163,7 @@ def build():
         ["Grupo", "Grupo 5"],
         ["Integrantes", "José Lobos · Clemente Sánchez · Matías Campos"],
         ["Repositorio", "https://github.com/jlobos-alt/MCOC-proyecto-2"],
-        ["Commit evaluado", "6775410"],
+        ["Commit evaluado", "7773d10"],
         ["Fecha", "Viernes 6 de noviembre de 2026"],
         ["Caso", "Fundación para aerogenerador, geometría del curso (IFC)"],
     ], anchos=[4.5, 11.5], fuente=9.5)
@@ -303,7 +303,7 @@ def build():
     doc.add_paragraph()
     p(doc, "Entrega en Canvas", negrita=True, tam=10.5, color=AZUL, espacio=2)
     p(doc, "Repositorio: https://github.com/jlobos-alt/MCOC-proyecto-2", tam=10, align=WD_ALIGN_PARAGRAPH.LEFT, espacio=1)
-    p(doc, "Commit evaluado: 6775410", tam=10, align=WD_ALIGN_PARAGRAPH.LEFT, espacio=1)
+    p(doc, "Commit evaluado: 7773d10", tam=10, align=WD_ALIGN_PARAGRAPH.LEFT, espacio=1)
 
     doc.core_properties.title = "E09 — Baseline 3D con hidratación"
     doc.core_properties.author = "Grupo 5 — José Lobos, Clemente Sánchez, Matías Campos"

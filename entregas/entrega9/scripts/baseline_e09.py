@@ -1,4 +1,4 @@
-"""E09 - Baseline 3D con hidratacion: geometria del curso, vertidas y clima simple.
+﻿"""E09 - Baseline 3D con hidratacion: geometria del curso, vertidas y clima simple.
 
 Corre el caso de la fundacion del IFC (18 x 18 m, 5 vertidas) y guarda las
 evidencias del informe: T_max(t), temperaturas en puntos, cortes 3D, error de
@@ -194,7 +194,7 @@ def main():
     tmax_global, t_tmax = float(r.T_max_abs), float(r.time_of_max(r.T_max_global))
     resumen = {
         "entrega": "E09 - Baseline 3D con hidratacion",
-        "commit_base": "6775410",
+        "commit_base": "7773d10",
         "ifc": args.ifc.name,
         "malla": {"dx_m": grid.dx, "dz_m": grid.dz, "nx": grid.nx, "ny": grid.ny, "nz": grid.nz,
                   "celdas_activas": int(vox.mask.sum()), "error_volumen_total": vox.error_volumen()},
