@@ -1,0 +1,11 @@
+caso,vertida,inicio_h,retiro_h,moldaje,R_moldaje_m2K_W,aislacion,R_aislacion_m2K_W,R_total_lateral_m2K_W
+ambiente,1,0.0,72.0,Madera,0.1583,Ninguna,0.0000,0.1583
+ambiente,2,6.0,78.0,Madera,0.1583,Ninguna,0.0000,0.1583
+ambiente,3,12.0,84.0,Madera,0.1583,Ninguna,0.0000,0.1583
+ambiente,4,18.0,90.0,Madera,0.1583,Ninguna,0.0000,0.1583
+ambiente,5,24.0,96.0,Madera,0.1583,Ninguna,0.0000,0.1583
+aislado,1,0.0,72.0,Madera,0.1583,EPS_50mm,1.4286,1.5869
+aislado,2,6.0,78.0,Madera,0.1583,EPS_50mm,1.4286,1.5869
+aislado,3,12.0,84.0,Madera,0.1583,EPS_50mm,1.4286,1.5869
+aislado,4,18.0,90.0,Madera,0.1583,EPS_50mm,1.4286,1.5869
+aislado,5,24.0,96.0,Madera,0.1583,EPS_50mm,1.4286,1.5869

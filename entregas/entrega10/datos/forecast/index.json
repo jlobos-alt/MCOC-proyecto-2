@@ -1,0 +1,46 @@
+{
+  "snapshots": [
+    {
+      "snapshot_id": "20261111T193622Z_open-meteo-forecast",
+      "source": "open-meteo-forecast",
+      "model": "best_match",
+      "issued_at": "2026-11-11T19:36:22+00:00",
+      "fetched_at": "2026-11-11T19:36:22+00:00",
+      "endpoint": "https://api.open-meteo.com/v1/forecast",
+      "latitude": -35.606327,
+      "longitude": -72.532135,
+      "timezone": "America/Santiago",
+      "first_time": "2026-11-11T00:00",
+      "last_time": "2026-11-24T23:00",
+      "n_hours": 336,
+      "sha256_raw": "f97ae82fd124f4f4cbfec6f5b798d6e0764a7125e05ffd6d294ca855f0dac7d7",
+      "sha256_csv": "ba1d71b500a58ecc357ee86d4af6ceb235192a1dec4d11c8434415f388585162",
+      "files": {
+        "raw": "raw.json",
+        "csv": "normalizado.csv"
+      },
+      "notes": "Forecast 14 dias para Pahuil/Chanco. No cubre el 27-nov: se usa como referencia de lo que se sabia hoy."
+    },
+    {
+      "snapshot_id": "20261111T193623Z_open-meteo-archive",
+      "source": "open-meteo-archive",
+      "model": "best_match",
+      "issued_at": "2026-11-11T19:36:23+00:00",
+      "fetched_at": "2026-11-11T19:36:23+00:00",
+      "endpoint": "https://archive-api.open-meteo.com/v1/archive",
+      "latitude": -35.606327,
+      "longitude": -72.532135,
+      "timezone": "America/Santiago",
+      "first_time": "2025-11-27T00:00",
+      "last_time": "2025-12-11T23:00",
+      "n_hours": 360,
+      "sha256_raw": "a56377b6d1bb27ec687762b9436abbd174dbd04be5adc30b7928c61fd286bbb1",
+      "sha256_csv": "f4377629850977c8daf30aa4e163a59c0596678f809e73756657628cd0c6a82e",
+      "files": {
+        "raw": "raw.json",
+        "csv": "normalizado.csv"
+      },
+      "notes": "Reanalysis del mismo calendario del anio anterior. Se desplaza al anio del caso como climatologia."
+    }
+  ]
+}
