@@ -4,8 +4,10 @@
 (geometría del IFC, vertidas, curva de hidratación, suelo, moldaje/aislación, clima y
 visualización 3D), y el veredicto de los criterios de 70 °C y 20 °C.
 
-**Canvas:** `Repositorio` y `Commit evaluado`. Informe: [E12_informe.docx](E12_informe.docx)
-([Markdown](E12_informe.md), 1394 palabras).
+**Canvas:** `Repositorio` y `Commit evaluado`. Informe final:
+[E12_informe_final.pdf](E12_informe_final.pdf) (9 páginas, 7 figuras, 1326 palabras).
+Fuentes editables: [E12_informe.docx](E12_informe.docx) y [E12_informe.md](E12_informe.md)
+(1394 palabras).
 
 Carpeta autocontenida: `src`, `tests`, `datos`, `geometry`, `scripts` y `results`.
 
