@@ -409,7 +409,7 @@ def generar_docx(bloques, salida: Path) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--commit", default="5aa4bfa", help="SHA que se declara en el informe")
+    ap.add_argument("--commit", default="f53f3d9", help="SHA que se declara en el informe")
     ap.add_argument("--solo-md", action="store_true")
     args = ap.parse_args()
 

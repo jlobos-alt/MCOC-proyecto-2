@@ -4,7 +4,7 @@
 
 **Repositorio:** https://github.com/jlobos-alt/MCOC-proyecto-2
 
-**Commit evaluado:** 5aa4bfa
+**Commit evaluado:** f53f3d9
 
 **Fecha:** viernes 13 de noviembre de 2026
 
