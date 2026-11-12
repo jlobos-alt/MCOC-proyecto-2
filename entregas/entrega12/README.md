@@ -5,7 +5,7 @@
 visualización 3D), y el veredicto de los criterios de 70 °C y 20 °C.
 
 **Canvas:** `Repositorio` y `Commit evaluado`. Informe: [E12_informe.docx](E12_informe.docx)
-([Markdown](E12_informe.md), 1374 palabras).
+([Markdown](E12_informe.md), 1394 palabras).
 
 Carpeta autocontenida: `src`, `tests`, `datos`, `geometry`, `scripts` y `results`.
 

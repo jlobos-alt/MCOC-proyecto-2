@@ -51,35 +51,33 @@ def contenido(d: dict, commit: str):
     b.append(("meta", f"**Fecha:** {FECHA}"))
     b.append(("meta", "**Caso:** fundación del IFC, 5 vertidas, 336 h desde el 27-nov-2026 04:00"))
 
-    b.append(("h2", "1. Resumen"))
+    b.append(("h2", "1. Introducción"))
     b.append(("p",
-        "Un único caso determinista: misma geometría, plan de vertidas, clima y una sola "
-        "curva de hidratación. La malla es de "
-        f"{fmt(malla['dx_m'], 1)} m en planta y {fmt(malla['dz_m'], 2)} m en altura "
-        f"({malla['shape'][0]}×{malla['shape'][1]}×{malla['shape'][2]}, "
-        f"{malla['celdas_activas']} celdas activas, error de volumen {fmt(malla['error_volumen_pct'])} %). "
-        f"La temperatura máxima es **{fmt(r['T_max_C'])} °C a las {r['T_max_h']:g} h** y cumple el límite "
-        f"de 70 °C con {fmt(70.0 - r['T_max_C'])} °C de margen. El diferencial núcleo-superficie llega a "
-        f"**{fmt(r['delta_T_max_C'])} °C a las {r['delta_T_h']:g} h**, {fmt(r['delta_T_max_C'] / 20.0, 1)} veces "
-        "el límite de 20 °C: **el plan no cumple**. El ΔT supera los 20 °C desde las 24 h y no vuelve "
-        "a bajar en toda la ventana."))
+        "Este informe documenta la simulación determinista de 14 días (336 h) del caso de fundación del "
+        "IFC. Su propósito es evaluar, con un único conjunto de supuestos y sin variabilidad aleatoria, si "
+        "el plan de vertidas satisface los criterios de 70 °C de temperatura máxima y 20 °C de diferencial "
+        "núcleo-superficie. El modelo integra la geometría y la secuencia del IFC, una única curva de "
+        "hidratación (C1), el suelo semi-infinito, el moldaje por vertida, el clima de snapshots "
+        "verificados y la visualización tridimensional, sobre una malla de 0,5 m. Los resultados indican "
+        f"que el criterio de 70 °C se satisface con {fmt(r['T_max_C'])} °C, mientras que el diferencial "
+        f"alcanza {fmt(r['delta_T_max_C'])} °C y excede los 20 °C."))
 
-    b.append(("h2", "2. Curva de hidratación (una sola)"))
+    b.append(("h2", "2. Curva de hidratación"))
     b.append(("p",
-        f"Se usa la curva **C1**, única declarada en el modelo desde E09: θ_ad(a) = "
+        f"Se emplea la curva C1, única declarada en el modelo desde E09: θ_ad(a) = "
         f"{fmt(hid['theta_inf_C'], 0)}·(1 − e^(−a/{fmt(hid['tau_h'], 0)})) °C, con madurez de Arrhenius "
         f"Ea/R = {fmt(hid['Ea_R_K'], 0)} K y T_ref = {fmt(hid['T_ref_C'], 0)} °C, sin segunda rama "
-        f"exponencial (θ∞₂ = {fmt(hid['segunda_rama_C'], 0)}). La curva se evalúa con la edad equivalente, "
-        "de modo que el calor total no depende de la temperatura: el hormigón caliente libera lo mismo, "
-        "pero antes. Da θ_ad(24 h) = 24,78 °C, θ_ad(168 h) = 44,83 °C y q̇(0) = 0,97 kW/m³."))
+        f"exponencial (θ∞₂ = {fmt(hid['segunda_rama_C'], 0)}). La curva se evalúa con la edad equivalente: "
+        "el hormigón caliente libera la misma energía en menos tiempo. La curva proporciona "
+        "θ_ad(24 h) = 24,78 °C, θ_ad(168 h) = 44,83 °C y q̇(0) = 0,97 kW/m³."))
     b.append(("formula", "θ_ad(a) = θ∞ (1 − e^(−a/τ)),    q̇_h = ρ c_p (dθ_ad/da) · m(T)"))
     b.append(("p",
-        "Cambiar de curva es editar θ∞, τ y Ea/R en `datos/fundacion_e12.yaml`; el resto no cambia. "
-        "No se mezclan curvas ni se usan ramas por vertida."))
+        "La curva se modifica editando θ∞, τ y Ea/R en `datos/fundacion_e12.yaml`; no se mezclan curvas "
+        "entre vertidas."))
 
-    b.append(("h2", "3. Clima: dataset, timestamp y horizonte no cubierto"))
+    b.append(("h2", "3. Clima: datasets, timestamps y horizonte"))
     b.append(("p",
-        "Dos snapshots inmutables de Open-Meteo, verificados por SHA-256 antes de simular:"))
+        "Dos snapshots inmutables de Open-Meteo, verificados mediante SHA-256 antes de simular:"))
     b.append(("tabla", ["Snapshot", "Contenido", "Horizonte", "SHA-256 (csv)"], [
         ["20261111T193622Z_open-meteo-forecast",
          "forecast best_match, Pahuil/Chanco; emitido 2026-11-11 19:36:22 UTC",
@@ -89,19 +87,21 @@ def contenido(d: dict, commit: str):
          "2025-11-27 00:00 → 2025-12-11 23:00 (360 h)", "`f4377629…`"],
     ], None, 8.5))
     b.append(("p",
-        "**Horizonte no cubierto.** La primera vertida es el 27-nov-2026 a las 04:00 y el forecast "
-        "disponible termina el 24-nov: no aporta ninguna hora. Las 336 h se completan con la climatología "
-        "del archivo, desplazada al año del caso (2026), hora a hora y sin interpolar entre años. Cada fila "
-        "de `series_e12.csv` declara su fuente: **0 h de forecast y 337 puntos de climatología**, sin horas "
-        "faltantes. Un forecast que cubra la ventana reemplaza ese bloque sin tocar el resto. "
-        f"El archivo usado da aire {fmt(cl['T_aire_min_C'], 1)}–{fmt(cl['T_aire_max_C'], 1)} °C, viento medio "
-        f"{fmt(cl['viento_medio_ms'])} m/s (máx {fmt(cl['viento_max_ms'])}), radiación máxima "
-        f"{cl['G_max_W_m2']:.0f} W/m², h = {fmt(cl['h_total_min_W_m2K'])}–{fmt(cl['h_total_max_W_m2K'])} W/(m²·K) "
-        f"y T sol-aire máxima {fmt(cl['T_sol_aire_max_C'])} °C."))
+        "**Horizonte no cubierto.** La primera vertida ocurre el 27 de noviembre de 2026 a las 04:00, "
+        "mientras que el pronóstico disponible finaliza el 24 de noviembre y no aporta horas. Las 336 h se "
+        "completan con la climatología del archivo, desplazada al año del caso, hora a hora y sin "
+        "interpolación entre años. Cada fila de `series_e12.csv` declara su fuente: 0 h de pronóstico y "
+        "337 puntos de climatología, sin horas faltantes. El archivo presenta aire entre "
+        f"{fmt(cl['T_aire_min_C'], 1)} y {fmt(cl['T_aire_max_C'], 1)} °C, viento medio de "
+        f"{fmt(cl['viento_medio_ms'])} m/s (máximo {fmt(cl['viento_max_ms'])}), radiación máxima de "
+        f"{cl['G_max_W_m2']:.0f} W/m², h entre {fmt(cl['h_total_min_W_m2K'])} y "
+        f"{fmt(cl['h_total_max_W_m2K'])} W/(m²·K) y sol-aire máxima de "
+        f"{fmt(cl['T_sol_aire_max_C'])} °C."))
 
     b.append(("h2", "4. Condiciones de borde"))
     b.append(("p",
-        "Robin lateral y superior; base conductiva semi-infinita:"))
+        "Las caras laterales y la superficie usan una condición de Robin; la base es un medio conductivo "
+        "semi-infinito:"))
     b.append(("tabla", ["Frontera", "Tipo", "Parámetros"], [
         ["Lateral y superior", "Robin",
          "−k∂T/∂n = h(t)·(T − T∞); h = 5,7 + 3,8v + 4εσT³; T∞ = T sol-aire; α = 0,6; ε = 0,9"],
@@ -112,7 +112,7 @@ def contenido(d: dict, commit: str):
         ["Inicial", "Dirichlet", "T = 18 °C al colocar cada vertida"],
         ["Fuente", "Volumétrica", "q̇ de la curva C1 con madurez de Arrhenius"],
     ], [3.0, 3.0, 10.0], 8.5))
-    b.append(("p", "Muestras de la serie que recibe el Robin:"))
+    b.append(("p", "Muestras de la serie que recibe la condición de Robin:"))
     filas = borde["muestras"]
     elegidos = [f for f in filas if f["t_h"] in (0.0, 12.0, 24.0, 72.0, 168.0, 336.0)]
     b.append(("tabla",
@@ -124,41 +124,40 @@ def contenido(d: dict, commit: str):
 
     b.append(("h2", "5. Plan de vertidas"))
     b.append(("p",
-        "El plan sale del IFC (horas, temperatura, moldaje y retiro por vertida); el script no contiene "
-        "datos de obra:"))
+        "El plan se obtiene del IFC (horas, temperatura de colocación, moldaje y retiro), sin datos de "
+        "obra en el script:"))
     zs = {"1": "0,00–0,55", "2": "0,55–1,10", "3": "1,10–2,20", "4": "2,20–3,30", "5": "3,30–4,30"}
     b.append(("tabla", ["V", "Inicio [h]", "Hora local", "T col. [°C]", "z [m]", "Moldaje", "Retiro [h]"],
               [[p["id"], f"{p['inicio_h']:g}", p["inicio_local"][11:16], fmt(p["T_colocacion_C"], 1),
                 zs[str(p["id"])], p["moldaje"], f"{p['retiro_moldaje_h']:g}"] for p in d["plan_vertidas"]],
               [1.0, 2.0, 2.4, 2.2, 2.6, 2.6, 2.2], 9))
-    b.append(("p", "Las cinco vertidas suman 636,89 m³ según los Pset del IFC. Todas usan madera sin aislación."))
+    b.append(("p", "Las cinco vertidas suman 636,89 m³ y usan madera sin aislación."))
 
-    b.append(("h2", "6. Resultados: criterios de 70 °C y 20 °C"))
+    b.append(("h2", "6. Resultados de los criterios de 70 °C y 20 °C"))
     b.append(("tabla", ["Criterio", "Límite [°C]", "Valor [°C]", "Instante", "Veredicto"], [
         ["T_max", "70", fmt(r["T_max_C"]), f"{r['T_max_h']:g} h · {r['T_max_local'].replace('T', ' ')}", "**cumple**"],
         ["ΔT_max", "20", fmt(r["delta_T_max_C"]), f"{r['delta_T_h']:g} h · {r['delta_T_local'].replace('T', ' ')}", "**no cumple**"],
     ], [2.4, 2.4, 2.4, 5.4, 2.8], 9))
     b.append(("p",
-        f"**T_max = {fmt(x['T_C'])} °C a las {x['t_h']:g} h** ({x['time_local'].replace('T', ' ')}) en la celda "
-        f"({fmt(x['x_m'])}; {fmt(x['y_m'])}; {fmt(x['z_m'])}) m, en el eje del pedestal (V{x['vertida']}). "
-        f"Es {fmt(70.0 - x['T_C'])} °C bajo el límite; el hormigón pasa 208 h sobre 60 °C."))
+        f"La temperatura máxima asciende a {fmt(x['T_C'])} °C a las {x['t_h']:g} h en la celda "
+        f"({fmt(x['x_m'])}; {fmt(x['y_m'])}; {fmt(x['z_m'])}) m, sobre el eje del pedestal (V{x['vertida']}). "
+        f"Queda {fmt(70.0 - x['T_C'])} °C bajo el límite, aunque el hormigón permanece 208 h sobre 60 °C."))
     b.append(("p",
-        f"**ΔT_max = {fmt(dm['delta_T_C'])} °C a las {dm['t_h']:g} h** ({dm['time_local'].replace('T', ' ')}). "
-        f"El núcleo más caliente está en ({fmt(dm['nucleo']['x_m'])}; {fmt(dm['nucleo']['y_m'])}; "
+        f"El diferencial máximo alcanza {fmt(dm['delta_T_C'])} °C a las {dm['t_h']:g} h. El núcleo más "
+        f"caliente está en ({fmt(dm['nucleo']['x_m'])}; {fmt(dm['nucleo']['y_m'])}; "
         f"{fmt(dm['nucleo']['z_m'])}) m con {fmt(dm['nucleo']['T_C'])} °C (V{dm['nucleo']['vertida']}), y la "
         f"superficie más fría en ({fmt(dm['superficie']['x_m'])}; {fmt(dm['superficie']['y_m'])}; "
-        f"{fmt(dm['superficie']['z_m'])}) m con {fmt(dm['superficie']['T_C'])} °C (V{dm['superficie']['vertida']}), "
-        "sobre la cara lateral del octágono. El ΔT supera 20 °C en "
-        f"{ex['horas_sobre_20']} de las 337 horas registradas: empieza a las {ex['primera_h']:g} h y sigue sobre "
-        f"el límite al terminar la ventana ({fmt(r['delta_T_final_C'])} °C a las 336 h)."))
+        f"{fmt(dm['superficie']['z_m'])}) m con {fmt(dm['superficie']['T_C'])} °C "
+        f"(V{dm['superficie']['vertida']}), sobre la cara lateral. El ΔT supera los 20 °C en "
+        f"{ex['horas_sobre_20']} de las 337 horas: comienza a las {ex['primera_h']:g} h y permanece sobre el "
+        f"límite al finalizar la ventana ({fmt(r['delta_T_final_C'])} °C a las 336 h)."))
     b.append(("p",
-        f"La temperatura máxima por vertida es V1 {fmt(pv['1']['T_max_C'])} °C ({pv['1']['t_h']:g} h), "
-        f"V2 {fmt(pv['2']['T_max_C'])} °C ({pv['2']['t_h']:g} h), V3 {fmt(pv['3']['T_max_C'])} °C "
-        f"({pv['3']['t_h']:g} h), V4 {fmt(pv['4']['T_max_C'])} °C ({pv['4']['t_h']:g} h) y "
-        f"V5 {fmt(pv['5']['T_max_C'])} °C ({pv['5']['t_h']:g} h): el pico lo fija la acumulación de "
-        "V1–V3 en el centro del bloque."))
+        f"La temperatura máxima por vertida es V1 {fmt(pv['1']['T_max_C'])} °C, V2 {fmt(pv['2']['T_max_C'])} °C, "
+        f"V3 {fmt(pv['3']['T_max_C'])} °C, V4 {fmt(pv['4']['T_max_C'])} °C y V5 {fmt(pv['5']['T_max_C'])} °C, "
+        "con instantes entre 43 y 64 h. El máximo global se explica por la acumulación de V1–V3 en el centro "
+        "del bloque."))
 
-    b.append(("h2", "7. Curvas núcleo/superficie y visualización 3D"))
+    b.append(("h2", "7. Curvas núcleo-superficie y visualización tridimensional"))
     b.append(("fig", "results/e12/e12_clima.png",
               "Figura 1. Clima del caso: aire, sol-aire, suelo y h(t) en las 336 h (todo climatología)."))
     b.append(("fig", "results/e12/e12_curva_c1.png",
@@ -166,10 +165,10 @@ def contenido(d: dict, commit: str):
     b.append(("fig", "results/e12/e12_criterios.png",
               "Figura 3. T_max(t) contra 70 °C y ΔT(t) contra 20 °C."))
     b.append(("p",
-        "El núcleo sube rápido y se enfría lento: 63,98 °C a las 54 h y 56,58 °C al final. La superficie "
-        "sigue el ciclo diario y el retiro del moldaje: 35,53 °C a las 54 h y 20,38 °C a las 148 h. El ΔT "
-        "crece de 28,45 a 42,06 °C; al retirarse el moldaje (72–96 h) la cara lateral pasa de R ≈ 0,37 a "
-        "≈ 0,21 m²K/W y la superficie pierde calor casi al doble de tasa."))
+        "El núcleo asciende con rapidez y desciende lentamente: 63,98 °C a las 54 h y 56,58 °C al final. "
+        "La superficie sigue el ciclo diario y el retiro del moldaje: 35,53 °C a las 54 h y 20,38 °C a las "
+        "148 h. El ΔT crece de 28,45 a 42,06 °C al retirarse el moldaje (72–96 h), cuando la cara lateral "
+        "pasa de R ≈ 0,37 a ≈ 0,21 m²K/W."))
     b.append(("fig", "results/e12/e12_nucleo_superficie.png",
               "Figura 4. Curvas núcleo (máximo) y superficie (mínimo) con el ΔT y el límite de 20 °C."))
     b.append(("fig", "results/e12/e12_3d_tmax.png",
@@ -179,23 +178,27 @@ def contenido(d: dict, commit: str):
     b.append(("fig", "results/e12/e12_3d_zonas.png",
               "Figura 7. Zonas de control del criterio (núcleo y superficie) a t = 148 h."))
     b.append(("p",
-        "La serie `results/e12/vti/serie.pvd` (17 archivos `.vti`, cada 24 h más los dos instantes máximos) "
-        "se abre en ParaView con temperatura, vertida y las máscaras de núcleo y superficie."))
+        "La serie `.vti` (17 archivos, cada 24 h y los dos máximos) se abre en ParaView con temperatura, "
+        "vertida y las zonas de control."))
 
-    b.append(("h2", "8. Conclusión"))
+    b.append(("h2", "8. Conclusiones"))
     b.append(("p",
-        "**¿Cumple determinísticamente?** No. Con el clima, la curva y el plan declarados, 70 °C se cumple "
-        f"({fmt(r['T_max_C'])} °C) pero 20 °C no ({fmt(r['delta_T_max_C'])} °C); repetir la corrida da "
-        "exactamente la misma serie."))
+        "En las condiciones declaradas, el plan no satisface el criterio de 20 °C: la temperatura máxima "
+        f"se mantiene bajo 70 °C, con {fmt(r['T_max_C'])} °C a las {r['T_max_h']:g} h y "
+        f"{fmt(70.0 - r['T_max_C'])} °C de margen, pero el diferencial alcanza "
+        f"{fmt(r['delta_T_max_C'])} °C a las {r['delta_T_h']:g} h. El veredicto es determinista, pues la "
+        "corrida reproduce exactamente la misma serie y la no conformidad proviene de los supuestos del "
+        "caso, no de una fluctuación aleatoria."))
     b.append(("p",
-        "**¿Qué mecanismo controla el resultado?** Dos mecanismos. La T_max la fija el calor de hidratación "
-        "acumulado por las cinco vertidas, acotado por las pérdidas de borde; queda cerca de la suma adiabática "
-        "(18 + 45 = 63 °C) porque la pérdida temprana es pequeña. El ΔT lo controla el desacople "
+        "El resultado está controlado por dos mecanismos. La temperatura máxima depende del calor de "
+        "hidratación acumulado por las cinco vertidas y de las pérdidas de borde, y se aproxima a la suma "
+        "adiabática de 63 °C porque la pérdida temprana es pequeña. El diferencial depende del desacople "
         "núcleo-superficie: con k = 2,22 W/(m·K) y V3 de 1,10 m, la conducción del núcleo tarda semanas, "
-        "mientras la superficie sigue el aire y el sol en horas. El mínimo de superficie (20,38 °C), no el "
-        "máximo del núcleo, fija el ΔT. Por eso crece al retirarse el moldaje y acoplarse la superficie al "
-        "ambiente. Para cumplir 20 °C hay que desacoplar la superficie: aislar las caras laterales con EPS o "
-        "retirar el moldaje más tarde; esa comparación queda para E15."))
+        "mientras que la superficie sigue el aire y la radiación en horas. El mínimo de superficie "
+        "(20,38 °C), y no el máximo del núcleo, fija el ΔT, que crece al retirarse el moldaje."))
+    b.append(("p",
+        "Para cumplir los 20 °C sería necesario desacoplar la superficie, por ejemplo con aislación lateral "
+        "de EPS o un retiro más tardío del moldaje; esa comparación se abordará en E15."))
 
     b.append(("h2", "9. Reproducibilidad"))
     b.append(("code", "cd entregas/entrega12\n"
@@ -203,11 +206,11 @@ def contenido(d: dict, commit: str):
                       "python scripts/e12_determinista.py\n"
                       "python -m pytest tests -q"))
     b.append(("p",
-        "El script imprime los ocho pasos, verifica los snapshots y deja en `results/e12/` las figuras, "
-        "`series_e12.csv` (337 filas con su fuente), `condiciones_borde.csv`, `plan_vertidas.csv`, "
-        "`resumen_e12.json` y la serie `.vti`. Corre con dt = "
-        f"{d['dt_s']:.0f} s y {d['pasos']} pasos. Los 9 tests de E12 verifican la curva, el clima, el plan, "
-        "ambos criterios, la ubicación de los máximos y la repetibilidad bit a bit."))
+        "El script imprime los siete pasos, verifica los snapshots y genera las figuras, `series_e12.csv` "
+        "(337 filas con su fuente), las tablas de borde y plan, `resumen_e12.json` y la serie `.vti`. La "
+        "corrida usa dt = "
+        f"{d['dt_s']:.0f} s y {d['pasos']} pasos. Los nueve tests comprueban la curva, el clima, el plan, "
+        "ambos criterios, la ubicación de los máximos y la repetibilidad."))
 
     return b
 
