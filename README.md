@@ -47,6 +47,11 @@ Matriz de verificación, convergencia espacial y temporal por separado, y BIM ba
 La secuencia está en los inputs (IFC y opciones del comando), no en el solver. Guion y resultados en
 [`entregas/entrega8/README.md`](entregas/entrega8/README.md).
 
+## E11 — Weather pipeline y visualización 3D
+
+`python scripts/e11_clima_3d.py` recorre los 8 pasos del laboratorio: snapshot, metadata, gráfico, frontera,
+simulación corta, VTK, cortes y núcleo/superficie. Detalle en [`entregas/entrega11/README.md`](entregas/entrega11/README.md).
+
 ## E09 y E10 — Caso base 3D y ambiente real
 
 E09: caso base con hidratación, ΔT a 25 mm y contraste con Ju & Lei
@@ -80,7 +85,7 @@ o con conda: `conda env create -f environment.yml && conda activate mcoc-p2`
 ## Uso
 
 ```bash
-python -m pytest tests -q                    # 140 tests (~4 min)
+python -m pytest tests -q                    # 146 tests (~1-4 min)
 python scripts/dossier_e06.py                # evidencia del dossier de verificación (E06), ~3 min
 python scripts/inspect_ifc.py                # vertidas, GUID y Pset del IFC
 python scripts/run_1d_demo.py                # losa 1D con hidratación -> results/demo_1d.png

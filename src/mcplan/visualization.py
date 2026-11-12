@@ -16,8 +16,16 @@ import numpy as np
 from .grid import Grid
 
 
-def a_image_data(grid: Grid, vertida_id: np.ndarray, T: np.ndarray | None = None):
-    """Grilla como ImageData, con vertida_id y, si se da, temperatura por celda."""
+# Zonas que se pueden resaltar en el visor: nombre -> (color, tecla)
+ZONAS = {"nucleo": ("#2b6cb0", "n"), "superficie": ("#2f9e44", "m")}
+
+
+def a_image_data(grid: Grid, vertida_id: np.ndarray, T: np.ndarray | None = None,
+                 extras: dict[str, np.ndarray] | None = None):
+    """Grilla como ImageData, con vertida_id, la temperatura y otros campos por celda.
+
+    `extras` agrega campos con la forma de la grilla, por ejemplo nucleo y superficie (0/1).
+    """
     import pyvista as pv
 
     malla = pv.ImageData(
@@ -28,10 +36,13 @@ def a_image_data(grid: Grid, vertida_id: np.ndarray, T: np.ndarray | None = None
     malla.cell_data["vertida_id"] = np.asarray(vertida_id).ravel(order="F")
     if T is not None:
         malla.cell_data["temperature"] = np.asarray(T, dtype=float).ravel(order="F")
+    for nombre, valores in (extras or {}).items():
+        malla.cell_data[nombre] = np.asarray(valores).ravel(order="F")
     return malla
 
 
-def guardar_serie(carpeta, grid: Grid, vertida_id: np.ndarray, campos: dict[float, np.ndarray]) -> list[Path]:
+def guardar_serie(carpeta, grid: Grid, vertida_id: np.ndarray, campos: dict[float, np.ndarray],
+                  extras: dict[str, np.ndarray] | None = None) -> list[Path]:
     """Guarda temperature_XXXXh.vti por instante y serie.pvd para abrir todo en ParaView."""
     carpeta = Path(carpeta)
     carpeta.mkdir(parents=True, exist_ok=True)
@@ -39,7 +50,7 @@ def guardar_serie(carpeta, grid: Grid, vertida_id: np.ndarray, campos: dict[floa
     filas = []
     for t_h in sorted(campos):
         ruta = carpeta / f"temperature_{t_h:07.1f}h.vti"
-        a_image_data(grid, vertida_id, campos[t_h]).save(str(ruta))
+        a_image_data(grid, vertida_id, campos[t_h], extras).save(str(ruta))
         archivos.append(ruta)
         filas.append(f'    <DataSet timestep="{t_h:g}" file="{ruta.name}"/>')
     (carpeta / "serie.pvd").write_text(
@@ -59,11 +70,14 @@ class VisorVertidas:
 
     Una vertida aun no colocada tiene T = NaN en todas sus celdas: no se dibuja, aunque
     este marcada como visible. Asi se ve la activacion en el tiempo.
+
+    `zonas` (opcional) son mascaras con la forma de la grilla, por ejemplo el nucleo y la
+    superficie que usan los criterios. Al mostrarlas, el resto queda casi transparente.
     """
 
     def __init__(self, grid: Grid, vertida_id: np.ndarray, campos: dict[float, np.ndarray],
                  off_screen: bool = False, clim: tuple[float, float] | None = None,
-                 tamano: tuple[int, int] = (1250, 850)):
+                 tamano: tuple[int, int] = (1250, 850), zonas: dict[str, np.ndarray] | None = None):
         import pyvista as pv
 
         self.tiempos = sorted(campos)
@@ -99,6 +113,15 @@ class VisorVertidas:
                 )
                 barra = False
                 self.piezas[(v, modo)] = (malla, actor)
+        self.zonas = {}
+        self.zona_visible = {}
+        for nombre, mascara in (zonas or {}).items():
+            color = ZONAS.get(nombre, ("#7048e8", ""))[0]
+            seleccion_zona = np.asarray(mascara, dtype=bool).ravel(order="F")
+            for modo, seleccion in (("entera", seleccion_zona), ("media", seleccion_zona & media)):
+                malla = base.extract_cells(np.flatnonzero(seleccion))
+                self.zonas[(nombre, modo)] = self.plotter.add_mesh(malla, color=color, show_scalar_bar=False)
+            self.zona_visible[nombre] = False
         self.plotter.camera_position = [(27.0, -31.0, 19.0), (0.0, 0.0, 1.9), (0.0, 0.0, 1.0)]
         self._dibujar()
 
@@ -118,9 +141,13 @@ class VisorVertidas:
         T = self.campos[self.t].ravel(order="F")
         for malla, _ in self.piezas.values():
             malla.cell_data["temperature"] = T[malla.cell_data["vtkOriginalCellIds"]]
+        modo_activo = "media" if self.corte else "entera"
+        resaltando = any(self.zona_visible.values())
         for (v, modo), (_, actor) in self.piezas.items():
-            modo_activo = "media" if self.corte else "entera"
             actor.SetVisibility(modo == modo_activo and self.visible[v] and self._colocada(v))
+            actor.GetProperty().SetOpacity(0.12 if resaltando else 1.0)
+        for (nombre, modo), actor in self.zonas.items():
+            actor.SetVisibility(modo == modo_activo and self.zona_visible[nombre])
         dibujadas = self.vertidas_dibujadas()
         if dibujadas:
             vistos = np.concatenate([self.piezas[(v, "entera")][0].cell_data["temperature"] for v in dibujadas])
@@ -135,6 +162,12 @@ class VisorVertidas:
     def alternar(self, v: int, visible: bool | None = None) -> None:
         self.visible[v] = (not self.visible[v]) if visible is None else bool(visible)
         self._sincronizar(v, self.visible[v])
+        self._dibujar()
+
+    def mostrar_zona(self, nombre: str, visible: bool | None = None) -> None:
+        """Resalta una zona (nucleo o superficie); el resto queda casi transparente."""
+        self.zona_visible[nombre] = (not self.zona_visible[nombre]) if visible is None else bool(visible)
+        self._sincronizar(nombre, self.zona_visible[nombre])
         self._dibujar()
 
     def fijar_tiempo(self, t_h: float) -> None:
@@ -182,6 +215,18 @@ class VisorVertidas:
         self.plotter.add_text("Corte en y = 0 (tecla x)", position=(54, y + 8), font_size=10, color="black",
                               name="etiqueta_corte")
         self.plotter.add_key_event("x", lambda: self.fijar_corte(not self.corte))
+        for i, nombre in enumerate(self.zona_visible, start=1):
+            y_zona = y - 45 * i
+            color, tecla = ZONAS.get(nombre, ("#7048e8", ""))
+            self._casillas[nombre] = self.plotter.add_checkbox_button_widget(
+                lambda estado, nombre=nombre: self.mostrar_zona(nombre, estado), value=self.zona_visible[nombre],
+                position=(12, y_zona), size=34, color_on=color, color_off="#bbbbbb",
+            )
+            texto = nombre.capitalize() + (f" (tecla {tecla})" if tecla else "")
+            self.plotter.add_text(texto, position=(54, y_zona + 8), font_size=10, color="black",
+                                  name=f"etiqueta_{nombre}")
+            if tecla:
+                self.plotter.add_key_event(tecla, lambda nombre=nombre: self.mostrar_zona(nombre))
         self.plotter.add_slider_widget(
             lambda t: self.fijar_tiempo(t), rng=(self.tiempos[0], self.tiempos[-1]), value=self.t,
             title="t [h]", pointa=(0.3, 0.07), pointb=(0.9, 0.07), color="black", fmt="%.0f",

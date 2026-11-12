@@ -115,7 +115,8 @@ y comparación antes/después sin IfcOpenShell) y `scripts/roundtrip_ifc.py --an
 | E08 Lab BIM→grid + activación | 5 nov | hecho (Matías) | ver `entregas/entrega8/README.md` |
 | E09 Baseline 3D con hidratación | 6 nov | hecho (José) | `7773d10` |
 | E10 Revisión oral entorno, moldaje, clima | 11 nov | hecho (José) | `e0998c3` |
-| E11–E12 Weather pipeline + visualización 3D, simulación 14 días | 12–13 nov | pendiente | — |
+| E11 Lab weather pipeline + visualización 3D | 12 nov | en revisión (Matías) | ver `entregas/entrega11/README.md` |
+| E12 Simulación determinista 14 días | 13 nov | pendiente | — |
 | E13–E15 Incertidumbre, Monte Carlo + HPC, recomendación | 18–20 nov | pendiente | — |
 
 Detalle de cada entrega en `calendario/calendario.md` y en `entregas/entregaN/README.md`.
@@ -148,6 +149,7 @@ python scripts\simular_fundacion_ifc.py         # pipeline completo; admite --dx
                                                 # --intervalo H --visor --t H --ocultar V --corte
 python scripts\baseline_e09.py                  # caso base E09 (~15 s)
 python scripts\e10_ambiente.py                  # clima de los snapshots, 4 casos de frontera
+python scripts\e11_clima_3d.py                  # snapshot -> frontera -> simulación corta -> VTK; --visor
 
 cd entregas\entrega2
 python scripts\roundtrip_ifc.py --antes         # foto antes de editar en Bonsai
