@@ -1,0 +1,3 @@
+# Snapshots de clima: se verifican por SHA-256 byte a byte. Git no debe cambiarles
+# el fin de linea al descargarlos en Windows (core.autocrlf), o el hash deja de calzar.
+**/datos/forecast/** -text

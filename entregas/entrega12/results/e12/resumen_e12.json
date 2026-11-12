@@ -1,0 +1,347 @@
+{
+  "entrega": "E12 - simulación determinista de 14 días",
+  "caso": "fundacion_e12",
+  "inicio_local": "2026-11-27T04:00:00",
+  "duracion_h": 336.0,
+  "fecha_fin_local": "2026-12-11T04:00",
+  "malla": {
+    "dx_m": 0.5,
+    "dz_m": 0.55,
+    "shape": [
+      36,
+      36,
+      8
+    ],
+    "celdas_activas": 4656,
+    "error_volumen_pct": 0.522
+  },
+  "hidratacion": {
+    "curva": "C1",
+    "theta_inf_C": 45.0,
+    "tau_h": 30.0,
+    "segunda_rama_C": 0.0,
+    "madurez": true,
+    "Ea_R_K": 4000.0,
+    "T_ref_C": 20.0
+  },
+  "clima": {
+    "snapshots_verificados": 2,
+    "forecast": {
+      "snapshot_id": "20261111T193622Z_open-meteo-forecast",
+      "source": "open-meteo-forecast",
+      "model": "best_match",
+      "issued_at": "2026-11-11T19:36:22+00:00",
+      "fetched_at": "2026-11-11T19:36:22+00:00",
+      "endpoint": "https://api.open-meteo.com/v1/forecast",
+      "latitude": -35.606327,
+      "longitude": -72.532135,
+      "timezone": "America/Santiago",
+      "first_time": "2026-11-11T00:00",
+      "last_time": "2026-11-24T23:00",
+      "n_hours": 336,
+      "sha256_raw": "f97ae82fd124f4f4cbfec6f5b798d6e0764a7125e05ffd6d294ca855f0dac7d7",
+      "sha256_csv": "ba1d71b500a58ecc357ee86d4af6ceb235192a1dec4d11c8434415f388585162",
+      "files": {
+        "raw": "raw.json",
+        "csv": "normalizado.csv"
+      },
+      "notes": "Forecast 14 dias para Pahuil/Chanco. No cubre el 27-nov: se usa como referencia de lo que se sabia hoy."
+    },
+    "archivo": {
+      "snapshot_id": "20261111T193623Z_open-meteo-archive",
+      "source": "open-meteo-archive",
+      "model": "best_match",
+      "issued_at": "2026-11-11T19:36:23+00:00",
+      "fetched_at": "2026-11-11T19:36:23+00:00",
+      "endpoint": "https://archive-api.open-meteo.com/v1/archive",
+      "latitude": -35.606327,
+      "longitude": -72.532135,
+      "timezone": "America/Santiago",
+      "first_time": "2025-11-27T00:00",
+      "last_time": "2025-12-11T23:00",
+      "n_hours": 360,
+      "sha256_raw": "a56377b6d1bb27ec687762b9436abbd174dbd04be5adc30b7928c61fd286bbb1",
+      "sha256_csv": "f4377629850977c8daf30aa4e163a59c0596678f809e73756657628cd0c6a82e",
+      "files": {
+        "raw": "raw.json",
+        "csv": "normalizado.csv"
+      },
+      "notes": "Reanalysis del mismo calendario del anio anterior. Se desplaza al anio del caso como climatologia."
+    },
+    "cobertura": {
+      "climatology": 337
+    },
+    "horas_simuladas": 336,
+    "puntos": 337,
+    "T_aire_min_C": 8.0,
+    "T_aire_max_C": 20.6,
+    "viento_medio_ms": 2.57,
+    "viento_max_ms": 7.06,
+    "G_max_W_m2": 1081.0,
+    "h_total_min_W_m2K": 10.65,
+    "h_total_max_W_m2K": 37.63,
+    "T_sol_aire_max_C": 47.96,
+    "tratamiento_horizonte": "0 h de forecast: el snapshot del 11-nov termina el 24-nov y la primera vertida es el 27-nov. Las 336 h se completan con climatología ERA5 del mismo calendario (2025-11-27 a 2025-12-11) desplazada al año del caso, hora a hora, sin interpolar entre años."
+  },
+  "suelo": {
+    "R_m2K_W": 0.7199,
+    "profundidad_m": 1.0,
+    "amortiguacion": 0.69,
+    "atraso_fase_h": 517.4
+  },
+  "plan_vertidas": [
+    {
+      "id": 1,
+      "inicio_h": 0.0,
+      "inicio_local": "2026-11-27T04:00",
+      "T_colocacion_C": 18.0,
+      "moldaje": "Madera",
+      "aislacion": "Ninguna",
+      "retiro_moldaje_h": 72.0
+    },
+    {
+      "id": 2,
+      "inicio_h": 6.0,
+      "inicio_local": "2026-11-27T10:00",
+      "T_colocacion_C": 18.0,
+      "moldaje": "Madera",
+      "aislacion": "Ninguna",
+      "retiro_moldaje_h": 72.0
+    },
+    {
+      "id": 3,
+      "inicio_h": 12.0,
+      "inicio_local": "2026-11-27T16:00",
+      "T_colocacion_C": 18.0,
+      "moldaje": "Madera",
+      "aislacion": "Ninguna",
+      "retiro_moldaje_h": 72.0
+    },
+    {
+      "id": 4,
+      "inicio_h": 18.0,
+      "inicio_local": "2026-11-27T22:00",
+      "T_colocacion_C": 18.0,
+      "moldaje": "Madera",
+      "aislacion": "Ninguna",
+      "retiro_moldaje_h": 72.0
+    },
+    {
+      "id": 5,
+      "inicio_h": 24.0,
+      "inicio_local": "2026-11-28T04:00",
+      "T_colocacion_C": 18.0,
+      "moldaje": "Madera",
+      "aislacion": "Ninguna",
+      "retiro_moldaje_h": 72.0
+    }
+  ],
+  "moldajes_R_m2K_W": {
+    "Ninguno": 0.0,
+    "Madera": 0.1583,
+    "Metalico": 0.0001
+  },
+  "aislaciones_R_m2K_W": {
+    "Ninguna": 0.0,
+    "EPS_50mm": 1.4286,
+    "Lana_mineral_50mm": 1.25
+  },
+  "condiciones_borde": {
+    "tipo_lateral_y_superior": "Robin: -k dT/dn = h(t) (T - T_sol_aire(t))",
+    "tipo_base": "Robin conductivo con R_suelo = e/k y T no perturbada a 1 m",
+    "R_base_m2K_W": 0.7199,
+    "muestras": [
+      {
+        "t_h": 0.0,
+        "time_local": "2026-11-27T04:00",
+        "T_aire_C": 8.1,
+        "viento_ms": 0.25,
+        "solar_W_m2": 0.0,
+        "h_total_W_m2K": 11.19,
+        "T_sol_aire_C": 6.9,
+        "T_suelo_C": 13.95
+      },
+      {
+        "t_h": 6.0,
+        "time_local": "2026-11-27T10:00",
+        "T_aire_C": 16.0,
+        "viento_ms": 1.47,
+        "solar_W_m2": 563.0,
+        "h_total_W_m2K": 16.22,
+        "T_sol_aire_C": 33.46,
+        "T_suelo_C": 13.97
+      },
+      {
+        "t_h": 12.0,
+        "time_local": "2026-11-27T16:00",
+        "T_aire_C": 17.3,
+        "viento_ms": 2.98,
+        "solar_W_m2": 955.0,
+        "h_total_W_m2K": 22.03,
+        "T_sol_aire_C": 41.22,
+        "T_suelo_C": 13.98
+      },
+      {
+        "t_h": 18.0,
+        "time_local": "2026-11-27T22:00",
+        "T_aire_C": 11.5,
+        "viento_ms": 0.35,
+        "solar_W_m2": 0.0,
+        "h_total_W_m2K": 11.74,
+        "T_sol_aire_C": 7.04,
+        "T_suelo_C": 13.99
+      },
+      {
+        "t_h": 24.0,
+        "time_local": "2026-11-28T04:00",
+        "T_aire_C": 10.5,
+        "viento_ms": 1.35,
+        "solar_W_m2": 0.0,
+        "h_total_W_m2K": 15.49,
+        "T_sol_aire_C": 8.58,
+        "T_suelo_C": 14.0
+      },
+      {
+        "t_h": 48.0,
+        "time_local": "2026-11-29T04:00",
+        "T_aire_C": 10.8,
+        "viento_ms": 2.39,
+        "solar_W_m2": 0.0,
+        "h_total_W_m2K": 19.46,
+        "T_sol_aire_C": 8.1,
+        "T_suelo_C": 14.06
+      },
+      {
+        "t_h": 72.0,
+        "time_local": "2026-11-30T04:00",
+        "T_aire_C": 12.5,
+        "viento_ms": 2.09,
+        "solar_W_m2": 0.0,
+        "h_total_W_m2K": 18.4,
+        "T_sol_aire_C": 9.63,
+        "T_suelo_C": 14.11
+      },
+      {
+        "t_h": 168.0,
+        "time_local": "2026-12-04T04:00",
+        "T_aire_C": 13.5,
+        "viento_ms": 0.47,
+        "solar_W_m2": 0.0,
+        "h_total_W_m2K": 12.29,
+        "T_sol_aire_C": 9.09,
+        "T_suelo_C": 14.32
+      },
+      {
+        "t_h": 336.0,
+        "time_local": "2026-12-11T04:00",
+        "T_aire_C": 13.2,
+        "viento_ms": 1.1,
+        "solar_W_m2": 0.0,
+        "h_total_W_m2K": 14.67,
+        "T_sol_aire_C": 12.24,
+        "T_suelo_C": 14.7
+      }
+    ]
+  },
+  "resultado": {
+    "T_max_C": 63.981,
+    "T_max_h": 54.0,
+    "T_max_local": "2026-11-29T10:00",
+    "delta_T_max_C": 42.056,
+    "delta_T_h": 148.0,
+    "delta_T_local": "2026-12-03T08:00",
+    "T_final_max_C": 56.575,
+    "delta_T_final_C": 34.258,
+    "veredicto": "T_maxima: 63.98 C vs 70.0 C -> OK (h=54.0 h)\ndiferencial_termico: 42.06 C vs 20.0 C -> NO CUMPLE (h=148.0 h)\nVEREDICTO GLOBAL: NO CUMPLE",
+    "cumple_T_max": true,
+    "cumple_delta_T": false
+  },
+  "localizacion": {
+    "T_max": {
+      "T_C": 63.981,
+      "t_h": 54.0,
+      "time_local": "2026-11-29T10:00",
+      "x_m": -0.25,
+      "y_m": -0.25,
+      "z_m": 1.375,
+      "vertida": 3
+    },
+    "delta_T_max": {
+      "delta_T_C": 42.056,
+      "t_h": 148.0,
+      "time_local": "2026-12-03T08:00",
+      "nucleo": {
+        "T_C": 62.431,
+        "x_m": -0.25,
+        "y_m": -0.25,
+        "z_m": 1.925,
+        "vertida": 3
+      },
+      "superficie": {
+        "T_C": 20.375,
+        "x_m": -8.75,
+        "y_m": -3.75,
+        "z_m": 0.825,
+        "vertida": 2
+      }
+    }
+  },
+  "por_vertida": {
+    "1": {
+      "T_max_C": 57.032,
+      "t_h": 43.0,
+      "time_local": "2026-11-28T23:00",
+      "x_m": -0.25,
+      "y_m": -0.25,
+      "z_m": 0.28
+    },
+    "2": {
+      "T_max_C": 61.961,
+      "t_h": 50.0,
+      "time_local": "2026-11-29T06:00",
+      "x_m": -0.25,
+      "y_m": -0.25,
+      "z_m": 0.83
+    },
+    "3": {
+      "T_max_C": 63.981,
+      "t_h": 54.0,
+      "time_local": "2026-11-29T10:00",
+      "x_m": -0.25,
+      "y_m": -0.25,
+      "z_m": 1.38
+    },
+    "4": {
+      "T_max_C": 63.265,
+      "t_h": 64.0,
+      "time_local": "2026-11-29T20:00",
+      "x_m": -0.25,
+      "y_m": -0.25,
+      "z_m": 2.48
+    },
+    "5": {
+      "T_max_C": 61.565,
+      "t_h": 62.0,
+      "time_local": "2026-11-29T18:00",
+      "x_m": -0.25,
+      "y_m": -0.25,
+      "z_m": 3.58
+    }
+  },
+  "excedencia_delta_T": {
+    "horas_sobre_20": 313,
+    "primera_h": 24.0,
+    "ultima_h": 336.0,
+    "primera_local": "2026-11-28T04:00",
+    "ultima_local": "2026-12-11T04:00"
+  },
+  "dt_s": 3600.0,
+  "pasos": 336,
+  "supuestos": {
+    "absortividad": 0.6,
+    "emisividad": 0.9,
+    "h_convectiva": "ASHRAE pared plana: h = 5,7 + 3,8 v",
+    "radiacion": "incluida en T sol-aire; no se suma como flujo aparte",
+    "determinista": "sin Monte Carlo: un clima, una curva, un plan"
+  }
+}
