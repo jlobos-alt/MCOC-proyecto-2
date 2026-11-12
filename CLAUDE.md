@@ -60,20 +60,23 @@ src/mcplan/            paquete principal (raíz = versión vigente)
                        error de volumen, área en escalera, dz_que_calza
   visualization.py     exporta a .vti/.pvd y VisorVertidas (PyVista, se importa solo aquí)
   thermal.py, grid.py  solver 3D por balance de celdas (centrado en celdas), build_model/solve
-  boundary.py          capas en serie: convección, moldaje, aislación, retiro en el tiempo
+  boundary.py          capas en serie: convección, moldaje, aislación, retiro en el tiempo; h(t) variable
+  environment.py       viento → h, sol-aire y radiación: puente clima → frontera (E10)
+  soil.py              suelo semi-infinito: onda anual amortiguada (SoilSpec usa mean_C)
+  meteo.py, snapshots.py   cliente Open-Meteo y snapshots inmutables con SHA-256 (datos/forecast)
   hydration.py         θ_ad(t) → q_h = ρ cp dθ/dt, con madurez de Arrhenius (parámetros provisorios)
   plan.py, criteria.py plan declarativo YAML y chequeo 70/20 °C. Fundación real: plantilla
                        datos/fundacion_ifc.yaml + plan_desde_solidos + build_model(plan, voxeles=...)
-  reliability.py, weather.py   Monte Carlo y series de clima (esqueleto)
+  reliability.py, weather.py   Monte Carlo (esqueleto) y series de temperatura
 geometry/              foundation.ifc (guardado con Bonsai), foundation_base.ifc (semilla),
                        course_geometry.json, make_foundation_ifc.py, bonsai_open_and_save.py
-scripts/               inspect_ifc.py, run_1d_demo.py, run_case.py
+scripts/               inspect_ifc.py, run_1d_demo.py, run_case.py, baseline_e09.py, e10_ambiente.py, …
 tests/                 tests de la raíz (unittest/pytest)
 entregas/entregaN/     carpeta AUTOCONTENIDA por entrega (convención de José): copia de src,
                        scripts, tests, resultados y README con el mapeo a la rúbrica
 docs/                  guías del curso G00–G08 (docs/guias), respuestas y guiones orales
 calendario/            calendario E00–E15
-datos/, validacion/    plan YAML y resultados del caso 3D
+datos/, validacion/    plantillas YAML (fundacion_ifc.yaml, fundacion_e10.yaml), datos/forecast/ y resultados
 ```
 
 Convención: el código evoluciona en `src/mcplan` (raíz). Para cada entrega se crea
@@ -110,8 +113,9 @@ y comparación antes/después sin IfcOpenShell) y `scripts/roundtrip_ifc.py --an
 | E06 Dossier de verificación + BIM del caso | 30 oct | hecho (Matías) | `539c621` |
 | E07 Revisión oral voxelización, vertidas, hidratación | 4 nov | hecho (Matías) | `b5efa27` |
 | E08 Lab BIM→grid + activación | 5 nov | hecho (Matías) | ver `entregas/entrega8/README.md` |
-| E09 Baseline 3D con hidratación | 6 nov | pendiente | — |
-| E10–E12 Entorno, moldaje, clima, simulación 14 días | 11–13 nov | pendiente | — |
+| E09 Baseline 3D con hidratación | 6 nov | hecho (José) | `7773d10` |
+| E10 Revisión oral entorno, moldaje, clima | 11 nov | hecho (José) | `e0998c3` |
+| E11–E12 Weather pipeline + visualización 3D, simulación 14 días | 12–13 nov | pendiente | — |
 | E13–E15 Incertidumbre, Monte Carlo + HPC, recomendación | 18–20 nov | pendiente | — |
 
 Detalle de cada entrega en `calendario/calendario.md` y en `entregas/entregaN/README.md`.
@@ -127,6 +131,9 @@ Detalle de cada entrega en `calendario/calendario.md` y en `entregas/entregaN/RE
   `...\semestre_actual\MCOC\...`); son la misma carpeta.
 - Git: los archivos pueden aparecer modificados solo por fin de línea (CRLF). No commitear ese
   ruido: revisar `git diff --ignore-cr-at-eol` antes de `git add`.
+- `.gitattributes` marca `datos/forecast/**` como `-text`: los snapshots se verifican por SHA-256 y,
+  con `core.autocrlf=true`, Git les cambiaba el fin de línea y `verify()` fallaba en Windows.
+- PC de Matías: entorno en `C:\Users\matia\.venvs\mcoc-p2` (con PyVista); Blender 5.2.3 + Bonsai 0.9.0.
 
 ## Comandos habituales
 
@@ -139,6 +146,8 @@ python scripts\run_case.py --plan datos\caso_fundacion.yaml   # caso 3D con losa
 python scripts\voxelizar_ifc.py                 # voxeles, error de volumen y de área
 python scripts\simular_fundacion_ifc.py         # pipeline completo; admite --dx --inicio V=H --tcol V=C
                                                 # --intervalo H --visor --t H --ocultar V --corte
+python scripts\baseline_e09.py                  # caso base E09 (~15 s)
+python scripts\e10_ambiente.py                  # clima de los snapshots, 4 casos de frontera
 
 cd entregas\entrega2
 python scripts\roundtrip_ifc.py --antes         # foto antes de editar en Bonsai

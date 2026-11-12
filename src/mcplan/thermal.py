@@ -73,6 +73,10 @@ class Model:
     exposed_group: dict[int, np.ndarray] = field(default_factory=dict)
     exposed_start: dict[int, np.ndarray] = field(default_factory=dict)
     exposed_end: dict[int, np.ndarray] = field(default_factory=dict)
+    # Moldaje/aislacion por vertida (resistencia por unidad de area).
+    r_moldaje_flat: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    r_aislacion_flat: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    formwork_end_flat: np.ndarray = field(default_factory=lambda: np.zeros(0))
 
 
 @dataclass
@@ -166,6 +170,9 @@ def build_model(plan: Plan, voxeles=None) -> Model:
     lift_of_cell = np.full(grid.shape, -1, dtype=int)
     place_time = np.full(grid.shape, np.inf)
     placement_T = np.full(grid.shape, np.nan)
+    r_moldaje = np.zeros(grid.shape)
+    r_aislacion = np.zeros(grid.shape)
+    formwork_end = np.full(grid.shape, np.inf)
 
     for lift in plan.vertidas:
         if voxeles is not None:
@@ -178,6 +185,15 @@ def build_model(plan: Plan, voxeles=None) -> Model:
         lift_of_cell[lift_mask] = lift.id
         place_time[lift_mask] = lift.inicio_h
         placement_T[lift_mask] = lift.temperatura_colocacion_C
+
+        capa_moldaje = plan.moldajes.get(lift.moldaje)
+        if capa_moldaje is not None and capa_moldaje.resistencia > 0.0:
+            r_moldaje[lift_mask] = capa_moldaje.resistencia
+            if lift.retiro_moldaje_h is not None:
+                formwork_end[lift_mask] = lift.inicio_h + lift.retiro_moldaje_h
+        capa_aislacion = plan.aislaciones.get(lift.aislacion)
+        if capa_aislacion is not None and capa_aislacion.resistencia > 0.0:
+            r_aislacion[lift_mask] = capa_aislacion.resistencia
 
     k_field = np.zeros(grid.shape)
     rho_cp_field = np.zeros(grid.shape)
@@ -199,6 +215,9 @@ def build_model(plan: Plan, voxeles=None) -> Model:
     placement_T_flat = placement_T.ravel()
     lift_flat = lift_of_cell.ravel()
     mask_flat = mask.ravel()
+    r_moldaje_flat = r_moldaje.ravel()
+    r_aislacion_flat = r_aislacion.ravel()
+    formwork_end_flat = formwork_end.ravel()
 
     ambient = TemperatureSeries.from_spec(
         {
@@ -209,19 +228,14 @@ def build_model(plan: Plan, voxeles=None) -> Model:
             "datos": plan.ambiente.datos,
         }
     )
-    ground = TemperatureSeries.from_spec(
-        {
-            "media_C": plan.suelo.media_C,
-            "amplitud_C": plan.suelo.amplitud_C,
-            "periodo_h": plan.suelo.periodo_h,
-            "desfase_h": plan.suelo.desfase_h,
-            "datos": plan.suelo.datos,
-        }
-    )
+    ground = plan.suelo.series()
 
     groups: dict[str, BoundaryGroup] = {}
     for spec in plan.fronteras:
-        far_field = ground if spec.direccion == "base" else ambient
+        if spec.far_field_series is not None:
+            far_field = spec.far_field_series
+        else:
+            far_field = ground if spec.direccion == "base" else ambient
         capas: list[ScheduledLayer] = []
         for layer in spec.capas:
             if layer.tipo == "convectiva":
@@ -239,6 +253,10 @@ def build_model(plan: Plan, voxeles=None) -> Model:
                     hasta_h=layer.hasta_h,
                 )
             )
+        h_max = spec.h_max
+        if spec.h_series is not None and h_max is None:
+            muestras = np.arange(0.0, plan.simulacion.duracion_h + 1.0, 1.0)
+            h_max = float(max(spec.h_series(float(t)) for t in muestras))
         group = BoundaryGroup(
             name=spec.name,
             tipo=spec.tipo,
@@ -247,6 +265,8 @@ def build_model(plan: Plan, voxeles=None) -> Model:
             far_field=far_field,
             valor_dirichlet_C=spec.valor_dirichlet_C,
             flujo_W_m2=spec.flujo_W_m2,
+            h_series=spec.h_series,
+            h_max=h_max,
         )
         groups[spec.name] = group
 
@@ -280,6 +300,9 @@ def build_model(plan: Plan, voxeles=None) -> Model:
         ground=ground,
         is_core=core_cells(mask, plan.criterios.core_erosion).ravel(),
         is_surface=surface_cells(mask, plan.criterios.incluir_base_en_superficie).ravel(),
+        r_moldaje_flat=r_moldaje_flat,
+        r_aislacion_flat=r_aislacion_flat,
+        formwork_end_flat=formwork_end_flat,
     )
 
     _build_faces(model, plan, ids, mask_flat)
@@ -663,13 +686,20 @@ def _accumulate_boundary(model: Model, T: np.ndarray, net: np.ndarray, t_h: floa
                     q_neumann[selection] = group.flujo_W_m2
                 continue
             r_layers = group.capas_resistance(t_h)
-            r_conv = group.convective_resistance()
+            r_conv = group.convective_resistance(t_h)
             r_half = np.where(k_owner[selection] > 0, half / np.maximum(k_owner[selection], 1e-12), np.inf)
             if group.tipo == "dirichlet":
                 resistance[selection] = r_half
                 far_field[selection] = group.far_field_at(t_h)
                 continue
-            resistance[selection] = r_half + r_layers + r_conv
+            # Moldaje y aislacion por vertida: solo caras laterales (x, y).
+            extra = np.zeros(selection.sum())
+            if face.axis in (0, 1) and model.r_moldaje_flat.size:
+                celdas = owner[selection]
+                capa = model.r_moldaje_flat[celdas]
+                activo = t_h < model.formwork_end_flat[celdas]
+                extra = np.where(activo, capa, 0.0) + model.r_aislacion_flat[celdas]
+            resistance[selection] = r_half + r_layers + r_conv + extra
             far_field[selection] = group.far_field_at(t_h)
         with np.errstate(divide="ignore", invalid="ignore"):
             conductance = face.area / resistance

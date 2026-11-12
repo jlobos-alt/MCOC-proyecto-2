@@ -15,11 +15,30 @@ Uso tipico:
 from .bim import SolidoVertida, aplicar_cambios, extraer_solidos, revisar_secuencia
 from .boundary import BoundaryGroup
 from .criteria import Criterio, Veredicto, evaluar_criterios
+from .environment import (
+    aplicar_ambiente,
+    condiciones_de_timeline,
+    formwork_resistance,
+    sol_air_temperature,
+    surface_heat_fluxes,
+    wind_convection_coefficient,
+)
 from .grid import Grid
 from .hydration import HydrationModel
 from .materials import Material
+from .meteo import (
+    SITIO_PAHUIL,
+    MeteoFrame,
+    OpenMeteoClient,
+    Site,
+    WeatherTimeline,
+    assemble_timeline,
+    normalize_payload,
+)
 from .plan import Plan, load_plan, plan_desde_solidos, plan_from_dict, read_ifc_vertidas
 from .reliability import MuestraConfiabilidad, ejecutar_montecarlo
+from .snapshots import SnapshotMeta, latest_snapshot, load_snapshot, save_snapshot, verify
+from .soil import SoilSpec
 from .thermal import Model, Result, build_model, estimate_timestep, solve
 from .weather import TemperatureSeries
 from .voxel import Voxelizacion, area_expuesta, area_exterior, dz_que_calza, voxelizar
@@ -61,4 +80,23 @@ __all__ = [
     "dz_que_calza",
     "extraer_solidos",
     "voxelizar",
+    "SoilSpec",
+    "MeteoFrame",
+    "OpenMeteoClient",
+    "SITIO_PAHUIL",
+    "Site",
+    "WeatherTimeline",
+    "assemble_timeline",
+    "normalize_payload",
+    "SnapshotMeta",
+    "latest_snapshot",
+    "load_snapshot",
+    "save_snapshot",
+    "verify",
+    "aplicar_ambiente",
+    "condiciones_de_timeline",
+    "formwork_resistance",
+    "sol_air_temperature",
+    "surface_heat_fluxes",
+    "wind_convection_coefficient",
 ]

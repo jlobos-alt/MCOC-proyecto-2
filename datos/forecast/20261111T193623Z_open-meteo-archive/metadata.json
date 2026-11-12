@@ -1,0 +1,21 @@
+{
+  "snapshot_id": "20261111T193623Z_open-meteo-archive",
+  "source": "open-meteo-archive",
+  "model": "best_match",
+  "issued_at": "2026-11-11T19:36:23+00:00",
+  "fetched_at": "2026-11-11T19:36:23+00:00",
+  "endpoint": "https://archive-api.open-meteo.com/v1/archive",
+  "latitude": -35.606327,
+  "longitude": -72.532135,
+  "timezone": "America/Santiago",
+  "first_time": "2025-11-27T00:00",
+  "last_time": "2025-12-11T23:00",
+  "n_hours": 360,
+  "sha256_raw": "a56377b6d1bb27ec687762b9436abbd174dbd04be5adc30b7928c61fd286bbb1",
+  "sha256_csv": "f4377629850977c8daf30aa4e163a59c0596678f809e73756657628cd0c6a82e",
+  "files": {
+    "raw": "raw.json",
+    "csv": "normalizado.csv"
+  },
+  "notes": "Reanalysis del mismo calendario del anio anterior. Se desplaza al anio del caso como climatologia."
+}

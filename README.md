@@ -47,6 +47,21 @@ Matriz de verificación, convergencia espacial y temporal por separado, y BIM ba
 La secuencia está en los inputs (IFC y opciones del comando), no en el solver. Guion y resultados en
 [`entregas/entrega8/README.md`](entregas/entrega8/README.md).
 
+## E09 y E10 — Caso base 3D y ambiente real
+
+E09: caso base con hidratación, ΔT a 25 mm y contraste con Ju & Lei
+([`entregas/entrega9/README.md`](entregas/entrega9/README.md)). E10: clima de Chanco con snapshots de
+Open-Meteo, viento, radiación, suelo y moldaje/aislación por vertida
+([`entregas/entrega10/README.md`](entregas/entrega10/README.md)).
+
+```bash
+python scripts/baseline_e09.py               # caso base E09 -> results/e09
+python scripts/e10_ambiente.py               # 4 casos de frontera con los snapshots -> results/e10
+python scripts/e10_ambiente.py --actualizar  # descarga y guarda un snapshot nuevo (no pisa los anteriores)
+```
+
+`scripts/generar_informe_e09.py` requiere además `python-docx`.
+
 ## E07 — Voxelización, vertidas e hidratación
 
 Del IFC a la grilla: `extraer_solidos` (geometría y propiedades) → `voxelizar` (`vertida_id` por celda,
@@ -65,7 +80,7 @@ o con conda: `conda env create -f environment.yml && conda activate mcoc-p2`
 ## Uso
 
 ```bash
-python -m pytest tests -q                    # 119 tests
+python -m pytest tests -q                    # 140 tests (~4 min)
 python scripts/dossier_e06.py                # evidencia del dossier de verificación (E06), ~3 min
 python scripts/inspect_ifc.py                # vertidas, GUID y Pset del IFC
 python scripts/run_1d_demo.py                # losa 1D con hidratación -> results/demo_1d.png

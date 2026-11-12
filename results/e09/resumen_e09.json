@@ -1,0 +1,113 @@
+﻿{
+  "entrega": "E09 - Baseline 3D con hidratacion",
+  "commit_base": "7773d10",
+  "ifc": "foundation.ifc",
+  "malla": {
+    "dx_m": 0.25,
+    "dz_m": 0.275,
+    "nx": 72,
+    "ny": 72,
+    "nz": 16,
+    "celdas_activas": 37164,
+    "error_volumen_total": 0.002949596705510664
+  },
+  "vertidas": [
+    {
+      "id": 1,
+      "inicio_h": 0.0,
+      "T_colocacion_C": 18.0,
+      "V_ifc_m3": 147.626,
+      "V_voxel_m3": 146.438,
+      "error_volumen": 0.008
+    },
+    {
+      "id": 2,
+      "inicio_h": 6.0,
+      "T_colocacion_C": 18.0,
+      "V_ifc_m3": 147.626,
+      "V_voxel_m3": 146.438,
+      "error_volumen": 0.008
+    },
+    {
+      "id": 3,
+      "inicio_h": 12.0,
+      "T_colocacion_C": 18.0,
+      "V_ifc_m3": 214.224,
+      "V_voxel_m3": 214.706,
+      "error_volumen": 0.0022
+    },
+    {
+      "id": 4,
+      "inicio_h": 18.0,
+      "T_colocacion_C": 18.0,
+      "V_ifc_m3": 88.925,
+      "V_voxel_m3": 88.825,
+      "error_volumen": 0.0011
+    },
+    {
+      "id": 5,
+      "inicio_h": 24.0,
+      "T_colocacion_C": 18.0,
+      "V_ifc_m3": 38.477,
+      "V_voxel_m3": 42.35,
+      "error_volumen": 0.1007
+    }
+  ],
+  "hidratacion": {
+    "theta_inf_C": 45.0,
+    "tau_h": 30.0,
+    "Ea_R_K": 4000.0,
+    "madurez": true
+  },
+  "ambiente": {
+    "media_C": 15.0,
+    "amplitud_C": 5.0,
+    "periodo_h": 24.0,
+    "suelo_C": 12.0,
+    "h_superficie_W_m2K": 12.0
+  },
+  "resultado": {
+    "T_max_C": 63.06,
+    "T_max_h": 52.0,
+    "delta_T_celda_max_C": 47.18,
+    "delta_T_celda_h": 166.0,
+    "delta_T_25mm_max_C": 49.17,
+    "delta_T_25mm_h": 138.0,
+    "veredicto": "T_maxima: 63.06 C vs 70.0 C -> OK (h=52.0 h)\ndiferencial_termico: 47.18 C vs 20.0 C -> NO CUMPLE (h=166.0 h)\nVEREDICTO GLOBAL: NO CUMPLE"
+  },
+  "puntos": [
+    {
+      "punto": "Nucleo (0.0, 0.0, 2.06 m)",
+      "T_max_C": 62.63,
+      "t_max_h": 84.0,
+      "T_final_C": 55.93
+    },
+    {
+      "punto": "Superficie superior (0.0, 0.0, 4.26 m)",
+      "T_max_C": 43.44,
+      "t_max_h": 57.0,
+      "T_final_C": 22.45
+    },
+    {
+      "punto": "Base (0.0, 0.0, 0.14 m)",
+      "T_max_C": 55.28,
+      "t_max_h": 42.0,
+      "T_final_C": 43.95
+    },
+    {
+      "punto": "Borde lateral (-6.1, 0.0, 2.06 m)",
+      "T_max_C": 42.27,
+      "t_max_h": 42.0,
+      "T_final_C": 20.81
+    },
+    {
+      "punto": "Superficie a 25 mm (0.0, 0.0)",
+      "T_max_C": 31.4,
+      "t_max_h": 54.0,
+      "T_final_C": 18.7
+    }
+  ],
+  "dt_s": 3600.0,
+  "pasos": 336,
+  "aviso": "Hidratacion y clima provisorios: baseline para interpretar, no para aprobar el plan."
+}

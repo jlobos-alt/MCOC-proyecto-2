@@ -80,6 +80,10 @@ class BoundaryGroup:
     far_field: Callable[[float], float] = lambda t: 15.0
     valor_dirichlet_C: float | None = None
     flujo_W_m2: float = 0.0
+    # Conveccion variable en el tiempo: h(t) [W/(m2 K)]. Si es None se usa `h`.
+    h_series: Callable[[float], float] | None = None
+    # Cota superior de h en el horizonte, para dimensionar el paso estable.
+    h_max: float | None = None
 
     def capas_resistance(self, t_h: float) -> float:
         """Resistencia por unidad de area de las capas activas [m^2 K/W]."""
@@ -89,21 +93,30 @@ class BoundaryGroup:
                 total += scheduled.layer.resistance
         return total
 
-    def convective_resistance(self) -> float:
+    def convective_resistance(self, t_h: float = 0.0) -> float:
         if self.tipo == "convectiva":
-            return 1.0 / self.h if self.h > 0.0 else float("inf")
+            h = self.h_series(t_h) if self.h_series is not None else self.h
+            return 1.0 / h if h > 0.0 else float("inf")
         return 0.0
 
     def resistance(self, t_h: float) -> float:
         """Resistencia total por unidad de area de la frontera [m^2 K/W]."""
         if self.tipo in ("adiabatica", "neumann"):
             return float("inf")
-        return self.capas_resistance(t_h) + self.convective_resistance()
+        return self.capas_resistance(t_h) + self.convective_resistance(t_h)
 
     def minimum_resistance(self, breakpoints: list[float]) -> float:
         """Menor resistencia del grupo en el horizonte [m^2 K/W]."""
         candidates = [0.0] + [b for b in breakpoints if b >= 0.0]
-        return min(self.resistance(t) for t in candidates)
+        capas = min(self.capas_resistance(t) for t in candidates)
+        if self.h_series is not None:
+            h_max = self.h_max
+            if h_max is None:
+                h_max = max(self.h_series(t) for t in candidates)
+            r_conv = 1.0 / h_max if h_max > 0.0 else float("inf")
+        else:
+            r_conv = self.convective_resistance(0.0)
+        return capas + r_conv
 
     def far_field_at(self, t_h: float) -> float:
         if self.tipo == "dirichlet" and self.valor_dirichlet_C is not None:

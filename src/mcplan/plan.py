@@ -8,10 +8,12 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass, field, replace
+from typing import Callable
 
 import yaml
 
 from .bim import inicios_en_horas
+from .soil import SoilSpec
 
 
 @dataclass
@@ -34,6 +36,8 @@ class LiftSpec:
     temperatura_colocacion_C: float = 18.0
     aislacion_mm: float = 0.0
     retiro_moldaje_h: float | None = None
+    moldaje: str = ""
+    aislacion: str = ""
 
 
 @dataclass
@@ -47,6 +51,10 @@ class LayerSpec:
     h: float = 0.0
     desde_h: float = 0.0
     hasta_h: float = float("inf")
+
+    @property
+    def resistencia(self) -> float:
+        return self.espesor_m / self.k if self.k > 0.0 else 0.0
 
 
 @dataclass
@@ -72,6 +80,11 @@ class BoundarySpec:
     ejes: list[int] = field(default_factory=list)
     signo: str = "ambos"
     capas: list[LayerSpec] = field(default_factory=list)
+    # Ambiente real: h(t) por viento y T_inf(t) sol-aire. No vienen del YAML
+    # porque son funciones; las inyecta el script o el loader meteorologico.
+    h_series: Callable[[float], float] | None = field(default=None, repr=False)
+    h_max: float | None = None
+    far_field_series: Callable[[float], float] | None = field(default=None, repr=False)
 
 
 @dataclass
@@ -126,10 +139,12 @@ class Plan:
     descripcion: str = ""
     geometria: GeometrySpec = field(default_factory=GeometrySpec)
     materiales: dict[str, MaterialSpec] = field(default_factory=dict)
+    moldajes: dict[str, LayerSpec] = field(default_factory=dict)
+    aislaciones: dict[str, LayerSpec] = field(default_factory=dict)
     vertidas: list[LiftSpec] = field(default_factory=list)
     hidratacion: HydrationSpec = field(default_factory=HydrationSpec)
     ambiente: AmbientSpec = field(default_factory=AmbientSpec)
-    suelo: AmbientSpec = field(default_factory=AmbientSpec)
+    suelo: SoilSpec = field(default_factory=SoilSpec)
     fronteras: list[BoundarySpec] = field(default_factory=list)
     criterios: CriteriaSpec = field(default_factory=CriteriaSpec)
     simulacion: SimulationSpec = field(default_factory=SimulationSpec)
@@ -157,6 +172,21 @@ def plan_from_dict(data: dict) -> Plan:
         for name, spec in (data.get("materiales", {}) or {}).items()
     }
 
+    def capas(specs: dict | None) -> dict[str, LayerSpec]:
+        return {
+            str(name): LayerSpec(
+                tipo=str(spec.get("tipo", "conductiva")),
+                nombre=str(spec.get("nombre", name)),
+                espesor_m=float(spec.get("espesor_m", 0.0)),
+                k=float(spec.get("k", 0.0)),
+                h=float(spec.get("h", 0.0)),
+            )
+            for name, spec in (specs or {}).items()
+        }
+
+    moldajes = capas(data.get("moldajes"))
+    aislaciones = capas(data.get("aislaciones"))
+
     vertidas = [
         LiftSpec(
             id=int(v["id"]),
@@ -169,6 +199,8 @@ def plan_from_dict(data: dict) -> Plan:
             retiro_moldaje_h=(
                 float(v["retiro_moldaje_h"]) if v.get("retiro_moldaje_h") is not None else None
             ),
+            moldaje=str(v.get("moldaje", "")),
+            aislacion=str(v.get("aislacion", "")),
         )
         for v in data.get("vertidas", []) or []
     ]
@@ -243,10 +275,12 @@ def plan_from_dict(data: dict) -> Plan:
         descripcion=str(data.get("descripcion", "")),
         geometria=geometry,
         materiales=materiales,
+        moldajes=moldajes,
+        aislaciones=aislaciones,
         vertidas=vertidas,
         hidratacion=hydration,
         ambiente=ambient(data.get("ambiente")),
-        suelo=ambient(data.get("suelo")),
+        suelo=SoilSpec.from_dict(data.get("suelo")),
         fronteras=fronteras,
         criterios=criteria,
         simulacion=simulation,
@@ -275,7 +309,9 @@ def apply_overrides(plan: Plan, values: dict[str, float]) -> Plan:
         if path == "ambiente.media_C":
             updated.ambiente.media_C = float(value)
         elif path == "suelo.media_C":
-            updated.suelo.media_C = float(value)
+            # SoilSpec guarda la media como mean_C: asignar media_C crearia un atributo
+            # que nadie lee, y la variacion no tendria efecto.
+            updated.suelo = replace(updated.suelo, mean_C=float(value))
         elif path == "hidratacion.elevacion_adibatica_C":
             updated.hidratacion.elevacion_adibatica_C = float(value)
         elif path == "hidratacion.tau_h":
@@ -335,6 +371,8 @@ def plan_desde_solidos(plantilla: Plan, solidos, dx: float) -> Plan:
                 material=solido.tipo_hormigon,
                 temperatura_colocacion_C=solido.temperatura_colocacion_C,
                 retiro_moldaje_h=solido.retiro_moldaje_h,
+                moldaje=getattr(solido, "moldaje", ""),
+                aislacion=getattr(solido, "aislacion", ""),
             )
         )
     plan.vertidas = vertidas
