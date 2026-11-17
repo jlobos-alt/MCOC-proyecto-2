@@ -1,0 +1,21 @@
+{
+  "snapshot_id": "20261117T173409Z_gfs-ens-calido-member12",
+  "source": "open-meteo-ensemble-gfs_seamless",
+  "model": "gfs_seamless:member12",
+  "issued_at": "2026-11-17T17:34:19+00:00",
+  "fetched_at": "2026-11-17T17:34:19+00:00",
+  "endpoint": "https://ensemble-api.open-meteo.com/v1/ensemble",
+  "latitude": -35.75,
+  "longitude": -72.5,
+  "timezone": "America/Santiago",
+  "first_time": "2026-11-17T00:00",
+  "last_time": "2026-12-02T23:00",
+  "n_hours": 384,
+  "sha256_raw": "a15b37d46bfdb01c5c9a55c504363b6fb4c38ce10c3606fe994c9879e231ac35",
+  "sha256_csv": "d79cbcc4569981c8f7a19ba62bea1d13cdaf8327f1da454ed3340afca73dc2b3",
+  "files": {
+    "raw": "raw.json",
+    "csv": "normalizado.csv"
+  },
+  "notes": "Miembro member12 del ensemble 20261117T173409Z_open-meteo-ensemble-gfs_seamless; representa 10 de 31 miembros (grupo calido)."
+}

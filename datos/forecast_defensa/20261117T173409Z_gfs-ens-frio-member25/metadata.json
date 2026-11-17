@@ -1,0 +1,21 @@
+{
+  "snapshot_id": "20261117T173409Z_gfs-ens-frio-member25",
+  "source": "open-meteo-ensemble-gfs_seamless",
+  "model": "gfs_seamless:member25",
+  "issued_at": "2026-11-17T17:34:19+00:00",
+  "fetched_at": "2026-11-17T17:34:19+00:00",
+  "endpoint": "https://ensemble-api.open-meteo.com/v1/ensemble",
+  "latitude": -35.75,
+  "longitude": -72.5,
+  "timezone": "America/Santiago",
+  "first_time": "2026-11-17T00:00",
+  "last_time": "2026-12-02T23:00",
+  "n_hours": 384,
+  "sha256_raw": "d062ada6c357b2c16ff474a6f52d621592743d596b3807b40a066ccbb555db53",
+  "sha256_csv": "a80d324033ca15148aeb0d20629638a055ffc613663c54923a49e787c969c454",
+  "files": {
+    "raw": "raw.json",
+    "csv": "normalizado.csv"
+  },
+  "notes": "Miembro member25 del ensemble 20261117T173409Z_open-meteo-ensemble-gfs_seamless; representa 11 de 31 miembros (grupo frio)."
+}

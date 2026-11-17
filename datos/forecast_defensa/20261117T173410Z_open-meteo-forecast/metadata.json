@@ -1,0 +1,21 @@
+{
+  "snapshot_id": "20261117T173410Z_open-meteo-forecast",
+  "source": "open-meteo-forecast",
+  "model": "best_match",
+  "issued_at": "2026-11-17T17:34:10+00:00",
+  "fetched_at": "2026-11-17T17:34:10+00:00",
+  "endpoint": "https://api.open-meteo.com/v1/forecast",
+  "latitude": -35.606327,
+  "longitude": -72.532135,
+  "timezone": "America/Santiago",
+  "first_time": "2026-11-17T00:00",
+  "last_time": "2026-12-02T23:00",
+  "n_hours": 384,
+  "sha256_raw": "c279b1e9aa6425e29c0036c86f65260646fe3c95d122de359d4e7fba32bb5cab",
+  "sha256_csv": "bf0a8da1258ac1a45c3b38ce78634f982a17fb6111be0afb2f7fcac9cf57b07d",
+  "files": {
+    "raw": "raw.json",
+    "csv": "normalizado.csv"
+  },
+  "notes": "Forecast determinista para la defensa (t0 = 19-nov 08:00)."
+}

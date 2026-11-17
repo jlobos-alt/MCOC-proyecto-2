@@ -1,0 +1,130 @@
+{
+  "snapshots": [
+    {
+      "snapshot_id": "20261117T173410Z_open-meteo-forecast",
+      "source": "open-meteo-forecast",
+      "model": "best_match",
+      "issued_at": "2026-11-17T17:34:10+00:00",
+      "fetched_at": "2026-11-17T17:34:10+00:00",
+      "endpoint": "https://api.open-meteo.com/v1/forecast",
+      "latitude": -35.606327,
+      "longitude": -72.532135,
+      "timezone": "America/Santiago",
+      "first_time": "2026-11-17T00:00",
+      "last_time": "2026-12-02T23:00",
+      "n_hours": 384,
+      "sha256_raw": "c279b1e9aa6425e29c0036c86f65260646fe3c95d122de359d4e7fba32bb5cab",
+      "sha256_csv": "bf0a8da1258ac1a45c3b38ce78634f982a17fb6111be0afb2f7fcac9cf57b07d",
+      "files": {
+        "raw": "raw.json",
+        "csv": "normalizado.csv"
+      },
+      "notes": "Forecast determinista para la defensa (t0 = 19-nov 08:00)."
+    },
+    {
+      "snapshot_id": "20261117T173413Z_open-meteo-archive",
+      "source": "open-meteo-archive",
+      "model": "best_match",
+      "issued_at": "2026-11-17T17:34:13+00:00",
+      "fetched_at": "2026-11-17T17:34:13+00:00",
+      "endpoint": "https://archive-api.open-meteo.com/v1/archive",
+      "latitude": -35.606327,
+      "longitude": -72.532135,
+      "timezone": "America/Santiago",
+      "first_time": "2025-11-18T00:00",
+      "last_time": "2025-12-19T23:00",
+      "n_hours": 768,
+      "sha256_raw": "79c010cc2e476a4ef74396e6cf8ec83453eea2e737bd1613bee97ac7c0adece6",
+      "sha256_csv": "5a3ef4e261843599b0fea2e5114d77965c2d4cffb1a8e94579d1cc7965d90027",
+      "files": {
+        "raw": "raw.json",
+        "csv": "normalizado.csv"
+      },
+      "notes": "ERA5 del mismo calendario 2025: completa las horas que el ensemble no cubre."
+    },
+    {
+      "snapshot_id": "20261117T173409Z_gfs-ens-calido-member12",
+      "source": "open-meteo-ensemble-gfs_seamless",
+      "model": "gfs_seamless:member12",
+      "issued_at": "2026-11-17T17:34:19+00:00",
+      "fetched_at": "2026-11-17T17:34:19+00:00",
+      "endpoint": "https://ensemble-api.open-meteo.com/v1/ensemble",
+      "latitude": -35.75,
+      "longitude": -72.5,
+      "timezone": "America/Santiago",
+      "first_time": "2026-11-17T00:00",
+      "last_time": "2026-12-02T23:00",
+      "n_hours": 384,
+      "sha256_raw": "a15b37d46bfdb01c5c9a55c504363b6fb4c38ce10c3606fe994c9879e231ac35",
+      "sha256_csv": "d79cbcc4569981c8f7a19ba62bea1d13cdaf8327f1da454ed3340afca73dc2b3",
+      "files": {
+        "raw": "raw.json",
+        "csv": "normalizado.csv"
+      },
+      "notes": "Miembro member12 del ensemble 20261117T173409Z_open-meteo-ensemble-gfs_seamless; representa 10 de 31 miembros (grupo calido)."
+    },
+    {
+      "snapshot_id": "20261117T173409Z_gfs-ens-frio-member25",
+      "source": "open-meteo-ensemble-gfs_seamless",
+      "model": "gfs_seamless:member25",
+      "issued_at": "2026-11-17T17:34:19+00:00",
+      "fetched_at": "2026-11-17T17:34:19+00:00",
+      "endpoint": "https://ensemble-api.open-meteo.com/v1/ensemble",
+      "latitude": -35.75,
+      "longitude": -72.5,
+      "timezone": "America/Santiago",
+      "first_time": "2026-11-17T00:00",
+      "last_time": "2026-12-02T23:00",
+      "n_hours": 384,
+      "sha256_raw": "d062ada6c357b2c16ff474a6f52d621592743d596b3807b40a066ccbb555db53",
+      "sha256_csv": "a80d324033ca15148aeb0d20629638a055ffc613663c54923a49e787c969c454",
+      "files": {
+        "raw": "raw.json",
+        "csv": "normalizado.csv"
+      },
+      "notes": "Miembro member25 del ensemble 20261117T173409Z_open-meteo-ensemble-gfs_seamless; representa 11 de 31 miembros (grupo frio)."
+    },
+    {
+      "snapshot_id": "20261117T173409Z_gfs-ens-medio-control",
+      "source": "open-meteo-ensemble-gfs_seamless",
+      "model": "gfs_seamless:control",
+      "issued_at": "2026-11-17T17:34:19+00:00",
+      "fetched_at": "2026-11-17T17:34:19+00:00",
+      "endpoint": "https://ensemble-api.open-meteo.com/v1/ensemble",
+      "latitude": -35.75,
+      "longitude": -72.5,
+      "timezone": "America/Santiago",
+      "first_time": "2026-11-17T00:00",
+      "last_time": "2026-12-02T23:00",
+      "n_hours": 384,
+      "sha256_raw": "7bb6ea4f4347e0a07e06bfc019965d95add7523115691f991ad35fc523e7e9b6",
+      "sha256_csv": "f951b6b3db12c2dd433f8f929ad9050368d4396e3c163747a1f05cf76f434e4d",
+      "files": {
+        "raw": "raw.json",
+        "csv": "normalizado.csv"
+      },
+      "notes": "Miembro control del ensemble 20261117T173409Z_open-meteo-ensemble-gfs_seamless; representa 10 de 31 miembros (grupo medio)."
+    },
+    {
+      "snapshot_id": "20261117T173409Z_open-meteo-ensemble-gfs_seamless",
+      "source": "open-meteo-ensemble-gfs_seamless",
+      "model": "gfs_seamless:control",
+      "issued_at": "2026-11-17T17:34:19+00:00",
+      "fetched_at": "2026-11-17T17:34:19+00:00",
+      "endpoint": "https://ensemble-api.open-meteo.com/v1/ensemble",
+      "latitude": -35.75,
+      "longitude": -72.5,
+      "timezone": "America/Santiago",
+      "first_time": "2026-11-17T00:00",
+      "last_time": "2026-12-02T23:00",
+      "n_hours": 384,
+      "sha256_raw": "7be8a50c240d756cdf7a6acc7b177cc8162f33f4c4174729fe9505960cc90eee",
+      "sha256_csv": "f951b6b3db12c2dd433f8f929ad9050368d4396e3c163747a1f05cf76f434e4d",
+      "files": {
+        "raw": "raw.json",
+        "csv": "normalizado.csv"
+      },
+      "notes": "Ensemble gfs_seamless completo (31 miembros). raw.json = respuesta entera de la API."
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+{
+  "t0_local": "2026-11-19T08:00:00",
+  "zona_horaria": "America/Santiago",
+  "horizonte_h": 336,
+  "sitio": {
+    "nombre": "Pahuil / Chanco, Maule",
+    "lat": -35.644721,
+    "lon": -72.568332
+  },
+  "celda_open_meteo": {
+    "lat": -35.75,
+    "lon": -72.5
+  },
+  "ensemble": "20261117T173409Z_open-meteo-ensemble-gfs_seamless",
+  "forecast_determinista": "20261117T173410Z_open-meteo-forecast",
+  "relleno": "20261117T173413Z_open-meteo-archive",
+  "metodo": "Miembros ordenados por T media del aire en [t0, t0 + 14 d], tres grupos de tamano parecido; de cada grupo, el miembro mas cercano a la mediana del grupo; peso = fraccion de miembros del grupo. Horas sin dato del ensemble: ERA5 del mismo calendario de 2025.",
+  "perdidos": "Los miembros extremos de cada grupo no se simulan: los pesos son una hipotesis del modelo.",
+  "escenarios": [
+    {
+      "etiqueta": "frio",
+      "miembro": "member25",
+      "snapshot_id": "20261117T173409Z_gfs-ens-frio-member25",
+      "peso": 0.3548387096774194,
+      "T_media_ventana_C": 16.194,
+      "grupo_T_media_C": [
+        15.777,
+        16.369
+      ],
+      "representa": [
+        "member27",
+        "member28",
+        "member18",
+        "member11",
+        "member17",
+        "member25",
+        "member06",
+        "member09",
+        "member29",
+        "member08",
+        "member20"
+      ]
+    },
+    {
+      "etiqueta": "medio",
+      "miembro": "control",
+      "snapshot_id": "20261117T173409Z_gfs-ens-medio-control",
+      "peso": 0.3225806451612903,
+      "T_media_ventana_C": 16.503,
+      "grupo_T_media_C": [
+        16.398,
+        16.772
+      ],
+      "representa": [
+        "member10",
+        "member14",
+        "member15",
+        "member13",
+        "member03",
+        "control",
+        "member24",
+        "member02",
+        "member05",
+        "member01"
+      ]
+    },
+    {
+      "etiqueta": "calido",
+      "miembro": "member12",
+      "snapshot_id": "20261117T173409Z_gfs-ens-calido-member12",
+      "peso": 0.3225806451612903,
+      "T_media_ventana_C": 16.891,
+      "grupo_T_media_C": [
+        16.78,
+        17.27
+      ],
+      "representa": [
+        "member07",
+        "member04",
+        "member26",
+        "member30",
+        "member12",
+        "member22",
+        "member19",
+        "member16",
+        "member21",
+        "member23"
+      ]
+    }
+  ]
+}

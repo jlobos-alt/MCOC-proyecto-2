@@ -38,6 +38,7 @@ class LiftSpec:
     retiro_moldaje_h: float | None = None
     moldaje: str = ""
     aislacion: str = ""
+    duracion_h: float = 0.0     # duracion fisica de la colocacion (0: instantanea)
 
 
 @dataclass
@@ -201,6 +202,7 @@ def plan_from_dict(data: dict) -> Plan:
             ),
             moldaje=str(v.get("moldaje", "")),
             aislacion=str(v.get("aislacion", "")),
+            duracion_h=float(v.get("duracion_h", 0.0)),
         )
         for v in data.get("vertidas", []) or []
     ]

@@ -1,0 +1,21 @@
+{
+  "snapshot_id": "20261117T173413Z_open-meteo-archive",
+  "source": "open-meteo-archive",
+  "model": "best_match",
+  "issued_at": "2026-11-17T17:34:13+00:00",
+  "fetched_at": "2026-11-17T17:34:13+00:00",
+  "endpoint": "https://archive-api.open-meteo.com/v1/archive",
+  "latitude": -35.606327,
+  "longitude": -72.532135,
+  "timezone": "America/Santiago",
+  "first_time": "2025-11-18T00:00",
+  "last_time": "2025-12-19T23:00",
+  "n_hours": 768,
+  "sha256_raw": "79c010cc2e476a4ef74396e6cf8ec83453eea2e737bd1613bee97ac7c0adece6",
+  "sha256_csv": "5a3ef4e261843599b0fea2e5114d77965c2d4cffb1a8e94579d1cc7965d90027",
+  "files": {
+    "raw": "raw.json",
+    "csv": "normalizado.csv"
+  },
+  "notes": "ERA5 del mismo calendario 2025: completa las horas que el ensemble no cubre."
+}

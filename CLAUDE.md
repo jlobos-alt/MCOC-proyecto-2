@@ -68,6 +68,9 @@ src/mcplan/            paquete principal (raíz = versión vigente)
   plan.py, criteria.py plan declarativo YAML y chequeo 70/20 °C. Fundación real: plantilla
                        datos/fundacion_ifc.yaml + plan_desde_solidos + build_model(plan, voxeles=...)
   reliability.py, weather.py   Monte Carlo (esqueleto) y series de temperatura
+  decision.py          defensa: plan (particion, espera, proteccion, T_col), D, MT/MDelta, P_f por enumeracion
+  curvas.py            curvas de hidratacion medidas -> fuente por edad (dT_ad o J/kg), sin Arrhenius
+  escenarios_clima.py  ensemble Open-Meteo -> 3 historias completas con pesos (datos/forecast_defensa/)
   incertidumbre.py     E13: variables inciertas (aleatorias/epistemicas), copula, estados limite,
                        estimador MC (Wilson, cota con 0 fallas); scripts/e13_incertidumbre.py
 geometry/              foundation.ifc (guardado con Bonsai), foundation_base.ifc (semilla),
@@ -120,7 +123,7 @@ y comparación antes/después sin IfcOpenShell) y `scripts/roundtrip_ifc.py --an
 | E11 Lab weather pipeline + visualización 3D | 12 nov | en revisión (Matías) | ver `entregas/entrega11/README.md` |
 | E12 Simulación determinista 14 días | 13 nov | hecho (José) | `f53f3d9` |
 | E13 Revisión oral incertidumbre y confiabilidad | 18 nov | hecho (Clemente) | ver `entregas/entrega13/README.md` |
-| E14–E15 Monte Carlo + HPC, recomendación | 19–20 nov | pendiente | — |
+| Defensa (taller 18, defensa 19, artículo lunes 23) | 18–23 nov | en curso: faltan las 8 curvas | ver `entregas/defensa/README.md` |
 
 Detalle de cada entrega en `calendario/calendario.md` y en `entregas/entregaN/README.md`.
 

@@ -47,6 +47,12 @@ Matriz de verificación, convergencia espacial y temporal por separado, y BIM ba
 La secuencia está en los inputs (IFC y opciones del comando), no en el solver. Guion y resultados en
 [`entregas/entrega8/README.md`](entregas/entrega8/README.md).
 
+## Defensa (19-nov) — el plan más rápido con P_f ≤ 5 %
+
+`python scripts/defensa_plan.py` evalúa 48 planes (partición, espera, aislación, T de colocación) en escenarios
+curva × clima (ensemble GFS del 17-nov), con S25 a 25 mm y colocación por capas. Faltan las 8 curvas del profesor.
+Detalle, resultados y consultas en [`entregas/defensa/README.md`](entregas/defensa/README.md).
+
 ## E13 — Incertidumbre y confiabilidad
 
 `python scripts/e13_incertidumbre.py` corre el caso de E12 con 15 variables inciertas (11 aleatorias, 4 epistémicas,

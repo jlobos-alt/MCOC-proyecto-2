@@ -1,0 +1,21 @@
+{
+  "snapshot_id": "20261117T173409Z_gfs-ens-medio-control",
+  "source": "open-meteo-ensemble-gfs_seamless",
+  "model": "gfs_seamless:control",
+  "issued_at": "2026-11-17T17:34:19+00:00",
+  "fetched_at": "2026-11-17T17:34:19+00:00",
+  "endpoint": "https://ensemble-api.open-meteo.com/v1/ensemble",
+  "latitude": -35.75,
+  "longitude": -72.5,
+  "timezone": "America/Santiago",
+  "first_time": "2026-11-17T00:00",
+  "last_time": "2026-12-02T23:00",
+  "n_hours": 384,
+  "sha256_raw": "7bb6ea4f4347e0a07e06bfc019965d95add7523115691f991ad35fc523e7e9b6",
+  "sha256_csv": "f951b6b3db12c2dd433f8f929ad9050368d4396e3c163747a1f05cf76f434e4d",
+  "files": {
+    "raw": "raw.json",
+    "csv": "normalizado.csv"
+  },
+  "notes": "Miembro control del ensemble 20261117T173409Z_open-meteo-ensemble-gfs_seamless; representa 10 de 31 miembros (grupo medio)."
+}

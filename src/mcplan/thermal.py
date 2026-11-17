@@ -77,6 +77,7 @@ class Model:
     r_moldaje_flat: np.ndarray = field(default_factory=lambda: np.zeros(0))
     r_aislacion_flat: np.ndarray = field(default_factory=lambda: np.zeros(0))
     formwork_end_flat: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    grupo_base: str = "base"     # frontera contra el suelo: no es superficie exterior para S25
 
 
 @dataclass
@@ -94,6 +95,10 @@ class Result:
     active_final: np.ndarray
     metadata: dict = field(default_factory=dict)
     campos: dict = field(default_factory=dict)   # {t_h: T[nx, ny, nz]}, si se pidieron
+    # Definicion de la guia (18-nov): max sobre todo el hormigon colocado menos el min a 25 mm
+    # bajo las superficies exteriores que existen en ese instante (incluye techos temporales).
+    T_min_s25: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    delta_T_s25: np.ndarray = field(default_factory=lambda: np.zeros(0))
 
     @property
     def T_max_abs(self) -> float:
@@ -184,6 +189,14 @@ def build_model(plan: Plan, voxeles=None) -> Model:
         mask |= lift_mask
         lift_of_cell[lift_mask] = lift.id
         place_time[lift_mask] = lift.inicio_h
+        if getattr(lift, "duracion_h", 0.0) > 0.0:
+            # Colocacion por capas a ritmo constante: cada celda aparece cuando el hormigon
+            # llega a su altura (mitad de su nivel), dentro de [inicio, inicio + duracion].
+            ii, jj, kk = np.nonzero(lift_mask)
+            niveles, cuenta = np.unique(kk, return_counts=True)
+            antes = np.concatenate(([0], np.cumsum(cuenta)[:-1]))
+            hora = lift.inicio_h + lift.duracion_h * (antes + 0.5 * cuenta) / cuenta.sum()
+            place_time[ii, jj, kk] = hora[np.searchsorted(niveles, kk)]
         placement_T[lift_mask] = lift.temperatura_colocacion_C
 
         capa_moldaje = plan.moldajes.get(lift.moldaje)
@@ -279,6 +292,7 @@ def build_model(plan: Plan, voxeles=None) -> Model:
 
     model = Model(
         grid=grid,
+        grupo_base=next((s.name for s in plan.fronteras if s.direccion == "base"), "base"),
         mask=mask.ravel(),
         lift_of_cell=lift_flat,
         k_flat=k_flat,
@@ -539,6 +553,7 @@ def solve(
     temperatura_inicial=None,
     fuente_W_m3: float = 0.0,
     instantes_campo_h=None,
+    profundidad_s25_m: float = 0.025,
 ) -> Result:
     """Resuelve el problema termico y devuelve las series de salida.
 
@@ -577,6 +592,7 @@ def solve(
     max_core: list[float] = []
     min_surface: list[float] = []
     mean_values: list[float] = []
+    min_s25: list[float] = []
     pedidos = {round(float(t), 6) for t in (instantes_campo_h if instantes_campo_h is not None else [])}
     campos: dict[float, np.ndarray] = {}
 
@@ -595,6 +611,7 @@ def solve(
             max_core.append(_max_or_nan(T, active & model.is_core))
             min_surface.append(_min_or_nan(T, active & model.is_surface))
             mean_values.append(_mean_or_nan(T, active))
+            min_s25.append(_min_s25(model, T, t_h, profundidad_s25_m))
             if round(t_h, 6) in pedidos:
                 campos[round(t_h, 6)] = T.reshape(grid.shape).copy()
 
@@ -628,6 +645,8 @@ def solve(
         active_final=placed_mask.reshape(grid.shape),
         metadata={"n_cells": int(n_cells), "pasos": int(n_steps)},
         campos=campos,
+        T_min_s25=np.array(min_s25),
+        delta_T_s25=np.array(max_global) - np.array(min_s25),
     )
 
 
@@ -709,6 +728,48 @@ def _accumulate_boundary(model: Model, T: np.ndarray, net: np.ndarray, t_h: floa
         net += np.bincount(owner, weights=flux, minlength=model.grid.n_cells)
         # Neumann: -k dT/dn = q_n con n hacia afuera -> la celda pierde q_n * A
         net -= np.bincount(owner, weights=q_neumann * face.area, minlength=model.grid.n_cells)
+
+
+def _min_s25(model: Model, T: np.ndarray, t_h: float, profundidad_m: float = 0.025) -> float:
+    """Minimo de T a `profundidad_m` bajo las caras exteriores expuestas en t_h (sin la base).
+
+    Usa el mismo balance que el solver en cada cara: q = (T_c - T_inf) / R, con R = media celda
+    + capas + 1/h. Entre el centro de la celda y la cara el perfil es lineal (conduccion 1D),
+    asi que T(d) = T_c - q (dx/2 - d) / k. Con d = dx/2 se recupera el centro de celda.
+    """
+    minimo = np.inf
+    for axis, face in model.exposed.items():
+        if face.owner.size == 0:
+            continue
+        activo = (model.exposed_start[axis] <= t_h + 1e-9) & (t_h < model.exposed_end[axis])
+        activo &= model.exposed_group[axis] != model.grupo_base
+        if not np.any(activo):
+            continue
+        owner = face.owner[activo]
+        grupos = model.exposed_group[axis][activo]
+        half = face.spacing / 2.0
+        k = np.maximum(model.k_flat[owner], 1e-12)
+        Tc = T[owner]
+        T25 = Tc.copy()
+        for name in np.unique(grupos):
+            sel = grupos == name
+            group = model.groups[str(name)]
+            if group.tipo in ("adiabatica", "neumann"):
+                q = np.full(sel.sum(), group.flujo_W_m2 if group.tipo == "neumann" else 0.0)
+            else:
+                r = half / k[sel]
+                if group.tipo != "dirichlet":
+                    r = r + group.capas_resistance(t_h) + group.convective_resistance(t_h)
+                    if axis in (0, 1) and model.r_moldaje_flat.size:
+                        celdas = owner[sel]
+                        r = r + np.where(t_h < model.formwork_end_flat[celdas], model.r_moldaje_flat[celdas], 0.0)
+                        r = r + model.r_aislacion_flat[celdas]
+                q = (Tc[sel] - group.far_field_at(t_h)) / r
+            T25[sel] = Tc[sel] - q * (half - profundidad_m) / k[sel]
+        validos = np.isfinite(T25)
+        if np.any(validos):
+            minimo = min(minimo, float(np.min(T25[validos])))
+    return minimo if np.isfinite(minimo) else float("nan")
 
 
 def _accumulate_sources(
