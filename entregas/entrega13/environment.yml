@@ -1,0 +1,10 @@
+name: mcoc-p2
+channels: [conda-forge]
+dependencies:
+  - python=3.11
+  - numpy
+  - matplotlib
+  - pyvista
+  - pytest
+  - pyyaml
+  - ifcopenshell

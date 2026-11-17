@@ -47,6 +47,12 @@ Matriz de verificación, convergencia espacial y temporal por separado, y BIM ba
 La secuencia está en los inputs (IFC y opciones del comando), no en el solver. Guion y resultados en
 [`entregas/entrega8/README.md`](entregas/entrega8/README.md).
 
+## E13 — Incertidumbre y confiabilidad
+
+`python scripts/e13_incertidumbre.py` corre el caso de E12 con 15 variables inciertas (11 aleatorias, 4 epistémicas,
+cópula gaussiana), evalúa g_T = 70 − T_max y g_ΔT = 20 − ΔT_max y estima P(falla) con su intervalo. Tabla, resultados
+y guion en [`entregas/entrega13/README.md`](entregas/entrega13/README.md).
+
 ## E11 — Weather pipeline y visualización 3D
 
 `python scripts/e11_clima_3d.py` recorre los 8 pasos del laboratorio: snapshot, metadata, gráfico, frontera,
