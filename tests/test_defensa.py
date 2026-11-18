@@ -118,6 +118,28 @@ def test_cargar_curvas_desde_carpeta(tmp_path: Path):
     assert cargar_curvas(tmp_path / "no_existe", RHO_CP) == []
 
 
+def test_fuente_volumetrica_integra_al_calor_total(tmp_path: Path):
+    # Q constante de 100 W/m3 durante 10 h -> 3,6 MJ/m3; con rho cp propio de la curva
+    (tmp_path / "q.txt").write_text("# t Q1 Q2\n0 100 nan\n5 100 50\n10 100 50\n", encoding="utf-8")
+    (tmp_path / "curvas.yaml").write_text(
+        "curvas:\n  - {nombre: Q1, archivo: q.txt, columna: 1, tipo: Q_W_m3, rho: 2500, cp: 1000}\n"
+        "  - {nombre: Q2, archivo: q.txt, columna: 2, tipo: Q_W_m3}\n", encoding="utf-8")
+    q1, q2 = cargar_curvas(tmp_path, RHO_CP)
+    assert q1.theta_final_C * 2500 * 1000 == pytest.approx(100 * 10 * 3600)
+    assert q2.edad_h[0] == 0.0 and q2.theta_final_C * RHO_CP == pytest.approx(50 * 5 * 3600)   # NaN descartado
+
+
+def test_las_ocho_curvas_reales_reproducen_la_cabecera():
+    raiz = Path(__file__).resolve().parents[1] / "datos" / "curvas_hidratacion"
+    if not (raiz / "curvas.yaml").exists():
+        pytest.skip("sin curvas reales")
+    curvas = cargar_curvas(raiz, RHO_CP)
+    assert len(curvas) == 8
+    for c in curvas:
+        total = c.theta_final_C * c.metadatos["rho"] * c.metadatos["cp"] / 1e6
+        assert total == pytest.approx(c.metadatos["totales_MJ_m3"][1], abs=0.06)
+
+
 def test_curva_provisoria_es_c1():
     c = curva_provisoria_c1(RHO_CP)
     assert c.theta(30.0) == pytest.approx(45 * (1 - np.exp(-1)), abs=0.01)

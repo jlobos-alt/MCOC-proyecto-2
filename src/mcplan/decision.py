@@ -152,6 +152,12 @@ class Evaluacion:
 
 
 def mas_rapido_factible(evaluaciones: list[Evaluacion]) -> Evaluacion | None:
-    """Menor D entre los planes evaluados con P_f <= 5 % (desempate: menor P_f)."""
+    """Menor D entre los planes evaluados con P_f <= 5 %.
+
+    Desempate (mismo D): menor P_f y luego mayor margen, es decir, menor MDelta mas alto de los escenarios.
+    Con malla gruesa el margen importa: MDelta crece al refinar.
+    """
     factibles = [e for e in evaluaciones if e.cumple]
-    return min(factibles, key=lambda e: (round(e.D_h, 6), e.P_f)) if factibles else None
+    if not factibles:
+        return None
+    return min(factibles, key=lambda e: (round(e.D_h, 6), e.P_f, max(c["MDelta"] for c in e.corridas)))

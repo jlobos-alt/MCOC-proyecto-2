@@ -9,6 +9,8 @@ Lo que midio el ensayo decide la conversion a calor:
             q = rho cp dDeltaT_ad/da  [W/m3].
 - "Q_kg"  : calor acumulado por masa de cementante [J/kg] (o [J/g], se convierte).
             q = b dH/da, con b = contenido de cementante [kg/m3].
+- "Q_W_m3": fuente volumetrica Q(a) [W/m3] (calor por m3 de hormigon y por segundo). Se integra
+            en el tiempo (trapecios) para obtener el calor acumulado por m3.
 
 Las dos se llevan a una elevacion adiabatica equivalente theta(a) [°C] = calor por m3 / (rho cp),
 que es lo que el solver integra en cada paso: Q = rho cp [theta(a + da) - theta(a)] / dt.
@@ -84,6 +86,9 @@ def desde_tabla(nombre: str, edad: np.ndarray, valor: np.ndarray, tipo: str, rho
     avisos = []
     if tipo == "dT_ad":
         theta = valor
+    elif tipo == "Q_W_m3":
+        calor = np.concatenate(([0.0], np.cumsum(0.5 * (valor[1:] + valor[:-1]) * np.diff(edad) * 3600.0)))
+        theta = calor / rho_cp
     elif tipo == "Q_kg":
         if cementante_kg_m3 is None:
             raise ValueError(f"{nombre}: una curva de calor por masa necesita el contenido de cementante b [kg/m3].")
@@ -113,7 +118,8 @@ def cargar_curvas(carpeta: Path, rho_cp: float) -> list[CurvaHidratacion]:
         curvas:
           - nombre: M1
             archivo: M1.csv          # columnas: edad, valor
-            tipo: dT_ad | Q_kg
+            tipo: dT_ad | Q_kg | Q_W_m3
+            columna: 1                # opcional: columna de un archivo con varias curvas
             unidad_edad: h | d | min
             unidad_valor: °C | J/kg | J/g | kJ/kg
             cementante_kg_m3: 380     # solo Q_kg
@@ -128,16 +134,26 @@ def cargar_curvas(carpeta: Path, rho_cp: float) -> list[CurvaHidratacion]:
     datos = yaml.safe_load(indice.read_text(encoding="utf-8")) or {}
     curvas = []
     for spec in datos.get("curvas", []) or []:
-        with open(carpeta / spec["archivo"], encoding="utf-8") as h:
-            filas = [f for f in csv.reader(h) if f and not f[0].strip().startswith("#")]
-        try:
-            float(filas[0][0])
-        except ValueError:
-            filas = filas[1:]              # encabezado
-        edad = [float(f[0]) for f in filas]
-        valor = [float(f[1]) for f in filas]
+        ruta = carpeta / spec["archivo"]
+        if "columna" in spec:
+            # Archivo con varias curvas en columnas separadas por espacios (p. ej. source_terms.txt)
+            tabla = np.genfromtxt(ruta, comments="#")
+            edad, valor = tabla[:, 0], tabla[:, int(spec["columna"])]
+            ok = np.isfinite(edad) & np.isfinite(valor)
+            edad, valor = edad[ok], valor[ok]
+        else:
+            with open(ruta, encoding="utf-8") as h:
+                filas = [f for f in csv.reader(h) if f and not f[0].strip().startswith("#")]
+            try:
+                float(filas[0][0])
+            except ValueError:
+                filas = filas[1:]              # encabezado
+            edad = [float(f[0]) for f in filas]
+            valor = [float(f[1]) for f in filas]
+        # Propiedades asociadas a la curva (las del ensayo): se conservan juntas con ella
+        rho_cp_curva = float(spec["rho"]) * float(spec["cp"]) if "rho" in spec and "cp" in spec else rho_cp
         curvas.append(desde_tabla(
-            spec["nombre"], edad, valor, spec["tipo"], rho_cp,
+            spec["nombre"], edad, valor, spec["tipo"], rho_cp_curva,
             unidad_edad=spec.get("unidad_edad", "h"), unidad_valor=spec.get("unidad_valor"),
             cementante_kg_m3=spec.get("cementante_kg_m3"), metadatos=spec,
         ))

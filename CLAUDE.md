@@ -123,7 +123,7 @@ y comparación antes/después sin IfcOpenShell) y `scripts/roundtrip_ifc.py --an
 | E11 Lab weather pipeline + visualización 3D | 12 nov | en revisión (Matías) | ver `entregas/entrega11/README.md` |
 | E12 Simulación determinista 14 días | 13 nov | hecho (José) | `f53f3d9` |
 | E13 Revisión oral incertidumbre y confiabilidad | 18 nov | hecho (Clemente) | ver `entregas/entrega13/README.md` |
-| Defensa (taller 18, defensa 19, artículo lunes 23) | 18–23 nov | en curso: faltan las 8 curvas | ver `entregas/defensa/README.md` |
+| Defensa (taller 18, defensa 19, artículo lunes 23) | 18–23 nov | plan elegido: vertida única, EPS 150, 10 °C, D = 15,9 h | ver `entregas/defensa/README.md` |
 
 Detalle de cada entrega en `calendario/calendario.md` y en `entregas/entregaN/README.md`.
 

@@ -1,0 +1,122 @@
+{
+  "malla": [
+    {
+      "plan": "unica_EPS150_Tcol10",
+      "curva": "M4_SS",
+      "clima": "medio",
+      "dx": 0.25,
+      "MDelta": 16.98838013313411,
+      "MT": 49.51590776214772,
+      "MDelta_dx0.5": 15.96432137737925
+    },
+    {
+      "plan": "unica_EPS150_Tcol10",
+      "curva": "M4_SS",
+      "clima": "medio",
+      "dx": 0.125,
+      "MDelta": 17.598513390561,
+      "MT": 49.52451936893707,
+      "MDelta_dx0.5": 15.96432137737925
+    },
+    {
+      "plan": "unica_EPS150_Tcol10",
+      "curva": "M4_SS",
+      "clima": "frio",
+      "dx": 0.25,
+      "MDelta": 16.888597406433043,
+      "MT": 49.508620539249044,
+      "MDelta_dx0.5": 15.873285247164752
+    },
+    {
+      "plan": "unica_EPS150_Tcol10",
+      "curva": "M4_SS",
+      "clima": "frio",
+      "dx": 0.125,
+      "MDelta": 17.502062015372736,
+      "MT": 49.513902243513094,
+      "MDelta_dx0.5": 15.873285247164752
+    },
+    {
+      "plan": "unica_EPS150_Tcol10",
+      "curva": "M4_SS",
+      "clima": "calido",
+      "dx": 0.25,
+      "MDelta": 16.884633340593943,
+      "MT": 49.50638105430561,
+      "MDelta_dx0.5": 15.854473733152759
+    },
+    {
+      "plan": "unica_EPS150_Tcol10",
+      "curva": "M4_SS",
+      "clima": "calido",
+      "dx": 0.125,
+      "MDelta": 17.50120642835684,
+      "MT": 49.51203381136163,
+      "MDelta_dx0.5": 15.854473733152759
+    },
+    {
+      "plan": "unica_EPS100_Tcol10",
+      "curva": "M4_SS",
+      "clima": "medio",
+      "dx": 0.25,
+      "MDelta": 18.08225145156316,
+      "MT": 49.48565915371575,
+      "MDelta_dx0.5": 17.117531946899398
+    },
+    {
+      "plan": "unica_EPS100_Tcol10",
+      "curva": "M4_SS",
+      "clima": "medio",
+      "dx": 0.125,
+      "MDelta": 18.656682777914902,
+      "MT": 49.487172574751376,
+      "MDelta_dx0.5": 17.117531946899398
+    },
+    {
+      "plan": "unica_EPS100_Tcol10",
+      "curva": "M4_SS",
+      "clima": "frio",
+      "dx": 0.25,
+      "MDelta": 17.93707601224101,
+      "MT": 49.4753111779336,
+      "MDelta_dx0.5": 16.99006463142793
+    },
+    {
+      "plan": "unica_EPS100_Tcol10",
+      "curva": "M4_SS",
+      "clima": "frio",
+      "dx": 0.125,
+      "MDelta": 18.512459892987312,
+      "MT": 49.47570122484394,
+      "MDelta_dx0.5": 16.99006463142793
+    },
+    {
+      "plan": "unica_EPS100_Tcol10",
+      "curva": "M4_SS",
+      "clima": "calido",
+      "dx": 0.25,
+      "MDelta": 17.93007363616074,
+      "MT": 49.47188845819847,
+      "MDelta_dx0.5": 16.956060917800087
+    },
+    {
+      "plan": "unica_EPS100_Tcol10",
+      "curva": "M4_SS",
+      "clima": "calido",
+      "dx": 0.125,
+      "MDelta": 18.514324084656927,
+      "MT": 49.47198488409771,
+      "MDelta_dx0.5": 16.956060917800087
+    }
+  ],
+  "beta": {
+    "beta_2.1": {
+      "P_f": 0.0,
+      "MDelta_max": 12.98
+    },
+    "beta_3.0": {
+      "P_f": 0.0,
+      "MDelta_max": 19.7
+    }
+  }
+}

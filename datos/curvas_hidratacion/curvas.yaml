@@ -1,0 +1,28 @@
+# Curvas de hidratacion entregadas por el profesor (Canvas: "Datos Fuentes de calor Q(t) - source_terms.txt",
+# descargado el 18-nov-2026). Archivo original sin modificar en originales/source_terms.txt.
+#
+# Que son (cabecera del archivo):
+#   - Fuente volumetrica Q(t) [W/m3 de hormigon], paso de 10 min, edad en horas.
+#   - Obtenida por inversion (volumenes finitos axisimetricos + Tikhonov) de temperaturas medidas
+#     en probetas cilindricas (r = 0.0375 m, h = 0.15 m), con conductancia de borde beta = 2.5 W/(m2 K).
+#   - Probetas M1..M4 de UNA mezcla (Arrieta, cemento 350.77 kg/m3), en dos campanas:
+#       SS  = 13-20 abril 2025 (240 h)
+#       22A = 22 abril 2025 (163 h; el archivo la declara de MENOR CONFIANZA).
+#   - Tiempo cero = inicio del registro + 2 h: falta el calor de las primeras 2 h.
+#   - Propiedades de las probetas: rho = 2476 kg/m3, cp = 1023 J/(kg K). Se usan JUNTO con cada curva.
+#
+# Hipotesis del modelo (declarada): las 8 son replicas de la misma mezcla y son equiprobables
+# (peso 1/8). Sensibilidades en scripts/defensa_plan.py: solo SS (4 curvas, 1/4) y beta de la
+# inversion (2.1 y 3.0 escalan el calor total segun la tabla de la cabecera).
+#
+# totales_MJ_m3: calor total [MJ/m3] con beta = 2.1 / 2.5 (este archivo) / 3.0, de la cabecera.
+
+curvas:
+  - {nombre: M1_SS,  archivo: originales/source_terms.txt, columna: 1, tipo: Q_W_m3, unidad_edad: h, rho: 2476, cp: 1023, campana: SS,  confianza: normal, totales_MJ_m3: [74.1, 88.1, 105.8]}
+  - {nombre: M2_SS,  archivo: originales/source_terms.txt, columna: 2, tipo: Q_W_m3, unidad_edad: h, rho: 2476, cp: 1023, campana: SS,  confianza: normal, totales_MJ_m3: [80.4, 95.7, 114.7]}
+  - {nombre: M3_SS,  archivo: originales/source_terms.txt, columna: 3, tipo: Q_W_m3, unidad_edad: h, rho: 2476, cp: 1023, campana: SS,  confianza: normal, totales_MJ_m3: [79.1, 94.1, 112.9]}
+  - {nombre: M4_SS,  archivo: originales/source_terms.txt, columna: 4, tipo: Q_W_m3, unidad_edad: h, rho: 2476, cp: 1023, campana: SS,  confianza: normal, totales_MJ_m3: [84.3, 100.2, 120.1]}
+  - {nombre: M1_22A, archivo: originales/source_terms.txt, columna: 5, tipo: Q_W_m3, unidad_edad: h, rho: 2476, cp: 1023, campana: 22A, confianza: menor, totales_MJ_m3: [50.9, 61.2, 74.1]}
+  - {nombre: M2_22A, archivo: originales/source_terms.txt, columna: 6, tipo: Q_W_m3, unidad_edad: h, rho: 2476, cp: 1023, campana: 22A, confianza: menor, totales_MJ_m3: [69.1, 82.4, 99.0]}
+  - {nombre: M3_22A, archivo: originales/source_terms.txt, columna: 7, tipo: Q_W_m3, unidad_edad: h, rho: 2476, cp: 1023, campana: 22A, confianza: menor, totales_MJ_m3: [61.0, 73.3, 88.5]}
+  - {nombre: M4_22A, archivo: originales/source_terms.txt, columna: 8, tipo: Q_W_m3, unidad_edad: h, rho: 2476, cp: 1023, campana: 22A, confianza: menor, totales_MJ_m3: [61.5, 73.6, 88.7]}

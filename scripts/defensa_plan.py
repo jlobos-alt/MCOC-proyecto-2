@@ -108,6 +108,11 @@ def correr(plan: PlanVertidas, curva, clima_frame, dx: float, tasa: float, profu
     H = max(336.0, D + 240.0)
     p = aplicar_plan(ctx["base"], plan, ctx["volumenes"], tasa)
     p.simulacion.duracion_h = H
+    meta = getattr(curva, "metadatos", {}) or {}
+    if "rho" in meta and "cp" in meta:
+        # Propiedades del ensayo asociadas a la curva: el calor por m3 queda consistente
+        mat = p.materiales["M1"]
+        p.materiales["M1"] = type(mat)(name=mat.name, k=mat.k, cp=float(meta["cp"]), rho=float(meta["rho"]))
     tl = timeline(ctx, clima_frame, H)
     aplicar_ambiente(p, tl, con_viento=True, con_radiacion=True, absorptivity=ABSORTIVIDAD, emissivity=EMISIVIDAD)
     modelo = build_model(p, voxeles=ctx["vox"][plan.particion])
@@ -288,6 +293,30 @@ def main() -> None:
             pesos[nombre_peso] = round(pf, 4)
         resumen["sensibilidad_pesos_clima"] = pesos
         print(f"    pesos del clima -> P_f: {pesos}")
+        # Curvas: solo la campana SS (la 22A es de menor confianza) y beta de la inversion
+        nombres_c = [c.nombre for c in ctx["curvas"]]
+        ss = [n for n, c in zip(nombres_c, ctx["curvas"]) if (c.metadatos or {}).get("campana") == "SS"]
+        if ss and len(ss) < len(nombres_c):
+            k_idx = [e["etiqueta"] for e in esc["escenarios"]]
+            pf_ss = sum(ctx["pesos_k"][k_idx.index(c["clima"])] / len(ss)
+                        for c in foco.corridas if c["curva"] in ss and (c["MT"] > LIM_T or c["MDelta"] > LIM_DT))
+            resumen["sensibilidad_curvas_solo_SS"] = round(pf_ss, 4)
+            print(f"    solo curvas SS (1/{len(ss)} cada una): P_f {pf_ss:.3f}")
+        if all("totales_MJ_m3" in (c.metadatos or {}) for c in ctx["curvas"]):
+            from mcplan.curvas import CurvaHidratacion
+            beta = {}
+            for etiqueta, i in (("beta_2.1", 0), ("beta_3.0", 2)):
+                pf = 0.0
+                for m, c in enumerate(ctx["curvas"]):
+                    tot = c.metadatos["totales_MJ_m3"]
+                    escalada = CurvaHidratacion(c.nombre, c.edad_h, c.theta_C * tot[i] / tot[1], c.metadatos)
+                    for k, fr in enumerate(ctx["climas"]):
+                        r = correr(foco.plan, escalada, fr, args.dx, args.tasa)
+                        if r["MT"] > LIM_T or r["MDelta"] > LIM_DT:
+                            pf += ctx["pesos_m"][m] * ctx["pesos_k"][k]
+                beta[etiqueta] = round(pf, 4)
+            resumen["sensibilidad_beta_inversion"] = beta
+            print(f"    beta de la inversion -> P_f: {beta}")
         # Los 31 miembros del ensemble (la reduccion a 3 historias pierde extremos)
         ens_raw = json.loads((CLIMA / esc["ensemble"] / "raw.json").read_text(encoding="utf-8"))
         from mcplan.escenarios_clima import nombres_miembros
@@ -372,16 +401,25 @@ def figuras(ctx, evals, foco, args, out: Path) -> None:
     fig.savefig(out / "defensa_D_vs_Pf.png", dpi=160, facecolor=SUP)
     plt.close(fig)
 
-    # 2. Curvas de hidratacion
-    fig, ax = plt.subplots(figsize=(8, 3.8), facecolor=SUP, constrained_layout=True)
-    a = np.linspace(0, 336, 600)
+    # 2. Curvas de hidratacion: Q(a) y calor acumulado
+    fig, (ax, axb) = plt.subplots(1, 2, figsize=(12, 3.9), facecolor=SUP, constrained_layout=True)
+    a = np.linspace(0, 240, 1441)
     for c in ctx["curvas"]:
-        ax.plot(a, c.theta(a), linewidth=1.8, label=c.nombre)
+        meta = c.metadatos or {}
+        rc = float(meta.get("rho", 2400)) * float(meta.get("cp", 970))
+        menor = meta.get("confianza") == "menor"
+        color, estilo_l = ("#eb6834", "--") if menor else ("#2a78d6", "-")
+        ax.plot(a, c.dtheta_dage(a) * rc / 3600.0, color=color, linestyle=estilo_l, linewidth=1.2)
+        axb.plot(a, c.theta(a) * rc / 1e6, color=color, linestyle=estilo_l, linewidth=1.2, label=c.nombre)
     ax.set_xlabel("Edad [h]")
-    ax.set_ylabel("Elevación adiabática equivalente [°C]")
-    ax.set_title("Curvas de hidratación usadas como escenarios")
-    ax.legend(frameon=False, fontsize=8)
-    estilo(ax)
+    ax.set_ylabel("Q [W/m³]")
+    ax.set_title("Fuente de calor Q(t): peak a las 12–17 h")
+    axb.set_xlabel("Edad [h]")
+    axb.set_ylabel("Calor acumulado [MJ/m³]")
+    axb.set_title("Calor total 61–100 MJ/m³ (azul: SS, naranjo: 22A menor confianza)")
+    axb.legend(frameon=False, fontsize=7, ncol=2)
+    for a_ in (ax, axb):
+        estilo(a_)
     fig.savefig(out / "defensa_curvas.png", dpi=160, facecolor=SUP)
     plt.close(fig)
 
