@@ -1,0 +1,591 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Visor Térmico Grupo 5</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: riel de controles fijo a la izquierda + columna de paneles; en teléfono el riel pasa arriba. */
+:root{
+  --bg:#f3f4f2; --panel:#ffffff; --ink:#1c2226; --muted:#5d676d; --line:#d9ddda;
+  --accent:#1f5f8b; --accent-soft:#dbe8f1; --ok:#2f7d4f; --ok-soft:#dcefe3; --bad:#b23a2b; --bad-soft:#f6dfdb; --warn:#a46a10;
+  --f-display:"Archivo","Segoe UI",system-ui,sans-serif; --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --three-bg:#e9ecea;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12171a; --panel:#1a2125; --ink:#e4e8e6; --muted:#97a2a7; --line:#2c363b;
+  --accent:#6fb1de; --accent-soft:#1d3444; --ok:#6cc28f; --ok-soft:#1b3326; --bad:#ec8070; --bad-soft:#3d211d; --warn:#e0a84a;
+  --three-bg:#161c1f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171a; --panel:#1a2125; --ink:#e4e8e6; --muted:#97a2a7; --line:#2c363b;
+  --accent:#6fb1de; --accent-soft:#1d3444; --ok:#6cc28f; --ok-soft:#1b3326; --bad:#ec8070; --bad-soft:#3d211d; --warn:#e0a84a;
+  --three-bg:#161c1f; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.wrap{max-width:1440px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:18px}
+h1{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,3vw,30px);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font-family:var(--f-display);font-weight:700;font-size:18px;margin:0;text-wrap:balance}
+h3{font-family:var(--f-display);font-weight:700;font-size:14px;margin:0}
+.sub{color:var(--muted);margin:4px 0 0;max-width:72ch}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.rail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:14px}
+@media (max-width:900px){.rail{position:static}}
+.ctl{display:grid;gap:6px}
+.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
+.seg{display:flex;flex-wrap:wrap;gap:4px}
+.seg button{font:inherit;font-size:13px;padding:5px 9px;border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+.seg button:disabled{opacity:.35;cursor:not-allowed}
+.seg button:focus-visible,select:focus-visible,input:focus-visible,.cellbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+select{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);width:100%}
+.main{display:grid;gap:18px;min-width:0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.panel-h{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+.note{color:var(--muted);font-size:12.5px;margin:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:2px}
+.kpi .v{font-family:var(--f-mono);font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--muted)}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.bad{background:var(--bad-soft);color:var(--bad)}
+.planname{font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.crono{position:relative;height:30px;border:1px solid var(--line);border-radius:6px;margin-top:8px;overflow:hidden}
+.crono div{position:absolute;top:4px;bottom:4px;background:var(--accent);border-radius:3px;opacity:.85}
+.crono-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px}
+@media (max-width:1100px){.grid2{grid-template-columns:minmax(0,1fr)}}
+#three{width:100%;aspect-ratio:4/3;max-width:100%;border-radius:8px;background:var(--three-bg);touch-action:none;display:block}
+#sec{width:100%;max-width:100%;display:block;border-radius:8px;background:var(--three-bg)}
+.timebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+.timebar input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+.btn{font:inherit;font-size:13px;padding:5px 12px;border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:6px;cursor:pointer}
+.btn:hover{background:var(--accent-soft)}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.read div{font-size:12px;color:var(--muted)} .read b{display:block;font-family:var(--f-mono);font-size:16px;color:var(--ink);font-weight:500}
+.cbar{height:10px;border-radius:3px;margin-top:4px}
+.cbar-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:var(--f-mono)}
+.chk{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+.chk input{accent-color:var(--accent)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:8px}
+.chartbox{position:relative;height:320px;min-width:0}
+.chartbox.sm{height:260px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none}
+td:first-child,th:first-child{text-align:left}
+tbody tr{cursor:pointer} tbody tr:hover{background:var(--accent-soft)} tr.sel{background:var(--accent-soft);font-weight:600}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.matrix{display:grid;grid-template-columns:auto repeat(3,minmax(64px,1fr));gap:4px;font-size:12.5px}
+.matrix .h{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em;align-self:end;text-align:center}
+.matrix .rh{font-family:var(--f-mono);align-self:center;padding-right:6px}
+.cellbtn{font:inherit;font-family:var(--f-mono);border:2px solid transparent;border-radius:6px;padding:6px 4px;text-align:center;cursor:pointer;color:#111;font-variant-numeric:tabular-nums}
+.cellbtn.fail{border-color:var(--bad)}
+.cellbtn.cur{outline:2px solid var(--ink);outline-offset:1px}
+.cellbtn small{display:block;font-size:10.5px;opacity:.8}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px;border-radius:2px}
+.cols3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.loading{padding:40px;text-align:center;color:var(--muted)}
+.err{color:var(--bad)}
+.tag{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Visor térmico de la fundación</h1>
+      <p class="sub">Grupo 5 · MCOC Proyecto 2. 48 planes × 24 escenarios (8 curvas Q(t) × 3 climas), malla de 0,5 m, t₀ = 19-nov-2026 08:00. Todo sale de las corridas del solver del repositorio; nada está interpolado ni inventado.</p>
+    </div>
+    <span class="tag mono" id="valid">cargando datos…</span>
+  </header>
+
+  <div class="layout">
+    <aside class="rail" aria-label="Elegir plan y escenario">
+      <div class="ctl"><span class="lbl">Número de vertidas</span><div class="seg" id="c-part"></div></div>
+      <div class="ctl"><span class="lbl">Espera entre vertidas</span><div class="seg" id="c-esp"></div></div>
+      <div class="ctl"><span class="lbl">Protección (laterales + manta)</span><div class="seg" id="c-prot"></div></div>
+      <div class="ctl"><span class="lbl">T de colocación</span><div class="seg" id="c-tcol"></div></div>
+      <hr style="border:0;border-top:1px solid var(--line);margin:2px 0">
+      <div class="ctl"><label class="lbl" for="c-curva">Curva de hidratación</label><select id="c-curva"></select></div>
+      <div class="ctl"><span class="lbl">Clima</span><div class="seg" id="c-clima"></div></div>
+      <div class="ctl"><label class="lbl" for="c-comp">Comparar con otro plan</label><select id="c-comp"></select></div>
+      <button class="btn" id="b-elegido" type="button">Volver al plan elegido</button>
+    </aside>
+
+    <main class="main" id="main">
+      <div class="panel loading" id="loading">Cargando 1152 corridas…</div>
+    </main>
+  </div>
+</div>
+
+<template id="tpl">
+  <section class="panel" id="p-resumen">
+    <div class="panel-h">
+      <div><h2 id="r-titulo">Plan</h2><div class="planname" id="r-nombre"></div></div>
+      <span id="r-pill" class="pill"></span>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><span class="lbl">D: fin de colocación</span><span class="v" id="k-D"></span><span class="s" id="k-D2"></span></div>
+      <div class="kpi"><span class="lbl">P_f (24 escenarios)</span><span class="v" id="k-pf"></span><span class="s" id="k-pf2"></span></div>
+      <div class="kpi"><span class="lbl">MT más alto</span><span class="v" id="k-mt"></span><span class="s">límite 70 °C</span></div>
+      <div class="kpi"><span class="lbl">MΔ más alto</span><span class="v" id="k-md"></span><span class="s" id="k-md2"></span></div>
+      <div class="kpi"><span class="lbl">Escenario actual</span><span class="v" id="k-esc"></span><span class="s" id="k-esc2"></span></div>
+    </div>
+    <div style="margin-top:12px">
+      <span class="lbl">Cronograma de colocación (40 m³/h, una bomba)</span>
+      <div class="crono" id="crono"></div>
+      <div class="crono-axis mono" id="crono-axis"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-3d">
+    <div class="panel-h">
+      <h2>La fundación por dentro</h2>
+      <p class="note" id="f-nota"></p>
+    </div>
+    <div class="grid2">
+      <div>
+        <canvas id="three" aria-label="Vista 3D de la fundación coloreada por temperatura"></canvas>
+        <div class="toolbar" style="margin-top:8px">
+          <label class="chk"><input type="checkbox" id="o-corte" checked> Cortar por la mitad</label>
+          <label class="chk"><input type="checkbox" id="o-vert"> Colorear por vertida</label>
+          <span class="note">Arrastra para girar, rueda para acercar.</span>
+        </div>
+      </div>
+      <div>
+        <h3>Corte vertical (x–z)</h3>
+        <canvas id="sec" aria-label="Corte vertical coloreado por temperatura"></canvas>
+        <div class="toolbar" style="margin-top:6px">
+          <label class="note" for="o-fila">Fila y:</label>
+          <input type="range" id="o-fila" min="0" max="35" value="18" style="flex:1;accent-color:var(--accent)">
+          <span class="mono note" id="o-fila-v"></span>
+        </div>
+        <div>
+          <div class="cbar" id="cbar"></div>
+          <div class="cbar-axis"><span>5 °C</span><span>20</span><span>35</span><span>50</span><span>65 °C</span></div>
+        </div>
+        <div class="read">
+          <div>Tiempo<b id="t-t"></b></div>
+          <div>T máx. hormigón<b id="t-max"></b></div>
+          <div>T mín. a 25 mm<b id="t-s25"></b></div>
+          <div>ΔT (MΔ en t)<b id="t-dt"></b></div>
+          <div>Colocado<b id="t-col"></b></div>
+        </div>
+      </div>
+    </div>
+    <div class="timebar">
+      <button class="btn" id="b-play" type="button">▶ Reproducir</button>
+      <input type="range" id="t-slider" min="0" max="56" value="0" aria-label="Tiempo">
+      <span class="mono note" id="t-fecha"></span>
+    </div>
+  </section>
+
+  <section class="panel" id="p-series">
+    <div class="panel-h">
+      <h2>Temperaturas en el tiempo</h2>
+      <div class="legend" id="leg-series"></div>
+    </div>
+    <div class="toolbar">
+      <span class="lbl">Ver</span>
+      <div class="seg" id="s-modo"></div>
+      <label class="chk"><input type="checkbox" id="s-14"> Solo 14 días</label>
+    </div>
+    <div class="chartbox"><canvas id="ch-series"></canvas></div>
+    <p class="note" id="s-nota" style="margin-top:6px"></p>
+  </section>
+
+  <section class="panel" id="p-matriz">
+    <div class="panel-h">
+      <h2>Los 24 escenarios del plan</h2>
+      <div class="seg" id="m-met"></div>
+    </div>
+    <div class="grid2">
+      <div class="matrix" id="matriz"></div>
+      <div>
+        <p class="note">Cada celda es una corrida completa: una curva con un clima. El borde rojo marca una falla (MT &gt; 70 °C o MΔ &gt; 20 °C). Haz clic en una celda para verla en las demás vistas.</p>
+        <p class="note" style="margin-top:8px">P_f = Σ w_m q_k · 1{falla}, con w_m = 1/8 por curva y q_k = peso del clima. Cada escenario pesa entre 4,0 % y 4,4 %.</p>
+        <div class="kpis" style="margin-top:10px" id="m-pesos"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-decision">
+    <div class="panel-h">
+      <h2>Comparación de los 48 planes</h2>
+      <p class="note">Clic en un punto para elegir ese plan.</p>
+    </div>
+    <div class="cols3">
+      <div><h3>P_f frente a D</h3><div class="chartbox sm"><canvas id="ch-pf"></canvas></div></div>
+      <div><h3>MΔ más alto frente a D</h3><div class="chartbox sm"><canvas id="ch-md"></canvas></div></div>
+    </div>
+    <div class="legend" style="margin-top:6px"><span><i style="background:var(--ok)"></i>cumple P_f ≤ 5 %</span><span><i style="background:var(--bad)"></i>no cumple</span><span><i style="background:var(--ink)"></i>plan seleccionado</span></div>
+    <div class="scroll" style="margin-top:14px"><table id="tabla"></table></div>
+  </section>
+
+  <section class="panel" id="p-curvas">
+    <div class="panel-h">
+      <h2>Las 8 curvas de calor del cemento</h2>
+      <p class="note">Archivo del profesor <span class="mono">source_terms.txt</span> (β = 2,5), ρ = 2476 kg/m³, cp = 1023 J/(kg K).</p>
+    </div>
+    <div class="cols3">
+      <div><h3>Potencia Q(t) [W/m³]</h3><div class="chartbox sm"><canvas id="ch-q"></canvas></div></div>
+      <div><h3>Calor acumulado [MJ/m³]</h3><div class="chartbox sm"><canvas id="ch-cal"></canvas></div></div>
+    </div>
+    <div class="scroll" style="margin-top:12px"><table id="tabla-curvas"></table></div>
+  </section>
+
+  <section class="panel" id="p-clima">
+    <div class="panel-h">
+      <h2>Las 3 historias de clima</h2>
+      <p class="note">Ensemble GFS de Open-Meteo (17-nov), completado con ERA5 2025 donde no hay pronóstico.</p>
+    </div>
+    <div class="toolbar"><span class="lbl">Variable</span><div class="seg" id="cl-var"></div></div>
+    <div class="chartbox sm"><canvas id="ch-clima"></canvas></div>
+  </section>
+
+  <section class="panel" id="p-robustez">
+    <div class="panel-h"><h2>Robustez del plan elegido</h2></div>
+    <div class="cols3">
+      <div><h3>Malla: MΔ al refinar</h3><div class="chartbox sm"><canvas id="ch-malla"></canvas></div><p class="note">Plan elegido (EPS 150, 10 °C) en sus 3 escenarios más desfavorables.</p></div>
+      <div><h3>31 miembros del ensemble</h3><div class="chartbox sm"><canvas id="ch-31"></canvas></div><p class="note">Variante EPS 100 a 10 °C (la de menos margen), 8 curvas × 31 climas.</p></div>
+      <div style="grid-column:1/-1"><h3>Otras comprobaciones</h3><div class="scroll"><table id="tabla-rob"></table></div></div>
+    </div>
+  </section>
+</template>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(async function(){
+const $=id=>document.getElementById(id);
+const fmt=(v,d=1)=>v==null||!isFinite(v)?'—':v.toLocaleString('es-CL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const PROT={ninguna:'Sin protección',EPS50:'EPS 50 mm',EPS100:'EPS 100 mm',EPS150:'EPS 150 mm'};
+const CLN={frio:'Frío',medio:'Medio',calido:'Cálido'};
+const CURVE_COLORS=['#1f77b4','#2ca02c','#d62728','#9467bd','#6baed6','#74c476','#fc9272','#bcbddc'];
+
+const b64=s=>{const bin=atob(s.trim());const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u;};
+let meta, series;
+try{
+  const [mr,sr]=await Promise.all([fetch('meta.json'),fetch('series.txt')]);
+  if(!mr.ok||!sr.ok) throw new Error('No se encontraron meta.json o series.txt junto a la página.');
+  meta=await mr.json(); series=new Int16Array(b64(await sr.text()).buffer);
+}catch(e){ $('loading').innerHTML='<span class="err">'+e.message+'</span>'; return; }
+$('main').innerHTML=''; $('main').appendChild($('tpl').content.cloneNode(true));
+$('valid').textContent=`verificado contra corridas.csv: dif. máx. ${meta.validacion_max_dif_C.toExponential(1)} °C`;
+
+// ---------- índices ----------
+const planes=meta.planes.map(p=>({...p,espera_h:+p.espera_h,t_col_C:+p.t_col_C,D_h:+p.D_h,P_f:+p.P_f,MT_max_C:+p.MT_max_C,MDelta_max_C:+p.MDelta_max_C,MDelta_min_C:+p.MDelta_min_C,cumple:p.cumple==='True'}));
+const byName=Object.fromEntries(planes.map(p=>[p.plan,p]));
+const ipOf=Object.fromEntries(meta.orden_planes.map((n,i)=>[n,i]));
+const curvas=meta.curvas, climas=meta.climas;
+const runs={}; meta.corridas.forEach(r=>runs[r.plan+'|'+r.curva+'|'+r.clima]=r);
+const elegido=meta.resumen.elegido.plan;
+const fieldCache={};
+
+const st={part:'unica',esp:0,prot:'EPS150',tcol:10,m:3,k:1,comp:'',frame:0,modo:'uno',met:'MDelta',clvar:'T_aire'};
+{const p=byName[elegido]; Object.assign(st,{part:p.particion,esp:p.espera_h,prot:p.proteccion,tcol:p.t_col_C});
+ // peor escenario del plan elegido
+ let w=null; meta.corridas.filter(r=>r.plan===elegido).forEach(r=>{if(!w||r.MDelta>w.MDelta)w=r});
+ st.m=curvas.findIndex(c=>c.nombre===w.curva); st.k=climas.findIndex(c=>c.etiqueta===w.clima);}
+
+function planActual(){
+  return planes.find(p=>p.particion===st.part&&p.proteccion===st.prot&&p.t_col_C===st.tcol&&(st.part==='unica'||p.espera_h===st.esp));
+}
+function serie(plan,m,k){
+  const [pos,n]=meta.series.offsets[`${ipOf[plan]}_${m}_${k}`];
+  const dec=v=>v===-32768?null:v/100;
+  const Tm=new Array(n),Ts=new Array(n),dT=new Array(n);
+  for(let i=0;i<n;i++){Tm[i]=dec(series[pos+i]);Ts[i]=dec(series[pos+n+i]);dT[i]=(Tm[i]==null||Ts[i]==null)?null:Tm[i]-Ts[i];}
+  return {Tm,Ts,dT,n};
+}
+const desc=p=>(p.particion==='unica'?'Vertida única':`5 vertidas, espera ${p.espera_h} h`)+` · ${PROT[p.proteccion]} · ${p.t_col_C} °C`;
+
+// ---------- controles ----------
+function seg(id,opts,key,onchg){
+  const el=$(id); el.innerHTML='';
+  opts.forEach(([v,l])=>{const b=document.createElement('button');b.type='button';b.textContent=l;b.dataset.v=v;
+    b.onclick=()=>{st[key]=typeof st[key]==='number'?+v:v;onchg?onchg():update();};el.appendChild(b);});
+}
+function syncSeg(id,key,disabled=false){[...$(id).children].forEach(b=>{b.setAttribute('aria-pressed',String(String(st[key])===b.dataset.v));b.disabled=disabled;});}
+seg('c-part',[['unica','Única'],['5','5 vertidas']],'part');
+seg('c-esp',[0,6,12,24,48].map(v=>[v,v+' h']),'esp');
+seg('c-prot',Object.entries(PROT).map(([k,v])=>[k,k==='ninguna'?'Ninguna':v.replace(' mm','')]),'prot');
+seg('c-tcol',[[18,'18 °C'],[10,'10 °C']],'tcol');
+seg('c-clima',climas.map(c=>[c.etiqueta,CLN[c.etiqueta]+' '+Math.round(c.peso*100)+'%']),'k');
+[...$('c-clima').children].forEach((b,i)=>{b.dataset.v=i;b.onclick=()=>{st.k=i;update();}});
+$('c-curva').innerHTML=curvas.map((c,i)=>`<option value="${i}">${c.nombre} · ${c.totales_MJ_m3[1]} MJ/m³${c.campana==='22A'?' (menor confianza)':''}</option>`).join('');
+$('c-curva').onchange=e=>{st.m=+e.target.value;update();};
+$('c-comp').innerHTML='<option value="">— ninguno —</option>'+[...planes].sort((a,b)=>a.D_h-b.D_h||a.P_f-b.P_f).map(p=>`<option value="${p.plan}">${desc(p)} (D ${fmt(p.D_h)} h)</option>`).join('');
+$('c-comp').onchange=e=>{st.comp=e.target.value;drawSeries();};
+$('b-elegido').onclick=()=>{const p=byName[elegido];Object.assign(st,{part:p.particion,esp:p.espera_h,prot:p.proteccion,tcol:p.t_col_C});update();};
+seg('s-modo',[['uno','Escenario actual'],['curvas','Las 8 curvas'],['todos','Los 24 escenarios (ΔT)']],'modo',()=>drawSeries());
+seg('m-met',[['MDelta','MΔ'],['MT','MT']],'met',()=>drawMatrix());
+seg('cl-var',[['T_aire','T del aire'],['T_inf','T sol-aire (T∞)'],['viento','Viento'],['h','h del borde'],['solar','Radiación']],'clvar',()=>drawClima());
+$('s-14').onchange=()=>drawSeries();
+
+// ---------- colores de temperatura ----------
+const STOPS=[[5,[49,54,149]],[15,[69,117,180]],[25,[116,173,209]],[32,[171,217,233]],[38,[254,224,144]],[45,[253,174,97]],[52,[244,109,67]],[60,[215,48,39]],[65,[165,0,38]]];
+function tcol(T){ if(T<=STOPS[0][0])return STOPS[0][1]; for(let i=1;i<STOPS.length;i++){if(T<=STOPS[i][0]){const [a,ca]=STOPS[i-1],[b,cb]=STOPS[i],f=(T-a)/(b-a);return ca.map((c,j)=>Math.round(c+f*(cb[j]-c)));}} return STOPS[STOPS.length-1][1];}
+$('cbar').style.background='linear-gradient(90deg,'+STOPS.map(([t,c])=>`rgb(${c}) ${((t-5)/60*100).toFixed(1)}%`).join(',')+')';
+const VCOL=[[78,121,167],[242,142,43],[89,161,79],[225,87,89],[176,122,161]];
+
+// ---------- campos 3D ----------
+async function campo(plan){
+  if(fieldCache[plan]) return fieldCache[plan];
+  const r=await fetch(`${meta.campos.carpeta}/${plan}.txt`); if(!r.ok) throw new Error('Falta el campo de '+plan);
+  let buf=b64(await r.text());
+  if(buf[0]===0x1f&&buf[1]===0x8b){const ds=new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));buf=new Uint8Array(await new Response(ds).arrayBuffer());}
+  return fieldCache[plan]=buf;
+}
+const G=meta.geometria, NC=G.i.length, COD=meta.campos.cod;
+const decT=c=>c===255?null:COD.T_min+COD.paso*c;
+
+// three.js
+const canvas=$('three');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(35,4/3,0.1,200);
+cam.position.set(19,-24,15); cam.up.set(0,0,1);
+const ctrls=new THREE.OrbitControls(cam,canvas); ctrls.target.set(0,0,1.6); ctrls.enableDamping=true; ctrls.update();
+scene.add(new THREE.AmbientLight(0xffffff,0.65)); const dl=new THREE.DirectionalLight(0xffffff,0.55); dl.position.set(10,-15,25); scene.add(dl);
+const geo=new THREE.BoxGeometry(G.dx*0.96,G.dy*0.96,G.dz*0.96);
+const mat=new THREE.MeshLambertMaterial({color:0xffffff});
+const mesh=new THREE.InstancedMesh(geo,mat,NC);
+mesh.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(NC*3).fill(0.6),3); // antes del primer render: así el shader incluye el color por instancia
+scene.add(mesh);
+const pos=new Float32Array(NC*3);
+for(let c=0;c<NC;c++){pos[3*c]=G.x0+(G.i[c]+0.5)*G.dx;pos[3*c+1]=G.y0+(G.j[c]+0.5)*G.dy;pos[3*c+2]=G.z0+(G.k[c]+0.5)*G.dz;}
+const dummy=new THREE.Object3D(), color=new THREE.Color();
+// suelo de referencia
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(26,26),new THREE.MeshBasicMaterial({color:0x888888,transparent:true,opacity:0.12}));scene.add(ground);
+function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();}
+new ResizeObserver(resize).observe(canvas); resize();
+(function loop(){ctrls.update();renderer.render(scene,cam);requestAnimationFrame(loop);})();
+
+let fieldBuf=null, fieldPlan=null;
+function frameCodes(f){const F=meta.campos.cuadros[fieldPlan];const off=(st.m*F+f)*NC;return fieldBuf.subarray(off,off+NC);}
+function draw3D(){
+  if(!fieldBuf) return;
+  const cod=frameCodes(st.frame), corte=$('o-corte').checked, porV=$('o-vert').checked;
+  const jmid=G.ny/2;
+  for(let c=0;c<NC;c++){
+    const vis=cod[c]!==255&&!(corte&&G.j[c]<jmid);
+    dummy.position.set(pos[3*c],pos[3*c+1],pos[3*c+2]); dummy.scale.setScalar(vis?1:0.0001); dummy.updateMatrix(); mesh.setMatrixAt(c,dummy.matrix);
+    const rgb=porV?VCOL[(st.part==='unica'?0:G.vertida[c])%5]:tcol(decT(cod[c])??5);
+    color.setRGB(rgb[0]/255,rgb[1]/255,rgb[2]/255); mesh.setColorAt(c,color);
+  }
+  mesh.instanceMatrix.needsUpdate=true; if(mesh.instanceColor) mesh.instanceColor.needsUpdate=true;
+}
+// corte 2D
+const sec=$('sec');
+const secIdx={}; for(let c=0;c<NC;c++){(secIdx[G.j[c]]??=[]).push(c);}
+function drawSec(){
+  if(!fieldBuf) return;
+  const j=+$('o-fila').value; $('o-fila-v').textContent=`y = ${fmt(G.y0+(j+0.5)*G.dy,2)} m`;
+  const W=sec.clientWidth, cw=W/G.nx, ch=cw*G.dz/G.dx, H=Math.ceil(ch*G.nz)+8;
+  const dpr=Math.min(2,window.devicePixelRatio||1); sec.width=W*dpr; sec.height=H*dpr; sec.style.height=H+'px';
+  const ctx=sec.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+  const cod=frameCodes(st.frame), porV=$('o-vert').checked;
+  for(const c of (secIdx[j]||[])){
+    const x=G.i[c]*cw, y=H-4-(G.k[c]+1)*ch;
+    if(cod[c]===255){ctx.strokeStyle=css('--line');ctx.strokeRect(x+0.5,y+0.5,cw-1,ch-1);continue;}
+    const rgb=porV?VCOL[(st.part==='unica'?0:G.vertida[c])%5]:tcol(decT(cod[c]));
+    ctx.fillStyle=`rgb(${rgb})`; ctx.fillRect(x,y,cw+0.5,ch+0.5);
+  }
+}
+async function loadField(){
+  const p=planActual(); $('f-nota').textContent=`Campo 3D con clima medio (cada ${meta.campos.paso_h} h) · curva ${curvas[st.m].nombre}`;
+  try{ const b=await campo(p.plan); if(planActual().plan!==p.plan) return; fieldBuf=b; fieldPlan=p.plan;
+    const F=meta.campos.cuadros[p.plan]; $('t-slider').max=F-1; if(st.frame>F-1) st.frame=F-1; $('t-slider').value=st.frame; frameUpdate();
+  }catch(e){ $('f-nota').innerHTML='<span class="err">'+e.message+'</span>'; }
+}
+function frameUpdate(){
+  draw3D(); drawSec();
+  const t=st.frame*meta.campos.paso_h, p=planActual();
+  const d=new Date(Date.parse(meta.t0_local)+t*3600e3);
+  $('t-t').textContent=`${t} h (${fmt(t/24,1)} d)`;
+  $('t-fecha').textContent=d.toLocaleString('es-CL',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  const kMed=climas.findIndex(c=>c.etiqueta===meta.campos.clima);
+  const s=serie(p.plan,st.m,kMed);
+  $('t-max').textContent=fmt(s.Tm[t],1)+' °C'; $('t-s25').textContent=fmt(s.Ts[t],1)+' °C';
+  const dt=s.dT[t]; $('t-dt').innerHTML=dt==null?'—':`<span style="color:${dt>20?css('--bad'):'inherit'}">${fmt(dt,1)} °C</span>`;
+  if(fieldBuf){const cod=frameCodes(st.frame);let n=0;for(let c=0;c<NC;c++)if(cod[c]!==255)n++;$('t-col').textContent=Math.round(100*n/NC)+' %';}
+  if(chS) {chS.options.plugins.cursor.t=t; chS.update('none');}
+}
+$('t-slider').oninput=e=>{st.frame=+e.target.value;frameUpdate();};
+$('o-fila').oninput=drawSec; $('o-corte').onchange=draw3D; $('o-vert').onchange=()=>{draw3D();drawSec();};
+new ResizeObserver(()=>drawSec()).observe(sec);
+let timer=null;
+$('b-play').onclick=()=>{ if(timer){clearInterval(timer);timer=null;$('b-play').textContent='▶ Reproducir';return;}
+  $('b-play').textContent='❚❚ Pausa'; timer=setInterval(()=>{const F=+$('t-slider').max; st.frame=(st.frame+1)%(F+1); $('t-slider').value=st.frame; frameUpdate();},180);};
+
+// ---------- Chart.js ----------
+Chart.defaults.font.family=css('--f-body'); Chart.defaults.animation=false;
+const cursorPlugin={id:'cursor',afterDatasetsDraw(ch,_,o){if(o.t==null)return;const x=ch.scales.x.getPixelForValue(o.t);if(x<ch.chartArea.left||x>ch.chartArea.right)return;const c=ch.ctx;c.save();c.strokeStyle=css('--muted');c.setLineDash([4,4]);c.beginPath();c.moveTo(x,ch.chartArea.top);c.lineTo(x,ch.chartArea.bottom);c.stroke();c.restore();}};
+const limPlugin={id:'lims',afterDatasetsDraw(ch,_,o){(o.lines||[]).forEach(([y,l,axis])=>{const sc=ch.scales[axis||'y'];if(!sc)return;const py=sc.getPixelForValue(y);if(py<ch.chartArea.top||py>ch.chartArea.bottom)return;const c=ch.ctx;c.save();c.strokeStyle=css('--bad');c.setLineDash([6,4]);c.beginPath();c.moveTo(ch.chartArea.left,py);c.lineTo(ch.chartArea.right,py);c.stroke();c.fillStyle=css('--bad');c.font='11px '+css('--f-mono');c.fillText(l,ch.chartArea.left+4,py-4);c.restore();});}};
+Chart.register(cursorPlugin,limPlugin);
+function baseOpts(xTitle,yTitle){const ink=css('--muted'),grid=css('--line');return{responsive:true,maintainAspectRatio:false,parsing:false,normalized:true,
+  interaction:{mode:'nearest',intersect:false},
+  scales:{x:{type:'linear',title:{display:true,text:xTitle,color:ink},ticks:{color:ink},grid:{color:grid}},y:{title:{display:true,text:yTitle,color:ink},ticks:{color:ink},grid:{color:grid}}},
+  plugins:{legend:{display:false},tooltip:{callbacks:{}},cursor:{},lims:{}}};}
+let chS,chPf,chMd,chQ,chCal,chCl,chMalla,ch31;
+
+function drawSeries(){
+  const p=planActual(), modo=st.modo, solo14=$('s-14').checked;
+  syncSeg('s-modo','modo');
+  const xy=(arr,maxT)=>{const o=[];for(let i=0;i<arr.length;i++){if(maxT!=null&&i>maxT)break;o.push({x:i,y:arr[i]});}return o;};
+  const lim=solo14?336:null; let ds=[], leg=[];
+  const ink=css('--ink'),acc=css('--accent'),bad=css('--bad'),warn=css('--warn'),muted=css('--muted');
+  let opts=baseOpts('horas desde t₀ (19-nov 08:00)','°C');
+  if(modo==='uno'){
+    const s=serie(p.plan,st.m,st.k);
+    ds.push({label:'T máx. hormigón (MT)',data:xy(s.Tm,lim),borderColor:bad,borderWidth:2,pointRadius:0});
+    ds.push({label:'T mín. a 25 mm (S25)',data:xy(s.Ts,lim),borderColor:acc,borderWidth:2,pointRadius:0});
+    ds.push({label:'ΔT = MT − S25',data:xy(s.dT,lim),borderColor:warn,borderWidth:2.5,pointRadius:0,yAxisID:'y'});
+    leg=[[bad,'T máx. hormigón colocado'],[acc,'T mín. a 25 mm bajo la superficie'],[warn,'ΔT']];
+    if(st.comp){const s2=serie(st.comp,st.m,st.k);ds.push({label:'ΔT plan comparado',data:xy(s2.dT,lim),borderColor:muted,borderDash:[5,4],borderWidth:2,pointRadius:0});
+      ds.push({label:'T máx. plan comparado',data:xy(s2.Tm,lim),borderColor:muted,borderDash:[2,3],borderWidth:1.5,pointRadius:0});
+      leg.push([muted,'plan comparado (ΔT y T máx., punteado)']);}
+    opts.plugins.lims.lines=[[20,'ΔT 20 °C'],[70,'T 70 °C']];
+    const r=runs[p.plan+'|'+curvas[st.m].nombre+'|'+climas[st.k].etiqueta];
+    $('s-nota').textContent=`${curvas[st.m].nombre}, clima ${CLN[climas[st.k].etiqueta].toLowerCase()}: MT = ${fmt(r.MT,2)} °C a las ${r.t_MT} h; MΔ = ${fmt(r.MDelta,2)} °C a las ${r.t_MDelta} h. ${r.falla?'Este escenario FALLA.':'Este escenario cumple.'}`;
+  }else{
+    const ks=modo==='curvas'?[st.k]:climas.map((_,i)=>i);
+    curvas.forEach((c,m)=>ks.forEach(k=>{const s=serie(p.plan,m,k);
+      ds.push({label:`${c.nombre} ${CLN[climas[k].etiqueta]}`,data:xy(s.dT,lim),borderColor:CURVE_COLORS[m],borderWidth:(m===st.m&&k===st.k)?2.6:1.2,borderDash:k===0?[]:k===1?[6,3]:[2,3],pointRadius:0});}));
+    if(st.comp&&modo==='curvas'){curvas.forEach((c,m)=>{const s=serie(st.comp,m,st.k);ds.push({label:`${c.nombre} (comparado)`,data:xy(s.dT,lim),borderColor:muted,borderWidth:1,borderDash:[1,3],pointRadius:0});});}
+    leg=curvas.map((c,m)=>[CURVE_COLORS[m],c.nombre]); if(modo==='todos') leg.push([muted,'línea: frío · trazos: medio · puntos: cálido']);
+    opts.scales.y.title.text='ΔT [°C]'; opts.plugins.lims.lines=[[20,'ΔT 20 °C']];
+    $('s-nota').textContent=modo==='curvas'?`ΔT del plan con cada una de las 8 curvas (clima ${CLN[climas[st.k].etiqueta].toLowerCase()}).`:'ΔT del plan en los 24 escenarios. Si alguna línea pasa los 20 °C, ese escenario falla y suma su peso a P_f.';
+  }
+  opts.plugins.cursor.t=st.frame*meta.campos.paso_h;
+  opts.plugins.tooltip.callbacks.label=c=>`${c.dataset.label}: ${fmt(c.parsed.y,1)} °C`;
+  opts.plugins.tooltip.callbacks.title=c=>`t = ${c[0].parsed.x} h`;
+  $('leg-series').innerHTML=leg.map(([c,l])=>`<span><i style="background:${c}"></i>${l}</span>`).join('');
+  if(chS) chS.destroy(); chS=new Chart($('ch-series'),{type:'line',data:{datasets:ds},options:opts});
+}
+
+function drawMatrix(){
+  syncSeg('m-met','met'); const p=planActual(), el=$('matriz');
+  let h='<div></div>'+climas.map(c=>`<div class="h">${CLN[c.etiqueta]}<br>${fmt(c.peso*100,1)} %</div>`).join('');
+  const lim=st.met==='MT'?70:20;
+  curvas.forEach((c,m)=>{h+=`<div class="rh">${c.nombre}</div>`;climas.forEach((cl,k)=>{const r=runs[p.plan+'|'+c.nombre+'|'+cl.etiqueta];const v=r[st.met];
+    const lo=st.met==='MT'?20:5; const rgb=tcol(5+60*Math.max(0,Math.min(1,(v-lo)/(lim-lo)))*0.98);
+    h+=`<button type="button" class="cellbtn${r.falla?' fail':''}${m===st.m&&k===st.k?' cur':''}" data-m="${m}" data-k="${k}" style="background:rgb(${rgb})" title="${c.nombre} · ${CLN[cl.etiqueta]}">${fmt(v,1)}<small>${r.falla?'falla':'cumple'}</small></button>`;});});
+  el.innerHTML=h; el.querySelectorAll('.cellbtn').forEach(b=>b.onclick=()=>{st.m=+b.dataset.m;st.k=+b.dataset.k;update();});
+  const ws=curvas.map(c=>c.peso), pf=meta.corridas.filter(r=>r.plan===p.plan&&r.falla).reduce((a,r)=>a+ws[curvas.findIndex(c=>c.nombre===r.curva)]*climas.find(c=>c.etiqueta===r.clima).peso,0);
+  const nf=meta.corridas.filter(r=>r.plan===p.plan&&r.falla).length;
+  $('m-pesos').innerHTML=`<div class="kpi"><span class="lbl">Escenarios que fallan</span><span class="v">${nf} / 24</span></div><div class="kpi"><span class="lbl">P_f recalculada</span><span class="v">${fmt(pf*100,1)} %</span><span class="s">planes.csv: ${fmt(p.P_f*100,1)} %</span></div>`;
+}
+
+function drawDecision(){
+  const p=planActual(), ok=css('--ok'), bad=css('--bad'), ink=css('--ink');
+  const mk=(yk)=>[{data:planes.map(q=>({x:q.D_h,y:yk==='P_f'?q.P_f*100:q.MDelta_max_C,plan:q.plan})),
+      backgroundColor:planes.map(q=>q.plan===p.plan?ink:(q.cumple?ok:bad)),borderColor:planes.map(q=>q.plan===p.plan?ink:(q.cumple?ok:bad)),pointRadius:planes.map(q=>q.plan===p.plan?7:4),pointHoverRadius:8,showLine:false}];
+  const opt=(yt,lines)=>{const o=baseOpts('D [h]',yt);o.interaction={mode:'nearest',intersect:true};o.scales.x.type='logarithmic';o.scales.x.ticks.callback=v=>[10,20,50,100,200].includes(v)?v:'';
+    o.plugins.tooltip.callbacks.label=c=>{const q=byName[c.raw.plan];return [desc(q),`D ${fmt(q.D_h)} h · P_f ${fmt(q.P_f*100,1)} % · MΔ ${fmt(q.MDelta_max_C,1)} °C`];};
+    o.plugins.lims.lines=lines; o.onClick=(e,els)=>{if(!els.length)return;const q=byName[planes[els[0].index].plan];Object.assign(st,{part:q.particion,esp:q.espera_h,prot:q.proteccion,tcol:q.t_col_C});update();};return o;};
+  if(chPf) chPf.destroy(); chPf=new Chart($('ch-pf'),{type:'scatter',data:{datasets:mk('P_f')},options:opt('P_f [%]',[[5,'5 %']])});
+  if(chMd) chMd.destroy(); chMd=new Chart($('ch-md'),{type:'scatter',data:{datasets:mk('MD')},options:opt('MΔ más alto [°C]',[[20,'20 °C']])});
+}
+
+let sortKey='D_h', sortDir=1;
+function drawTable(){
+  const p=planActual();
+  const cols=[['plan','Plan',q=>desc(q)],['D_h','D [h]',q=>fmt(q.D_h)],['P_f','P_f',q=>fmt(q.P_f*100,1)+' %'],['MT_max_C','MT máx [°C]',q=>fmt(q.MT_max_C)],['MDelta_max_C','MΔ máx [°C]',q=>fmt(q.MDelta_max_C)],['MDelta_min_C','MΔ mín [°C]',q=>fmt(q.MDelta_min_C)],['cumple','Cumple',q=>`<span class="pill ${q.cumple?'ok':'bad'}">${q.cumple?'sí':'no'}</span>`]];
+  const rows=[...planes].sort((a,b)=>{const x=a[sortKey],y=b[sortKey];return (x>y?1:x<y?-1:(a.P_f-b.P_f))*sortDir;});
+  $('tabla').innerHTML='<thead><tr>'+cols.map(([k,l])=>`<th data-k="${k}">${l}${sortKey===k?(sortDir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr></thead><tbody>'+
+    rows.map(q=>`<tr data-p="${q.plan}" class="${q.plan===p.plan?'sel':''}">`+cols.map(([k,,f],i)=>`<td class="${i?'num':''}">${f(q)}${i===0&&q.plan===elegido?' <span class="tag">elegido</span>':''}</td>`).join('')+'</tr>').join('')+'</tbody>';
+  $('tabla').querySelectorAll('th').forEach(th=>th.onclick=()=>{const k=th.dataset.k;sortDir=sortKey===k?-sortDir:1;sortKey=k;drawTable();});
+  $('tabla').querySelectorAll('tbody tr').forEach(tr=>tr.onclick=()=>{const q=byName[tr.dataset.p];Object.assign(st,{part:q.particion,esp:q.espera_h,prot:q.proteccion,tcol:q.t_col_C});update();});
+}
+
+function drawCurvas(){
+  const rc=2476*1023/1e6;
+  const dsQ=curvas.map((c,m)=>({label:c.nombre,data:c.t_h.map((t,i)=>({x:t,y:c.Q_W_m3[i]})),borderColor:CURVE_COLORS[m],borderWidth:m===st.m?2.8:1.3,borderDash:c.campana==='22A'?[5,3]:[],pointRadius:0}));
+  const dsC=curvas.map((c,m)=>({label:c.nombre,data:c.edad_h.map((t,i)=>({x:t,y:c.theta_C[i]*rc})),borderColor:CURVE_COLORS[m],borderWidth:m===st.m?2.8:1.3,borderDash:c.campana==='22A'?[5,3]:[],pointRadius:0}));
+  const o1=baseOpts('edad [h]','Q [W/m³]'),o2=baseOpts('edad [h]','MJ/m³');
+  [o1,o2].forEach(o=>{o.plugins.legend={display:true,labels:{color:css('--muted'),boxWidth:12,font:{size:11}}};o.plugins.tooltip.callbacks.label=c=>`${c.dataset.label}: ${fmt(c.parsed.y,1)}`;});
+  if(chQ) chQ.destroy(); chQ=new Chart($('ch-q'),{type:'line',data:{datasets:dsQ},options:o1});
+  if(chCal) chCal.destroy(); chCal=new Chart($('ch-cal'),{type:'line',data:{datasets:dsC},options:o2});
+  const pk=c=>{let i=0;c.Q_W_m3.forEach((v,j)=>{if(v>c.Q_W_m3[i])i=j});return [c.Q_W_m3[i],c.t_h[i]];};
+  $('tabla-curvas').innerHTML='<thead><tr><th>Curva</th><th>Campaña</th><th>Registro [h]</th><th>Peak Q [W/m³]</th><th>t peak [h]</th><th>Calor β 2,1</th><th>β 2,5 (usado)</th><th>β 3,0</th><th>ΔT adiab. [K]</th></tr></thead><tbody>'+
+    curvas.map((c,m)=>{const [q,t]=pk(c);return `<tr data-m="${m}" class="${m===st.m?'sel':''}"><td>${c.nombre}</td><td class="num">${c.campana}${c.campana==='22A'?' (menor confianza)':''}</td><td class="num">${fmt(c.t_h[c.t_h.length-1],0)}</td><td class="num">${fmt(q,0)}</td><td class="num">${fmt(t,0)}</td>`+c.totales_MJ_m3.map(v=>`<td class="num">${fmt(v,1)}</td>`).join('')+`<td class="num">${fmt(c.theta_C[c.theta_C.length-1],1)}</td></tr>`;}).join('')+'</tbody>';
+  $('tabla-curvas').querySelectorAll('tbody tr').forEach(tr=>tr.onclick=()=>{st.m=+tr.dataset.m;update();});
+}
+
+function drawClima(){
+  syncSeg('cl-var','clvar'); const v=st.clvar, U={T_aire:'°C',T_inf:'°C',viento:'m/s',h:'W/(m² K)',solar:'W/m²'};
+  const cols=[css('--accent'),css('--muted'),css('--bad')];
+  const ds=meta.clima_horario.map((c,k)=>({label:`${CLN[climas[k].etiqueta]} (${climas[k].miembro})`,data:c.t_h.map((t,i)=>({x:t,y:c[v][i]})),borderColor:cols[k],borderWidth:k===st.k?2.4:1.2,pointRadius:0}));
+  const o=baseOpts('horas desde t₀',U[v]); o.plugins.legend={display:true,labels:{color:css('--muted'),boxWidth:12}};
+  const c0=meta.clima_horario[0]; const i0=c0.fuente.findIndex(f=>f!=='forecast');
+  if(i0>0){o.plugins.cursor.t=c0.t_h[i0];}
+  o.plugins.tooltip.callbacks.title=c=>`t = ${c[0].parsed.x} h · ${meta.clima_horario[0].local[c[0].dataIndex]} · ${meta.clima_horario[0].fuente[c[0].dataIndex]}`;
+  if(chCl) chCl.destroy(); chCl=new Chart($('ch-clima'),{type:'line',data:{datasets:ds},options:o});
+}
+
+function drawRobustez(){
+  const rob=meta.robustez, foco=elegido;
+  const m=rob.malla.filter(r=>r.plan===foco), grupos={};
+  m.forEach(r=>{const k=r.curva+' '+r.clima;(grupos[k]??=[{x:0.5,y:r['MDelta_dx0.5']}]).push({x:r.dx,y:r.MDelta});});
+  const cols=[css('--bad'),css('--accent'),css('--muted')];
+  const ds=Object.entries(grupos).map(([k,pts],i)=>({label:k,data:pts.sort((a,b)=>b.x-a.x),borderColor:cols[i%3],backgroundColor:cols[i%3],pointRadius:4,borderWidth:1.8}));
+  const o=baseOpts('tamaño de celda Δx [m]','MΔ [°C]'); o.scales.x.reverse=true; o.plugins.legend={display:true,labels:{color:css('--muted'),boxWidth:12,font:{size:11}}}; o.plugins.lims.lines=[[20,'20 °C']]; o.scales.y.suggestedMax=21;
+  if(chMalla) chMalla.destroy(); chMalla=new Chart($('ch-malla'),{type:'line',data:{datasets:ds},options:o});
+  const mm=meta.miembros_31, cn=curvas.map(c=>c.nombre);
+  const d31=[{data:mm.map((r,i)=>({x:cn.indexOf(r.curva)+((i%31)-15)/50,y:+r.MDelta})),pointRadius:2.5,backgroundColor:css('--accent'),showLine:false}];
+  const o31=baseOpts('curva','MΔ [°C]'); o31.scales.x.ticks.callback=v=>cn[v]??''; o31.scales.x.ticks.stepSize=1; o31.scales.x.min=-0.6; o31.scales.x.max=7.6; o31.plugins.lims.lines=[[20,'20 °C']]; o31.scales.y.suggestedMax=21;
+  o31.plugins.tooltip.callbacks.label=c=>{const r=mm[c.dataIndex];return `${r.curva} · ${r.miembro}: MΔ ${fmt(+r.MDelta,2)} °C`;};
+  if(ch31) ch31.destroy(); ch31=new Chart($('ch-31'),{type:'scatter',data:{datasets:d31},options:o31});
+  const R=meta.resumen, b=rob.beta;
+  const rows=[['β = 2,1 (menos calor)',`P_f ${fmt(b['beta_2.1'].P_f*100,0)} %`,`MΔ máx ${fmt(b['beta_2.1'].MDelta_max,1)} °C`],
+    ['β = 3,0 (+20 % calor)',`P_f ${fmt(b['beta_3.0'].P_f*100,0)} %`,`MΔ máx ${fmt(b['beta_3.0'].MDelta_max,1)} °C`],
+    ...Object.entries(R.profundidad_S25).map(([k,v])=>[`S25 a ${k}*`,`P_f ${fmt(v.P_f*100,0)} %`,`MΔ máx ${fmt(v.MDelta_max_C,1)} °C`]),
+    ...Object.entries(R.sensibilidad_pesos_clima).map(([k,v])=>[`Pesos del clima: ${k.replace('_',' ')}*`,`P_f ${fmt(v*100,0)} %`,'']),
+    ['Solo campaña SS*',`P_f ${fmt(R.sensibilidad_curvas_solo_SS*100,0)} %`,''],
+    ['β = 3,0 con EPS 100*',`P_f ${fmt(R.sensibilidad_beta_inversion['beta_3.0']*100,0)} %`,'']];
+  $('tabla-rob').innerHTML='<thead><tr><th>Comprobación</th><th>P_f</th><th>MΔ</th></tr></thead><tbody>'+rows.map(r=>`<tr style="cursor:default"><td>${r[0]}</td><td class="num">${r[1]}</td><td class="num">${r[2]}</td></tr>`).join('')+'</tbody>'+
+   '<caption style="caption-side:bottom;text-align:left;padding-top:6px" class="note">β: plan elegido. * Variante EPS 100 a 10 °C, que tiene menos margen.</caption>';
+}
+
+function drawResumen(){
+  const p=planActual();
+  $('r-titulo').textContent=desc(p)+(p.plan===elegido?' · plan elegido':'');
+  $('r-nombre').textContent=p.plan;
+  $('r-pill').className='pill '+(p.cumple?'ok':'bad'); $('r-pill').textContent=p.cumple?'Cumple P_f ≤ 5 %':'No cumple P_f ≤ 5 %';
+  $('k-D').textContent=fmt(p.D_h)+' h'; $('k-D2').textContent=p.D_h<16?'mínimo posible con una bomba':`${fmt(p.D_h-15.92)} h más que colocar seguido`;
+  $('k-pf').textContent=fmt(p.P_f*100,1)+' %'; $('k-pf2').textContent=`P(MT>70) ${fmt(+p.P_MT*100,0)} % · P(MΔ>20) ${fmt(+p.P_MDelta*100,0)} %`;
+  $('k-mt').textContent=fmt(p.MT_max_C)+' °C';
+  $('k-md').innerHTML=`<span style="color:${p.MDelta_max_C>20?css('--bad'):'inherit'}">${fmt(p.MDelta_max_C)} °C</span>`; $('k-md2').textContent=`rango ${fmt(p.MDelta_min_C)}–${fmt(p.MDelta_max_C)} °C · límite 20`;
+  const r=runs[p.plan+'|'+curvas[st.m].nombre+'|'+climas[st.k].etiqueta];
+  $('k-esc').textContent=`MΔ ${fmt(r.MDelta,1)} °C`; $('k-esc2').textContent=`${curvas[st.m].nombre} · clima ${CLN[climas[st.k].etiqueta].toLowerCase()} · MT ${fmt(r.MT,1)} °C`;
+  const cr=meta.cronogramas[p.plan], Hx=Math.max(16,...cr.map(([a,d])=>a+d));
+  $('crono').innerHTML=cr.map(([a,d],i)=>`<div title="Vertida ${i+1}: ${fmt(a)}–${fmt(a+d)} h (${fmt(meta.volumenes_m3.length===cr.length?meta.volumenes_m3[i]:636.9,0)} m³)" style="left:${a/Hx*100}%;width:max(3px,${d/Hx*100}%);background:${cr.length>1?`rgb(${VCOL[i%5]})`:'var(--accent)'}"></div>`).join('');
+  $('crono-axis').innerHTML=`<span>0 h</span><span>${fmt(Hx/2,0)} h</span><span>${fmt(Hx,0)} h</span>`;
+}
+
+function update(){
+  syncSeg('c-part','part'); syncSeg('c-esp','esp',st.part==='unica'); syncSeg('c-prot','prot'); syncSeg('c-tcol','tcol');
+  [...$('c-clima').children].forEach((b,i)=>b.setAttribute('aria-pressed',String(i===st.k)));
+  $('c-curva').value=st.m;
+  drawResumen(); drawSeries(); drawMatrix(); drawDecision(); drawTable(); drawCurvas(); drawClima();
+  loadField();
+}
+// primer cuadro: instante de MΔ del escenario elegido
+{const r=runs[elegido+'|'+curvas[st.m].nombre+'|'+climas[st.k].etiqueta]; st.frame=Math.round(r.t_MDelta/meta.campos.paso_h);}
+update(); drawRobustez();
+// tema: redibujar gráficos si cambia
+const redraw=()=>{update();drawRobustez();};
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redraw);
+new MutationObserver(redraw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+</script>
