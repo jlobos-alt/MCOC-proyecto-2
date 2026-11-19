@@ -10,7 +10,8 @@ Con la capacidad declarada, **15,9 h es la duración mínima posible**: el plan 
 recursos. La pregunta que queda es si ese plan cumple, y con qué margen.
 
 Qué llevar y qué preguntar al taller: [CONSULTAS_Y_CHECKLIST.md](CONSULTAS_Y_CHECKLIST.md). Guion:
-[GUION_DEFENSA.md](GUION_DEFENSA.md).
+[GUION_DEFENSA.md](GUION_DEFENSA.md). Mecanismo, sensibilidad temporal, balance de energía, robustez del plan
+elegido y qué pasa después del día 14: [COMPLEMENTOS.md](COMPLEMENTOS.md).
 
 ## Cómo correr (desde la raíz del repo)
 
@@ -114,14 +115,18 @@ La tabla completa de los 48 planes está en `results/defensa/planes.csv`.
 | Comprobación | Resultado |
 |---|---|
 | **Malla**, escenario más desfavorable (M4_SS) | MΔ = 15,96 → 16,99 → **17,60 °C** (0,5 → 0,25 → 0,125 m). Estimado convergido ≈ 18,5 °C: **cumple, con ~1,5 °C de margen** |
-| Profundidad de S25 (25 / 50 / 138 mm)* | 17,1 / 17,0 / 16,7 °C: la elección no cambia la conclusión |
-| Pesos del clima (declarados, iguales, todo frío, todo cálido)* | P_f = 0 en todos |
-| Solo la campaña SS (1/4 cada una)* | P_f = 0 |
-| Los 31 miembros del ensemble* | P_f = 0, MΔ entre 9,0 y 17,2 °C |
-| **β de la inversión** de las curvas | β = 2,1: MΔ máximo 13,0 °C. **β = 3,0** (+20 % de calor): MΔ máximo **19,7 °C** con la malla gruesa, sin margen para el error de malla. **Ahí la decisión es frágil** |
+| Profundidad de S25 (25 / 50 / 275 mm) | P_f = 0; MΔ máximo 15,96 / 15,90 / 15,39 °C: la elección no cambia la conclusión |
+| Pesos del clima (declarados, iguales, todo frío, todo medio, todo cálido) | P_f = 0 en todos |
+| Solo la campaña SS (1/4 cada una) | P_f = 0 |
+| Los 31 miembros del ensemble × 8 curvas (248 corridas) | P_f = 0, MΔ entre 8,6 y 16,0 °C |
+| **β de la inversión** de las curvas | β = 2,1: P_f = 0, MΔ máximo 13,0 °C. **β = 3,0** (+20 % de calor): P_f = 0, MΔ máximo **19,7 °C** con la malla gruesa, sin margen para el error de malla. **Ahí la decisión es frágil** |
+| Paso temporal (Δt = 3600 / 1800 / 900 s) | MΔ = 15,964 / 15,982 / 15,986 °C: el paso temporal no decide |
+| Balance de energía, caso real aislado | Error relativo 2,8·10⁻⁴ con Δt = 1 h, que baja con Δt (1,1·10⁻⁵ con 225 s) |
+| **Después del día 14**, aislación puesta | MΔ sigue subiendo: 18,1 °C a los 20 días y 19,8 °C a los 30. Hace falta retirar la aislación de forma gradual, guiada por monitoreo |
 
-\* Comprobación hecha sobre la variante EPS 100 a 10 °C, que tiene menos margen. Si esa cumple, la elegida
-también.
+Todas las filas son del plan elegido (EPS 150, 10 °C), malla de 0,5 m salvo la de malla. Antes, varias se
+habían corrido sobre la variante EPS 100; se rehicieron con `scripts/defensa_complementos.py`. Detalle y
+figuras en [COMPLEMENTOS.md](COMPLEMENTOS.md).
 
 **Conclusión admisible** (guía 4.3): *cumple bajo el conjunto de 8 curvas, 3 climas y los pesos declarados.* Las 8
 curvas no certifican por sí solas un 95 % de confiabilidad real, y el criterio térmico no demuestra ausencia de

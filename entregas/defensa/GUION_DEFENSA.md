@@ -22,7 +22,7 @@ comparación permite decidir**.
 | **Balance de celda** | C dT/dt = Σ G (T_j − T_i) + (A/R)(T∞ − T_i) + q V, con G = kA/d y k armónica en las interfaces | `thermal.py` |
 | **Estabilidad** | Euler explícito, Δt ≤ C/ΣG (incluido el borde), factor 0,8. El caso usa Δt = 1 h | `thermal.estimate_timestep` |
 | **Verificación** | Seno 1D/2D/3D con orden ≈ 2 en espacio y ≈ 1 en tiempo, energía, Robin, Neumann (E05, E06). S25 contra el perfil exacto con error < 10⁻⁶ °C | `tests/` |
-| **Sensibilidad de las métricas** | Malla (plan elegido, M4_SS): MΔ = 15,96 → 16,99 → 17,60 °C (0,5 → 0,25 → 0,125 m). Profundidad de S25 (variante EPS 100): 25 / 50 / 138 mm → 17,1 / 17,0 / 16,7 °C | `results/defensa/robustez_curvas_reales.json` |
+| **Sensibilidad de las métricas** | Malla (plan elegido, M4_SS): MΔ = 15,96 → 16,99 → 17,60 °C (0,5 → 0,25 → 0,125 m). Profundidad de S25 25 / 50 / 275 mm: 15,96 / 15,90 / 15,39 °C. Δt de 1 h a 15 min: 0,02 °C. Energía: error 2,8·10⁻⁴, baja con Δt | `COMPLEMENTOS.md` |
 | **Calibrado, verificado, validado** | Verificado: el solver. Calibrado: nada aún. Validado: nada contra observaciones | README §5 |
 | **Qué limita la recomendación** | El calor total de las curvas (β de la inversión), la malla converge lento, r y T_col mínimas son supuestos, la aislación no se retira y el suelo es 1D | README §5 |
 
@@ -46,11 +46,15 @@ comparación permite decidir**.
   Cada escenario pesa entre 4,0 y 4,4 %: una falla podría todavía cumplir, dos no. Es la probabilidad
   exacta del modelo discreto, sin error de muestreo y sin intervalo binomial.
 - **¿Por qué solo 3 historias de clima?**
-  Son trayectorias completas y coherentes. Con los 31 miembros y las 8 curvas, P_f sigue en 0 y MΔ queda entre 9,0
-  y 17,2 °C con la malla gruesa (variante EPS 100, que tiene menos margen). Cambiar los pesos (iguales, todo al frío, todo al cálido) tampoco cambia P_f.
+  Son trayectorias completas y coherentes. Con los 31 miembros y las 8 curvas (248 corridas), P_f sigue en 0 y
+  MΔ queda entre 8,6 y 16,0 °C con la malla gruesa. Cambiar los pesos (iguales, todo al frío, todo al medio, todo al
+  cálido) tampoco cambia P_f.
 - **¿Cumple con 95 % de confianza?**
   No es lo mismo. P_f ≤ 5 % es un riesgo bajo el conjunto y los pesos declarados. La enumeración no tiene error
   de muestreo, sí incertidumbre de representatividad, y no certifica ausencia de grietas.
 - **¿Y el Monte Carlo de E13?**
   Queda como alternativa, con su distribución, N, semilla y cota binomial. Para la decisión usamos la
   enumeración ponderada que pide la guía.
+- **¿Y después del día 14?**
+  El criterio son 14 días y ahí cumple. Con la aislación puesta, el núcleo sigue caliente y MΔ sube a 18,1 °C a
+  los 20 días y 19,8 °C a los 30. El plan incluye retirar la aislación de forma gradual, guiada por monitoreo.

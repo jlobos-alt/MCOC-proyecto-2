@@ -1,7 +1,8 @@
 # Curvas de hidratación del profesor
 
-Aquí van las **8 curvas reales** entregadas por el profesor. Mientras esta carpeta no tenga
-`curvas.yaml`, `scripts/defensa_plan.py` usa la curva C1 **provisoria** y lo avisa en cada corrida.
+Aquí están las **8 curvas reales** entregadas por el profesor: `originales/source_terms.txt`, sin modificar,
+y su descripción en `curvas.yaml`. Si faltara `curvas.yaml`, `scripts/defensa_plan.py` usaría la curva C1
+**provisoria** y lo avisaría en cada corrida.
 
 ## Cómo agregarlas
 

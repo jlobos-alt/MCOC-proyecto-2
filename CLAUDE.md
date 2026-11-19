@@ -120,7 +120,7 @@ y comparación antes/después sin IfcOpenShell) y `scripts/roundtrip_ifc.py --an
 | E08 Lab BIM→grid + activación | 5 nov | hecho (Matías) | ver `entregas/entrega8/README.md` |
 | E09 Baseline 3D con hidratación | 6 nov | hecho (José) | `7773d10` |
 | E10 Revisión oral entorno, moldaje, clima | 11 nov | hecho (José) | `e0998c3` |
-| E11 Lab weather pipeline + visualización 3D | 12 nov | en revisión (Matías) | ver `entregas/entrega11/README.md` |
+| E11 Lab weather pipeline + visualización 3D | 12 nov | hecho (Matías) | `325fea7` |
 | E12 Simulación determinista 14 días | 13 nov | hecho (José) | `f53f3d9` |
 | E13 Revisión oral incertidumbre y confiabilidad | 18 nov | hecho (Clemente) | ver `entregas/entrega13/README.md` |
 | Defensa (taller 18, defensa 19, artículo lunes 23) | 18–23 nov | plan elegido: vertida única, EPS 150, 10 °C, D = 15,9 h | ver `entregas/defensa/README.md` |

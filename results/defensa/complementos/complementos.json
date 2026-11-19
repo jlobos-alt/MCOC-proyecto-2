@@ -1,0 +1,175 @@
+{
+  "mecanismo": {
+    "curva": "M4_SS",
+    "clima": "medio",
+    "casos": [
+      {
+        "caso": "Vertida única sin protección, 18 °C",
+        "plan": "unica_ninguna_Tcol18",
+        "D_h": 15.92,
+        "MT_C": 56.78,
+        "t_MT_h": 177.0,
+        "MDelta_C": 41.55,
+        "t_MDelta_h": 259.0,
+        "cumple": false
+      },
+      {
+        "caso": "Propuesta: única, EPS 150, 10 °C",
+        "plan": "unica_EPS150_Tcol10",
+        "D_h": 15.92,
+        "MT_C": 49.45,
+        "t_MT_h": 222.0,
+        "MDelta_C": 15.96,
+        "t_MDelta_h": 335.0,
+        "cumple": true
+      },
+      {
+        "caso": "5 vertidas, espera 6 h, EPS 150, 10 °C",
+        "plan": "5v_espera6h_EPS150_Tcol10",
+        "D_h": 39.92,
+        "MT_C": 49.66,
+        "t_MT_h": 245.0,
+        "MDelta_C": 20.69,
+        "t_MDelta_h": 42.0,
+        "cumple": false
+      },
+      {
+        "caso": "5 vertidas, espera 48 h, EPS 150, 10 °C",
+        "plan": "5v_espera48h_EPS150_Tcol10",
+        "D_h": 207.92,
+        "MT_C": 51.71,
+        "t_MT_h": 271.0,
+        "MDelta_C": 40.01,
+        "t_MDelta_h": 208.0,
+        "cumple": false
+      }
+    ]
+  },
+  "sensibilidad_dt": {
+    "curva": "M4_SS",
+    "clima": "medio",
+    "corridas": [
+      {
+        "dt_s": 3600.0,
+        "MT_C": 49.453,
+        "MDelta_C": 15.964,
+        "dif_MDelta_vs_900s_C": -0.022,
+        "dif_MT_vs_900s_C": -0.014
+      },
+      {
+        "dt_s": 1800.0,
+        "MT_C": 49.464,
+        "MDelta_C": 15.982,
+        "dif_MDelta_vs_900s_C": -0.004,
+        "dif_MT_vs_900s_C": -0.003
+      },
+      {
+        "dt_s": 900.0,
+        "MT_C": 49.467,
+        "MDelta_C": 15.986,
+        "dif_MDelta_vs_900s_C": 0.0,
+        "dif_MT_vs_900s_C": 0.0
+      }
+    ]
+  },
+  "energia_adiabatica": {
+    "curva": "M4_SS",
+    "H_h": 336.0,
+    "celdas": 4656,
+    "corridas": [
+      {
+        "dt_s": 3600.0,
+        "calor_generado_GJ": 64.126344,
+        "calor_almacenado_GJ": 64.108127,
+        "error_relativo": 0.00028408231135050447
+      },
+      {
+        "dt_s": 900.0,
+        "calor_generado_GJ": 64.126344,
+        "calor_almacenado_GJ": 64.123149,
+        "error_relativo": 4.982199181247241e-05
+      },
+      {
+        "dt_s": 225.0,
+        "calor_generado_GJ": 64.126344,
+        "calor_almacenado_GJ": 64.12566,
+        "error_relativo": 1.0666170410055036e-05
+      }
+    ]
+  },
+  "plan_elegido": "unica_EPS150_Tcol10",
+  "robustez_elegido": {
+    "pesos_clima_P_f": {
+      "declarados": 0,
+      "iguales": 0,
+      "todo_frio": 0,
+      "todo_medio": 0,
+      "todo_calido": 0
+    },
+    "solo_SS_P_f": 0,
+    "profundidad_S25": {
+      "25 mm": {
+        "P_f": 0.0,
+        "MDelta_max_C": 15.96
+      },
+      "50 mm": {
+        "P_f": 0.0,
+        "MDelta_max_C": 15.9
+      },
+      "275 mm": {
+        "P_f": 0.0,
+        "MDelta_max_C": 15.39
+      }
+    },
+    "beta_inversion": {
+      "beta_2.1": {
+        "P_f": 0,
+        "MDelta_max_C": 12.98,
+        "MT_max_C": 43.21
+      },
+      "beta_3.0": {
+        "P_f": 0,
+        "MDelta_max_C": 19.7,
+        "MT_max_C": 57.27
+      }
+    },
+    "miembros_31": {
+      "corridas": 248,
+      "P_f_equiprobable": 0,
+      "MDelta_min_C": 8.58,
+      "MDelta_max_C": 16.04,
+      "MT_max_C": 49.46
+    }
+  },
+  "posterior_30d": {
+    "curva": "M4_SS",
+    "clima": "medio",
+    "nota": "Clima despues del ensemble: ERA5 2025 (climatologia). Malla 0,5 m.",
+    "cortes": [
+      {
+        "hasta_h": 336,
+        "MDelta_max_C": 15.96,
+        "t_h": 335.0,
+        "T_max_al_corte_C": 48.91
+      },
+      {
+        "hasta_h": 480,
+        "MDelta_max_C": 18.1,
+        "t_h": 479.0,
+        "T_max_al_corte_C": 47.84
+      },
+      {
+        "hasta_h": 600,
+        "MDelta_max_C": 19.41,
+        "t_h": 599.0,
+        "T_max_al_corte_C": 46.77
+      },
+      {
+        "hasta_h": 720,
+        "MDelta_max_C": 19.77,
+        "t_h": 715.0,
+        "T_max_al_corte_C": 45.58
+      }
+    ]
+  }
+}
