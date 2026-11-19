@@ -44,7 +44,3 @@ results/*.vtk
 # foto del round-trip (se regenera)
 resultados/foto_ifc_antes.json
 
-# Datos del visor: se regeneran con python scripts/exportar_visor.py (~15 MB)
-results/visor/meta.json
-results/visor/series.txt
-results/visor/campos/
