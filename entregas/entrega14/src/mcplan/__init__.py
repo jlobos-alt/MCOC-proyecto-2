@@ -1,0 +1,102 @@
+"""Paquete `mcplan`: solver 1D (E01), plan declarativo, solver termico 3D, criterios y confiabilidad.
+
+Solver 1D (E01):  from mcplan.thermal1d import Material, BC, solve_1d
+
+Uso tipico:
+
+    from mcplan import load_plan, build_model, solve, evaluar_criterios
+
+    plan = load_plan("datos/caso_fundacion.yaml")
+    model = build_model(plan)
+    result = solve(model, duracion_h=plan.simulacion.duracion_h)
+    veredicto = evaluar_criterios(result, plan.criterios)
+"""
+
+from .bim import SolidoVertida, aplicar_cambios, extraer_solidos, revisar_secuencia
+from .boundary import BoundaryGroup
+from .criteria import Criterio, Veredicto, evaluar_criterios
+from .environment import (
+    aplicar_ambiente,
+    condiciones_de_timeline,
+    formwork_resistance,
+    sol_air_temperature,
+    surface_heat_fluxes,
+    wind_convection_coefficient,
+)
+from .grid import Grid
+from .hydration import HydrationModel
+from .materials import Material
+from .meteo import (
+    SITIO_PAHUIL,
+    MeteoFrame,
+    OpenMeteoClient,
+    Site,
+    WeatherTimeline,
+    assemble_timeline,
+    normalize_payload,
+)
+from .plan import Plan, load_plan, plan_desde_solidos, plan_from_dict, read_ifc_vertidas
+from .reliability import MuestraConfiabilidad, ejecutar_montecarlo
+from .snapshots import SnapshotMeta, latest_snapshot, load_snapshot, save_snapshot, verify
+from .soil import SoilSpec
+from .thermal import Model, Result, build_model, estimate_timestep, solve
+from .weather import TemperatureSeries
+from .voxel import Voxelizacion, area_expuesta, area_exterior, dz_que_calza, voxelizar
+from .thermal1d import BC, Result1D, solve_1d, stable_dt_1d
+from .thermal1d import Material as Material1D
+
+__all__ = [
+    "BC",
+    "Material1D",
+    "Result1D",
+    "solve_1d",
+    "stable_dt_1d",
+    "BoundaryGroup",
+    "Criterio",
+    "Grid",
+    "HydrationModel",
+    "Material",
+    "Model",
+    "MuestraConfiabilidad",
+    "Plan",
+    "Result",
+    "TemperatureSeries",
+    "Veredicto",
+    "build_model",
+    "estimate_timestep",
+    "evaluar_criterios",
+    "ejecutar_montecarlo",
+    "load_plan",
+    "plan_desde_solidos",
+    "plan_from_dict",
+    "read_ifc_vertidas",
+    "solve",
+    "SolidoVertida",
+    "aplicar_cambios",
+    "revisar_secuencia",
+    "Voxelizacion",
+    "area_expuesta",
+    "area_exterior",
+    "dz_que_calza",
+    "extraer_solidos",
+    "voxelizar",
+    "SoilSpec",
+    "MeteoFrame",
+    "OpenMeteoClient",
+    "SITIO_PAHUIL",
+    "Site",
+    "WeatherTimeline",
+    "assemble_timeline",
+    "normalize_payload",
+    "SnapshotMeta",
+    "latest_snapshot",
+    "load_snapshot",
+    "save_snapshot",
+    "verify",
+    "aplicar_ambiente",
+    "condiciones_de_timeline",
+    "formwork_resistance",
+    "sol_air_temperature",
+    "surface_heat_fluxes",
+    "wind_convection_coefficient",
+]

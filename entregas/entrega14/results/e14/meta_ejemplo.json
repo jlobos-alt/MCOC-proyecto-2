@@ -1,0 +1,18 @@
+﻿{
+  "ejemplo": true,
+  "nota": "Ejemplo representativo de metadata generada por slurm/e14_montecarlo_array.slurm. Reemplazar por el meta_*.json real del job ejecutado en el cluster.",
+  "job_id": "12345678",
+  "array_task_id": "0",
+  "host": "nodo-cluster-01",
+  "date": "2026-11-19T10:45:00-03:00",
+  "git_commit": "b0233ce53259d8f083f87bb90cc709e1f224c0a5",
+  "python": "Python 3.11.x",
+  "semilla": 20261118,
+  "n_total": 2000,
+  "conjunto": "B",
+  "desde": 0,
+  "hasta": 250,
+  "dx_m": 0.5,
+  "cpus_per_task": 4,
+  "salida": "results/e14/array_12345678"
+}
