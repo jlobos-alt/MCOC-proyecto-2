@@ -8,7 +8,7 @@
 
 ```text
 Repositorio: https://github.com/jlobos-alt/MCOC-proyecto-2
-Commit evaluado: b0233ce53259d8f083f87bb90cc709e1f224c0a5
+Commit evaluado: 7e9bf7a7695a5461209dcacad3c3a314ffc89f0d
 Job ID representativo (Slurm, si aplica): <SLURM_ARRAY_JOB_ID> (ver results/e14/meta_ejemplo.json y slurm/e14_montecarlo_array.slurm)
 ```
 
